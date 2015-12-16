@@ -1,0 +1,9 @@
+{
+  "version": "2015-12-10",
+  "clause": [
+    { "effect": "allow", "action": ["*.view"], "object": ["$organisation/*/*/*"] },
+    { "effect": "deny",  "action": ["*.edit"], "object": ["$organisation/*/*/*"] },
+    { "effect": "deny",  "action": ["*.create"], "object": ["$organisation/*/*"] },
+    { "effect": "deny",  "action": ["admin.*"], "object": ["$organisation/*/*"] }
+  ]
+}

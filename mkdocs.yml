@@ -1,4 +1,0 @@
-site_name: django-tutelary
-site_description: Policy-based permissions for Django.
-repo_url: https://github.com/ian-ross/django-tutelary
-site_dir: html

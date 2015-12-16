@@ -1,0 +1,12 @@
+{
+  "version": "2015-12-10",
+  "clause": [
+    { "effect": "deny",
+      "action": [ "*.view", "*.edit" ],
+      "object": [ "Cadasta/*/*/*" ] },
+    { "effect": "deny",
+      "action": [ "*.edit" ],
+      "object": [ "Cadasta/Batangas/parcel/*",
+                  "Cadasta/Batangas/relationship/*" ] }
+  ]
+}

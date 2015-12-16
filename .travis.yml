@@ -3,35 +3,14 @@ language: python
 sudo: false
 
 env:
-    - TOX_ENV=py27-flake8
-    - TOX_ENV=py27-docs
-    - TOX_ENV=py27-django1.6-drf2.4
-    - TOX_ENV=py27-django1.6-drf3.0
-    - TOX_ENV=py27-django1.6-drf3.1
-    - TOX_ENV=py27-django1.7-drf2.4
-    - TOX_ENV=py27-django1.7-drf3.0
-    - TOX_ENV=py27-django1.7-drf3.1
-    - TOX_ENV=py27-django1.8-drf2.4
-    - TOX_ENV=py27-django1.8-drf3.0
-    - TOX_ENV=py27-django1.8-drf3.1
-    - TOX_ENV=py33-django1.6-drf2.4
-    - TOX_ENV=py33-django1.6-drf3.0
-    - TOX_ENV=py33-django1.6-drf3.1
-    - TOX_ENV=py33-django1.7-drf2.4
-    - TOX_ENV=py33-django1.7-drf3.0
-    - TOX_ENV=py33-django1.7-drf3.1
-    - TOX_ENV=py33-django1.8-drf2.4
-    - TOX_ENV=py33-django1.8-drf3.0
-    - TOX_ENV=py33-django1.8-drf3.1
-    - TOX_ENV=py34-django1.6-drf2.4
-    - TOX_ENV=py34-django1.6-drf3.0
-    - TOX_ENV=py34-django1.6-drf3.1
-    - TOX_ENV=py34-django1.7-drf2.4
-    - TOX_ENV=py34-django1.7-drf3.0
-    - TOX_ENV=py34-django1.7-drf3.1
-    - TOX_ENV=py34-django1.8-drf2.4
-    - TOX_ENV=py34-django1.8-drf3.0
-    - TOX_ENV=py34-django1.8-drf3.1
+    - TOX_ENV=py34-flake8
+    - TOX_ENV=py34-docs
+    - TOX_ENV=py33-django1.7
+    - TOX_ENV=py33-django1.8
+    - TOX_ENV=py34-django1.6
+    - TOX_ENV=py34-django1.7
+    - TOX_ENV=py34-django1.8
+    - TOX_ENV=py34-django1.9
 
 matrix:
   fast_finish: true
@@ -41,3 +20,8 @@ install:
 
 script:
     - tox -e $TOX_ENV
+notifications:
+  slack:
+    on_success: always
+    on_failure: change
+    secure: nTedPjRjPYtgB0lhX+NK5rTHx57zxhRLDD8GjrNVf9eJHJ4KaE5UXmQyru02NBNtz8QNDWUdvmouFvI6Nmm94FuY9qyM88MRg1UPiYb5KGDZVwEu5nBE5EUuhB0dKIr0LPbT6lDyqXGbTdR2abYxB5iIvbfzg0pjZrnzNQ42RgbkSWzMRdRcQb/BD/UI82voIChpLGfAnUba0cyy/otTtuC/tci4Z1HiCwqd1xRPJzx7n9Ibcd9SdwQcpDFcaGVJZzFKya8/wYXtlu38rc05bek1gObYrTY8SuAZfuyVbED9+PSfcn6WvFn98Jeq19nHkjlJzUXotFMdLz5q/PBJN+zTrykd/t69JKbW+L1gr4fG7WPBf0jlykGs+CniKpBVm20spwg6RitpmpVDsuQDC4jyp2zpes+yrD9cOUfGxBhkcUOtq1/hhOxtxqy1o+jpFypmALoqXzBGYDS471fYDwiLskGONU76c5xYfjZPJzaYFk7SPNzIT2K9erlSuq2bMhgUG+VRjEpNv+zDMQdXGTkQU7Grvs60M6lhYn8IqtghFaV7VgMO4BUYG3Ay/uS25Q5XQjNFnvLV0t34zvpSDyRy2uCO5Yz8zisxCJo1ix31wS92MnFyEKe+tG26/aDyy9sPX/p34iF2JSZ5ca0UVmvQq/9BBU9yDFOi5arZCHY=

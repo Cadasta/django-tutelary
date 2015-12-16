@@ -1,0 +1,9 @@
+{
+  "version": "2015-12-10",
+  "clause": [
+    { "effect": "allow",  "action": ["*.edit"], "object": ["$organisation/*/*/*"] },
+    { "effect": "allow",  "action": ["*.create"], "object": ["$organisation/*/*"] },
+    { "effect": "allow",  "action": ["admin.invite"], "object": ["user/*"] },
+    { "effect": "allow",  "action": ["admin.invite"], "object": ["org/$organisation"] }
+  ]
+}
