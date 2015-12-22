@@ -2,11 +2,21 @@ from django.conf.urls import url
 
 from .views import (
     index,
+    PolicyList, PolicyDetail, PolicyCreate, PolicyUpdate, PolicyDelete,
     PartyList, PartyDetail, PartyCreate, PartyUpdate, PartyDelete,
     ParcelList, ParcelDetail, ParcelCreate, ParcelUpdate, ParcelDelete)
 
 urlpatterns = [
     url(r'^$', index, name='index'),
+
+    url(r'^policy/$', PolicyList.as_view(), name='policy-list'),
+    url(r'^policy/(?P<pk>\d+)/$', PolicyDetail.as_view(),
+        name='policy-detail'),
+    url(r'^policy/add/$', PolicyCreate.as_view(), name='policy-add'),
+    url(r'^policy/(?P<pk>\d+)/edit/$', PolicyUpdate.as_view(),
+        name='policy-update'),
+    url(r'^policy/(?P<pk>\d+)/delete/$', PolicyDelete.as_view(),
+        name='policy-delete'),
 
     url(r'^party/$', PartyList.as_view(), name='party-list'),
     url(r'^party/(?P<pk>\d+)/$', PartyDetail.as_view(), name='party-detail'),

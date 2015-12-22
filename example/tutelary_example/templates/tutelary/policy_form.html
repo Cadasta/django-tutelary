@@ -1,13 +1,13 @@
-<a href="{% url 'party-list' %}">Back to party list</a>
+<a href="{% url 'policy-list' %}">Back to policy list</a>
 
 <hr>
 
-<h2>Create party</h2>
+<h2>Create policy</h2>
 
 <form action="" method="post">{% csrf_token %}
   {{ form.as_p }}
   <input type="submit" value="Create" />
-  <a href="{% url 'party-list' %}">
+  <a href="{% url 'policy-list' %}">
     <input type="button" value="Cancel" />
   </a>
 </form>

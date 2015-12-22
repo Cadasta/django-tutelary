@@ -1,0 +1,14 @@
+<a href="{% url 'policy-list' %}">Back to policy list</a>
+
+<hr>
+
+<p>Name: {{ object.name }}</p>
+
+<pre>
+{{ object.body }}
+</pre>
+
+<br>
+
+<a href="{% url 'policy-update' object.pk %}">Edit</a>
+<a href="{% url 'policy-delete' object.pk %}">Delete</a>

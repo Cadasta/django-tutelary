@@ -11,9 +11,13 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Path to parent directory for tutelary app.
+sys.path.insert(0, os.path.dirname(BASE_DIR))
 
 
 # Quick-start development settings - unsuitable for production
@@ -37,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-#    'tutelary',
+    'tutelary',
     'tutelary_example',
 ]
 

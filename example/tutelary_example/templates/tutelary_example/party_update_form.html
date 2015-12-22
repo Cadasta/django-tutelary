@@ -1,3 +1,9 @@
+<a href="{% url 'party-list' %}">Back to party list</a>
+
+<hr>
+
+<h2>Update party</h2>
+
 <form action="" method="post">{% csrf_token %}
   {{ form.as_p }}
   <input type="submit" value="Update" />

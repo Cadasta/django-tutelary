@@ -1,13 +1,13 @@
-<a href="{% url 'parcel-list' %}">Back to parcel list</a>
+<a href="{% url 'policy-list' %}">Back to policy list</a>
 
 <hr>
 
-<h2>Update parcel</h2>
+<h2>Update policy</h2>
 
 <form action="" method="post">{% csrf_token %}
   {{ form.as_p }}
   <input type="submit" value="Update" />
-  <a href="{% url 'parcel-detail' object.pk %}">
+  <a href="{% url 'policy-detail' object.pk %}">
     <input type="button" value="Cancel" />
   </a>
 </form>
