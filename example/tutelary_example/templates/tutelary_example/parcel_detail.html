@@ -1,0 +1,19 @@
+<a href="{% url 'parcel-list' %}">Back to parcel list</a>
+
+<hr>
+
+<table>
+  <tr>
+    <td>Status:</td>
+    <td>{{ object.status }}</td>
+  </tr>
+  <tr>
+    <td>Address:</td>
+    <td>{{ object.address }}</td>
+  </tr>
+</table>
+
+<br>
+
+<a href="{% url 'parcel-update' object.pk %}">Edit</a>
+<a href="{% url 'parcel-delete' object.pk %}">Delete</a>

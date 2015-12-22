@@ -1,0 +1,23 @@
+<a href="{% url 'party-list' %}">Back to party list</a>
+
+<hr>
+
+<table>
+  <tr>
+    <td>Name:</td>
+    <td>{{ object.name }}</td>
+  </tr>
+  <tr>
+    <td>Address:</td>
+    <td>{{ object.address }}</td>
+  </tr>
+  <tr>
+    <td>Status:</td>
+    <td>{{ object.status }}</td>
+  </tr>
+</table>
+
+<br>
+
+<a href="{% url 'party-update' object.pk %}">Edit</a>
+<a href="{% url 'party-delete' object.pk %}">Delete</a>

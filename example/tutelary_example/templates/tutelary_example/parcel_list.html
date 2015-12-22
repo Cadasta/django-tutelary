@@ -1,0 +1,16 @@
+<a href="{% url 'index' %}">Back to index</a>
+
+<hr>
+
+{% block content %}
+    <h2>Parcels</h2>
+    <ul>
+        {% for parcel in object_list %}
+            <li><a href="{% url 'parcel-detail' parcel.id %}">
+                {{ parcel.address }}
+            </a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+
+<a href="{% url 'parcel-add' %}">Create new parcel</a>

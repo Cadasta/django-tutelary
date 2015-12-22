@@ -1,0 +1,16 @@
+<a href="{% url 'index' %}">Back to index</a>
+
+<hr>
+
+{% block content %}
+    <h2>Parties</h2>
+    <ul>
+        {% for party in object_list %}
+            <li><a href="{% url 'party-detail' party.id %}">
+                {{ party.name }}
+            </a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+
+<a href="{% url 'party-add' %}">Create new party</a>
