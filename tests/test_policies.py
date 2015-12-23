@@ -1,6 +1,5 @@
 from tutelary.base import Clause, Policy, Action, Object
-from tutelary.exceptions import (IllegalEffectException,
-                                 IllegalPatternOverlapException)
+from tutelary.exceptions import (EffectException, PatternOverlapException)
 import pytest
 from .datadir import datadir  # noqa
 
@@ -10,17 +9,17 @@ def test_clause_creation():
                 [Action('parcel.edit')],
                 [Object('Cadasta/*/parcel/*')])
     assert c1.effect == 'allow'
-    with pytest.raises(IllegalPatternOverlapException):
+    with pytest.raises(PatternOverlapException):
         c2 = Clause('allow',
                     [Action('parcel.edit'), Action('parcel.*')],
                     [Object('Cadasta/*/parcel/*')])
         assert c2.effect == 'allow'
-    with pytest.raises(IllegalPatternOverlapException):
+    with pytest.raises(PatternOverlapException):
         c3 = Clause('allow',
                     [Action('parcel.edit')],
                     [Object('Cadasta/*/parcel/*'), Object('*/*/parcel/*')])
         assert c3.effect == 'allow'
-    with pytest.raises(IllegalEffectException):
+    with pytest.raises(EffectException):
         c4 = Clause('allows',
                     [Action('parcel.edit')],
                     [Object('Cadasta/*/parcel/*')])
@@ -32,7 +31,7 @@ def test_policy_read(datadir):  # noqa
     Test basic policy construction from a string.
     """
     p = Policy(json=datadir.join('test-policy-1.json').read())
-    assert p.valid
+    assert len(p) == 4
 
 
 def test_policy_elements(datadir):  # noqa

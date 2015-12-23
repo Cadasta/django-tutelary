@@ -1,13 +1,17 @@
 # coding:utf-8
 
 import re
-from json import loads, dumps
+from json import loads, dumps, JSONDecodeError
 from string import Template
 import hashlib
 from collections import Sequence
 
 from .wildtree import WildTree
-from .exceptions import IllegalEffectException, IllegalPatternOverlapException
+from .exceptions import (
+    EffectException,
+    PatternOverlapException,
+    PolicyBodyException,
+    VariableSubstitutionException)
 
 
 # ------------------------------------------------------------------------------
@@ -140,11 +144,11 @@ class Clause:
             action = list(map(Action, dict['action']))
             object = list(map(Object, dict['object']))
         if effect not in ['allow', 'deny']:
-            raise IllegalEffectException(effect)
+            raise EffectException(effect)
         if any(a1.match(a2) for a1 in action for a2 in action if a1 != a2):
-            raise IllegalPatternOverlapException('action')
+            raise PatternOverlapException('action')
         if any(o1.match(o2) for o1 in object for o2 in object if o1 != o2):
-            raise IllegalPatternOverlapException('object')
+            raise PatternOverlapException('object')
         self.effect = effect
         self.action = action
         self.object = object
@@ -168,15 +172,22 @@ class Policy(Sequence):
                 d = loads(Template(json).substitute(vars))
             else:
                 d = loads(json)
-            self.version = d['version'] or '2015-12-10'
-            self.clauses = d['clause'] or []
-            self.clauses = list(map(lambda c: Clause(dict=c), self.clauses))
-            self.nitems = sum(map(lambda c: len(c.action) * len(c.object),
-                                  self.clauses))
-            self.nclauses = len(self.clauses)
-            self.valid = self.version in ['2015-12-10']
-        except:
-            self.valid = False
+        except JSONDecodeError as e:
+            raise PolicyBodyException(lineno=e.lineno, colno=e.colno)
+        except KeyError:
+            raise VariableSubstitutionException()
+        except ValueError:
+            raise VariableSubstitutionException()
+        self.version = 'version' in d and d['version'] or '2015-12-10'
+        if 'clause' not in d:
+            raise PolicyBodyException(msg="no policy clauses")
+        self.clauses = d['clause']
+        self.clauses = list(map(lambda c: Clause(dict=c), self.clauses))
+        self.nitems = sum(map(lambda c: len(c.action) * len(c.object),
+                              self.clauses))
+        self.nclauses = len(self.clauses)
+        if self.version not in ['2015-12-10']:
+            raise PolicyBodyException(msg="version not recognised")
 
     def __len__(self):
         return self.nitems
@@ -228,15 +239,21 @@ class PermissionSet:
 
     """
 
-    def __init__(self, policies=None):
+    def __init__(self, policies=None, json=None):
         """
-        Permission sets are all created empty, with an optional list of
-        policies added.
+        Permission sets are all by default empty, with an optional list of
+        policies added.  They can also be deserialised from JSON.
 
         """
-        self.tree = WildTree()
+        self.tree = WildTree(json)
         if policies is not None:
             self.add(policies=policies)
+
+    def __repr__(self):
+        """
+        Serialisation to JSON.
+        """
+        return repr(self.tree)
 
     def add(self, effect=None, action=None, object=None,
             policy=None, policies=None):
@@ -283,7 +300,7 @@ def make_regex(separator):
 
     """
     return re.compile(r'(?:' + re.escape(separator) + r')?((?:[^' +
-                      re.escape(separator) + r'\\]|\\.)*)')
+                      re.escape(separator) + r'\\]|\\.)+)')
 
 
 def unescape(s, sep):

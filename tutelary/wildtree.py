@@ -1,5 +1,6 @@
 # coding:utf-8
 from collections import MutableMapping
+from json import loads, dumps
 
 
 class WildTree(MutableMapping):
@@ -9,21 +10,37 @@ class WildTree(MutableMapping):
     (e.g. ``a/*/c/*``), where later key path insertions override
     earlier ones.
 
+    Provides JSON serialisation (via repr) and deserialisation (via
+    constructor).
+
     """
-    def __init__(self):
+    def __init__(self, json=None):
         """
-        All new ``WildTree`` objects are empty.  We store the optional
-        value at the endpoint of the path to this node, plus a list of
-        subtrees.  Each subtree is a pair whose first element is a key
-        value (which may be a ``*`` wildcard) and whose second element
-        is a ``WildTree``.
+        By default, all new ``WildTree`` objects are empty.  They can also
+        be deserialised from a JSON representation.  We store the
+        optional value at the endpoint of the path to this node, plus
+        a list of subtrees.  Each subtree is a pair whose first
+        element is a key value (which may be a ``*`` wildcard) and
+        whose second element is a ``WildTree``.
 
         """
         self._item = None
         self._subtrees = []
+        if json is not None:
+            self._dict_setup(loads(json))
 
     def __repr__(self):
-        return ('<item=' + repr(self._item) + ' ' + repr(self._subtrees) + '>')
+        return ('{"item":' + dumps(self._item) +
+                ',"subtrees":[' +
+                ','.join(['[' + dumps(t[0]) + ',' + repr(t[1]) + ']'
+                          for t in self._subtrees]) + ']}')
+
+    def _dict_setup(self, d):
+        self._item = d['item']
+        for t in d['subtrees']:
+            st = WildTree()
+            st._dict_setup(t[1])
+            self._subtrees.append((t[0], st))
 
     def __contains__(self, key):
         """

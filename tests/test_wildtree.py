@@ -13,6 +13,7 @@ def test_wildtree_1():
     assert t[('a', 'b', 'e')] == 3
     with pytest.raises(KeyError):
         assert t[('a', 'c', 'e')] == 1
+    assert WildTree(json=repr(t)) == t
 
 
 def test_wildtree_2():
@@ -24,6 +25,7 @@ def test_wildtree_2():
     assert t[('a', 'b', 'c')] == 3
     assert t[('a', 'b', 'd')] == 3
     assert t[('a', 'b', 'e')] == 3
+    assert WildTree(json=repr(t)) == t
 
 
 def test_wildtree_3():
@@ -35,6 +37,7 @@ def test_wildtree_3():
     assert t[('a', 'b', 'c')] == 3
     assert t[('a', 'b', 'd')] == 3
     assert t[('a', 'b', 'e')] == 3
+    assert WildTree(json=repr(t)) == t
 
 
 def test_wildtree_4():
@@ -46,6 +49,7 @@ def test_wildtree_4():
     assert t[('a', 'b', 'c')] == 3
     assert t[('a', 'b', 'd')] == 2
     assert t[('a', 'b', 'e')] == 3
+    assert WildTree(json=repr(t)) == t
 
 
 def test_wildtree_5():
@@ -60,3 +64,4 @@ def test_wildtree_5():
     assert t[('a', 'd', 'e')] == 3
     with pytest.raises(KeyError):
         assert t[('a', 'x', 'f')] == 1
+    assert WildTree(json=repr(t)) == t
