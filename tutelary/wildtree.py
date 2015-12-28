@@ -24,37 +24,30 @@ class WildTree(MutableMapping):
         whose second element is a ``WildTree``.
 
         """
-        self._item = None
-        self._subtrees = []
-        if json is not None:
-            self._dict_setup(loads(json))
+        if json is None:
+            self.root = {'item': None, 'subtrees': []}
+        else:
+            self.root = loads(json)
 
     def __repr__(self):
-        return ('{"item":' + dumps(self._item) +
-                ',"subtrees":[' +
-                ','.join(['[' + dumps(t[0]) + ',' + repr(t[1]) + ']'
-                          for t in self._subtrees]) + ']}')
-
-    def _dict_setup(self, d):
-        self._item = d['item']
-        for t in d['subtrees']:
-            st = WildTree()
-            st._dict_setup(t[1])
-            self._subtrees.append((t[0], st))
+        return dumps(self.root)
 
     def __contains__(self, key):
         """
         Exact path membership: wildcards must be matched explicitly.
         """
-        if len(key) == 0:
-            return self._item is not None
-        else:
-            head, tail = key[0], key[1:]
-            for st in self._subtrees:
+        node = self.root
+        while len(key) > 0:
+            head, key = key[0], key[1:]
+            found = False
+            for st in node['subtrees']:
                 if st[0] == head:
-                    return tail in st[1]
-            else:
+                    found = True
+                    node = st[1]
+                    break
+            if not found:
                 return False
+        return node['item'] is not None
 
     def __len__(self):
         """
@@ -64,24 +57,28 @@ class WildTree(MutableMapping):
         increase monotonically as keys are inserted.
 
         """
-        n = sum(len(t[1]) for t in self._subtrees)
-        return n + 1 if self._item is not None else n
+        def _len_help(tree):
+            n = sum(_len_help(t[1]) for t in tree['subtrees'])
+            return n + 1 if tree['item'] is not None else n
+        return _len_help(self.root)
 
     def __iter__(self):
         """
         Iterate over keys in the tree in "domination order".
         """
-        if self._item is not None:
-            yield ()
-        for head in self._subtrees:
-            for tail in head[1]:
-                yield (head[0],) + tail
+        def _iter_help(tree):
+            if tree['item'] is not None:
+                yield ()
+            for st in tree['subtrees']:
+                for tail in _iter_help(st[1]):
+                    yield (st[0],) + tail
+        yield from _iter_help(self.root)
 
     def __getitem__(self, key):
         """
         Key lookup with wildcards.
         """
-        return self.find(key)[0]
+        return find_in_tree(self.root, key)[0]
 
     def __setitem__(self, key, value):
         """
@@ -90,18 +87,29 @@ class WildTree(MutableMapping):
 
         """
         self._purge_unreachable(key)
-        if len(key) == 0:
-            self._item = value
-        else:
-            head, tail = key[0], key[1:]
-            self._setdefault(head)[tail] = value
+        node = self.root
+        while len(key) > 0:
+            found = False
+            for st in node['subtrees']:
+                if st[0] == key[0]:
+                    found = True
+                    node = st[1]
+                    break
+                elif st[0] == '*':
+                    break
+            if not found:
+                default = {'item': None, 'subtrees': []}
+                node['subtrees'].insert(0, (key[0], default))
+                node = default
+            key = key[1:]
+        node['item'] = value
 
     def __delitem__(self, key):
         """
         Key deletion: wildcards must be matched explicitly.
         """
-        _, idxs = self.find(key, perfect=True)
-        self._del_by_idx(idxs)
+        _, idxs = find_in_tree(self.root, key, perfect=True)
+        del_by_idx(self.root, idxs)
 
     def find(self, key, perfect=False):
         """
@@ -110,36 +118,7 @@ class WildTree(MutableMapping):
         ``KeyError`` if the key path doesn't exist in the tree.
 
         """
-        if len(key) == 0:
-            if self._item is not None:
-                return self._item, ()
-            else:
-                raise KeyError(key)
-        else:
-            head, tail = key[0], key[1:]
-            for i in range(len(self._subtrees)):
-                if self._subtrees[i][0] == head or \
-                   not perfect and self._subtrees[i][0] == '*':
-                    try:
-                        item, trace = self._subtrees[i][1].find(tail)
-                        return item, (i,) + trace
-                    except KeyError:
-                        pass
-            raise KeyError(key)
-
-    def _del_by_idx(self, idxs):
-        """
-        Delete a key entry based on numerical indexes into subtree lists.
-
-        """
-        if len(idxs) == 0:
-            self._item = None
-            self._subtrees = []
-        else:
-            hidx, tidxs = idxs[0], idxs[1:]
-            self._subtrees[hidx][1]._del_by_idx(tidxs)
-            if len(self._subtrees[hidx][1]._subtrees) == 0:
-                del self._subtrees[hidx]
+        return find_in_tree(self.root, key, perfect)
 
     def _purge_unreachable(self, key):
         """
@@ -152,21 +131,45 @@ class WildTree(MutableMapping):
             if dominates(key, p):
                 dels.append(p)
         for k in dels:
-            _, idxs = self.find(k, perfect=True)
-            self._del_by_idx(idxs)
+            _, idxs = find_in_tree(self.root, k, perfect=True)
+            del_by_idx(self.root, idxs)
 
-    def _setdefault(self, key):
-        """
-        Find subtree, inserting a new one by default.
-        """
-        for st in self._subtrees:
-            if st[0] == key:
-                return st[1]
-            elif st[0] == '*':
-                break
-        default = self.__class__()
-        self._subtrees.insert(0, (key, default))
-        return default
+
+def del_by_idx(tree, idxs):
+    """
+    Delete a key entry based on numerical indexes into subtree lists.
+    """
+    if len(idxs) == 0:
+        tree['item'] = None
+        tree['subtrees'] = []
+    else:
+        hidx, tidxs = idxs[0], idxs[1:]
+        del_by_idx(tree['subtrees'][hidx][1], tidxs)
+        if len(tree['subtrees'][hidx][1]['subtrees']) == 0:
+            del tree['subtrees'][hidx]
+
+
+def find_in_tree(tree, key, perfect=False):
+    """
+    Helper to perform find in dictionary tree.
+    """
+    if len(key) == 0:
+        if tree['item'] is not None:
+            return tree['item'], ()
+        else:
+            raise KeyError(key)
+    else:
+        head, tail = key[0], key[1:]
+        for i in range(len(tree['subtrees'])):
+            if tree['subtrees'][i][0] == head or \
+               not perfect and tree['subtrees'][i][0] == '*':
+                try:
+                    item, trace = find_in_tree(tree['subtrees'][i][1],
+                                               tail, perfect)
+                    return item, (i,) + trace
+                except KeyError:
+                    pass
+        raise KeyError(key)
 
 
 def dominates(p, q):
