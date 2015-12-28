@@ -64,7 +64,7 @@ class PermissionSetManager(models.Manager):
         pset = base.PermissionSet(policies=pols, vars=vars)
         obj = self.create(data=repr(pset))
         map(lambda pa: obj.policy_assign.add(pa), pas)
-        ####  STOPPED HERE!!!
+        # STOPPED HERE!!!
         return obj
 
 

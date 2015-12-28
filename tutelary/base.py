@@ -1,7 +1,7 @@
 # coding:utf-8
 
 import re
-from json import loads, dumps, JSONDecodeError
+from simplejson import loads, dumps, JSONDecodeError
 from string import Template
 import hashlib
 from collections import Sequence

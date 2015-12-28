@@ -2,6 +2,9 @@
 Django==1.9
 django-audit-log==0.7.0
 
+# Helps with backwards compatibility before Python 3.5
+simplejson==3.8.1
+
 # Test requirements
 pytest-django==2.9.1
 pytest==2.8.5
