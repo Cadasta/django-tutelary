@@ -7,7 +7,7 @@ from tutelary.models import Policy
 
 
 def index(request):
-    return render(request, 'tutelary_example/index.html', {})
+    return render(request, 'exampleapp/index.html', {})
 
 
 class PolicyList(ListView):

@@ -1,24 +1,40 @@
-class EffectException(Exception):
+class TutelaryException(Exception):
+    pass
+
+
+class EffectException(TutelaryException):
     def __init__(self, effect):
-        super().__init__("illegal permission effect: '" + effect + "'")
+        super(EffectException, self).__init__(
+            "illegal permission effect: '" + effect + "'"
+        )
 
 
-class PatternOverlapException(Exception):
+class PatternOverlapException(TutelaryException):
     def __init__(self, type):
-        super().__init__("overlapping " + type + " patterns in policy clause")
+        super(PatternOverlapException, self).__init__(
+            "overlapping " + type + " patterns in policy clause"
+        )
 
 
-class PolicyBodyException(Exception):
+class PolicyBodyException(TutelaryException):
     def __init__(self, msg=None, lineno=None, colno=None):
         if msg is not None:
-            super().__init__("illegal policy body: " + msg)
+            super(PolicyBodyException, self).__init__(
+                "illegal policy body: " + msg
+            )
         elif lineno is not None:
-            super().__init__("illegal policy body: " +
-                             "line " + str(lineno) + ", column " + str(colno))
+            super(PolicyBodyException, self).__init__(
+                "illegal policy body: " +
+                "line " + str(lineno) + ", column " + str(colno)
+            )
         else:
-            super().__init__("illegal policy body")
+            super(PolicyBodyException, self).__init__(
+                "illegal policy body"
+            )
 
 
-class VariableSubstitutionException(Exception):
+class VariableSubstitutionException(TutelaryException):
     def __init__(self):
-        super().__init__("illegal variable substitution in policy body")
+        super(VariableSubstitutionException, self).__init__(
+            "illegal variable substitution in policy body"
+        )

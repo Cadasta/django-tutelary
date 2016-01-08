@@ -168,10 +168,7 @@ class Policy(Sequence):
     """
     def __init__(self, json, vars=None):
         try:
-            if vars is not None:
-                d = loads(Template(json).substitute(vars))
-            else:
-                d = loads(json)
+            d = loads(Template(json).substitute(vars))
         except JSONDecodeError as e:
             raise PolicyBodyException(lineno=e.lineno, colno=e.colno)
         except KeyError:

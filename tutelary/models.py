@@ -99,4 +99,4 @@ class PolicyInstanceAssign(models.Model):
     index = models.IntegerField()
 
     class Meta:
-        ordering = ('index',)
+        ordering = ['index']
