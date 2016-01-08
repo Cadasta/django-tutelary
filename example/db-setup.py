@@ -1,5 +1,14 @@
 import json
+from django.contrib.auth.models import User
 from tutelary.models import Policy, PolicyInstance, PermissionSet
+
+
+user1 = User.objects.create(username='user1')
+user1.save()
+user2 = User.objects.create(username='user2')
+user2.save()
+user3 = User.objects.create(username='user3')
+user3.save()
 
 
 default_p_body = {'clause': []}
@@ -27,14 +36,27 @@ proj_p = Policy(name='project-default', body=json.dumps(proj_p_body))
 proj_p.save()
 
 
-vars = {'organisation': 'Cadasta', 'project': 'TestProj'}
+vs = {'organisation': 'Cadasta', 'project': 'TestProj'}
 
-default_pi = PolicyInstance.objects.get_hashed(default_p, vars)
+default_pi = PolicyInstance.objects.get_hashed(default_p, vs)
 default_pi.save()
-org_pi = PolicyInstance.objects.get_hashed(org_p, vars)
+org_pi = PolicyInstance.objects.get_hashed(org_p, vs)
 org_pi.save()
-proj_pi = PolicyInstance.objects.get_hashed(proj_p, vars)
+proj_pi = PolicyInstance.objects.get_hashed(proj_p, vs)
 proj_pi.save()
 
-pset_policies = [default_p, org_p, proj_p]
-pset = PermissionSet.objects.make(policies=pset_policies, vars=vars)
+
+pset1 = PermissionSet.objects.get_hashed(policies=[default_p],
+                                         variables=vs)
+pset1.users.add(user1)
+pset1.save()
+
+pset2 = PermissionSet.objects.get_hashed(policies=[default_p, org_p],
+                                         variables=vs)
+pset2.users.add(user2)
+pset2.save()
+
+pset3 = PermissionSet.objects.get_hashed(policies=[default_p, org_p, proj_p],
+                                         variables=vs)
+pset3.users.add(user3)
+pset3.save()

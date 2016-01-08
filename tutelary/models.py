@@ -1,5 +1,8 @@
 import json
+import hashlib
+import itertools
 from django.db import models
+from django.conf import settings
 from audit_log.models.managers import AuditLog
 import tutelary.base as base
 
@@ -21,15 +24,15 @@ class PolicyInstanceManager(models.Manager):
     with the same hash together in the database.
 
     """
-    def get_hashed(self, policy, vars=None):
-        pol = base.Policy(json=policy.body, vars=vars)
+    def get_hashed(self, policy, variables=None):
+        pol = base.Policy(json=policy.body, variables=variables)
         existing = self.filter(hash=pol.hash())
         if existing:
             return existing[0]
         else:
             return self.create(policy=policy,
                                policy_text=str(pol),
-                               variables=json.dumps(vars),
+                               variables=json.dumps(variables),
                                hash=pol.hash())
 
 
@@ -43,29 +46,71 @@ class PolicyInstance(models.Model):
     policy = models.ForeignKey(Policy, null=True)
     policy_text = models.TextField()
     variables = models.TextField()
-    hash = models.CharField(max_length=64)
 
+    # Hash field and custom manager to deal with folding together
+    # permission sets generated from identical sequences of policies.
+    hash = models.CharField(max_length=64)
     objects = PolicyInstanceManager()
 
 
+class PolicyInstanceAssign(models.Model):
+    """
+    Record the sequence of policy instances used to compose a
+    permission set.
+
+    """
+    policy_instance = models.ForeignKey('PolicyInstance',
+                                        on_delete=models.CASCADE)
+    permission_set = models.ForeignKey('PermissionSet',
+                                       on_delete=models.CASCADE)
+    index = models.IntegerField()
+
+    class Meta:
+        ordering = ['index']
+
+
 class PermissionSetManager(models.Manager):
-    def get_hashed(self, policies, vars=None):
-        def make_pa(p, i):
-            return PolicyInstanceAssign(
-                policy_instance=PolicyInstance.objects.get_hashed(p, vars),
-                permission_set=self,
-                index=i)
+    def get_hashed(self, policies, variables=None):
+        def make_pi(p):
+            return PolicyInstance.objects.get_hashed(p, variables)
 
         def make_pol(p):
-            return base.Policy(json=p.body, vars=vars)
+            return base.Policy(json=p.body, variables=variables)
 
-        pas = map(make_pa, policies, range(len(policies)))
-        pols = map(make_pol, policies)
-        pset = base.PermissionSet(policies=pols, vars=vars)
-        obj = self.create(data=repr(pset))
-        map(lambda pa: obj.policy_assign.add(pa), pas)
-        # STOPPED HERE!!!
-        return obj
+        # Make policy instances for each of the sequence of policies
+        # on which this permission set is based, and extract their
+        # hashes.
+        pis = list(map(make_pi, policies))
+        pi_hashes = list(map(lambda pi: pi.hash, pis))
+
+        # Make a "big hash" of all the hashes from the individual
+        # policy assignment hashes in the order that they're used.
+        # This is used to identify the permission set in the database
+        # for quick access.
+        pset_hash = hashlib.md5(':'.join(pi_hashes).encode()).hexdigest()
+
+        # Look up by hash.
+        existing = self.filter(hash=pset_hash)
+        if existing:
+            return existing[0]
+        else:
+            # Make a new base permission set object: this merges the
+            # policy instances into a wild card tree for fast lookup.
+            pset = base.PermissionSet(policies=list(map(make_pol, policies)))
+
+            # The permission set model stores the JSON serialisation
+            # of this tree structure.
+            obj = self.create(data=repr(pset), hash=pset_hash)
+            obj.save()
+
+            # Record the policy instance assigments.
+            for pi, i in zip(pis, itertools.count()):
+                pa = PolicyInstanceAssign(policy_instance=pi,
+                                          permission_set=obj,
+                                          index=i)
+                pa.save()
+
+            return obj
 
 
 class PermissionSet(models.Model):
@@ -77,26 +122,24 @@ class PermissionSet(models.Model):
     instances is recorded using the ``PolicyInstanceAssign`` model.
 
     """
+    # JSON serialisation of wildcard tree representation of permission
+    # set.
     data = models.TextField()
+
+    # Ordered set of policies used to generate this permission set.
     policy_assign = models.ManyToManyField(PolicyInstance,
                                            through='PolicyInstanceAssign')
 
+    # Users to which this permission set is attached: a user has only
+    # one permission set, so this is really an 1:m relation, not an
+    # n:m relation.
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL)
+
+    # Hash field and custom manager to deal with folding together
+    # permission sets generated from identical sequences of policies.
+    hash = models.CharField(max_length=64)
     objects = PermissionSetManager()
 
     def policy_instances(self):
         pis = self.policy_assign.all()
         return pis
-
-
-class PolicyInstanceAssign(models.Model):
-    """
-    Record the sequence of policy instances used to compose a
-    permission set.
-
-    """
-    policy_instance = models.ForeignKey(PolicyInstance)
-    permission_set = models.ForeignKey(PermissionSet)
-    index = models.IntegerField()
-
-    class Meta:
-        ordering = ['index']

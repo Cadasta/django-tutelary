@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
+import tutelary.backends
 
 
-class SimpleBackend:
+class SimpleBackend(tutelary.backends.Backend):
     def get_user(self, user_id):
         try:
             return User.objects.get(pk=user_id)

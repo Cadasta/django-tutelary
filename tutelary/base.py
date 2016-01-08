@@ -166,9 +166,9 @@ class Policy(Sequence):
     clause can have multiple actions and objects).
 
     """
-    def __init__(self, json, vars=None):
+    def __init__(self, json, variables=None):
         try:
-            d = loads(Template(json).substitute(vars))
+            d = loads(Template(json).substitute(variables))
         except JSONDecodeError as e:
             raise PolicyBodyException(lineno=e.lineno, colno=e.colno)
         except KeyError:
