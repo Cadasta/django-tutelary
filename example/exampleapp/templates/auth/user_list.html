@@ -1,0 +1,16 @@
+<a href="{% url 'index' %}">Back to index</a>
+
+<hr>
+
+{% block content %}
+    <h2>Users</h2>
+    <ul>
+        {% for user in object_list %}
+            <li><a href="{% url 'user-detail' user.id %}">
+                {{ user.username }}
+            </a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+
+<a href="{% url 'user-add' %}">Create new user</a>

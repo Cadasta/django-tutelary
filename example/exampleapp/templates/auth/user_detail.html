@@ -1,0 +1,19 @@
+<a href="{% url 'user-list' %}">Back to user list</a>
+
+<hr>
+
+<table>
+  <tr>
+    <td>Name:</td>
+    <td>{{ object.username }}</td>
+  </tr>
+  <tr>
+    <td>Email:</td>
+    <td>{{ object.email }}</td>
+  </tr>
+</table>
+
+<br>
+
+<a href="{% url 'user-update' object.pk %}">Edit</a>
+<a href="{% url 'user-delete' object.pk %}">Delete</a>

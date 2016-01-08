@@ -3,11 +3,42 @@ from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
 from .models import Party, Parcel
+from django.contrib.auth.models import User
 from tutelary.models import Policy
 
 
 def index(request):
     return render(request, 'exampleapp/index.html', {})
+
+
+class UserList(ListView):
+    model = User
+
+
+class UserDetail(DetailView):
+    model = User
+
+
+class UserCreate(CreateView):
+    model = User
+    fields = ['username', 'email']
+
+    def get_success_url(self):
+        return reverse('user-detail', kwargs={'pk': self.object.pk})
+
+
+class UserUpdate(UpdateView):
+    model = User
+    fields = ['username', 'email']
+    template_name_suffix = '_update_form'
+
+    def get_success_url(self):
+        return reverse('user-detail', kwargs={'pk': self.object.pk})
+
+
+class UserDelete(DeleteView):
+    model = User
+    success_url = reverse_lazy('user-list')
 
 
 class PolicyList(ListView):
