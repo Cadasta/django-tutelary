@@ -14,14 +14,17 @@
       {% block content %}{% endblock %}
     </div>
 
-    {% if users %}
     <hr>
-    <label for="usersel">Switch user:</label>
-    <select id="usersel" name="user">
-      {% for user in users %}
-      <option value="{{ user.username }}">{{ user.username }}</option>
-      {% endfor %}
-    </select>
+    {% if request.user.is_anonymous %}
+      <p>No user currently selected</p>
+    {% else %}
+      <p>Current user: {{ request.user.username }}</p>
+    {% endif %}
+    {% if users %}
+      <form action="/switch-user/" method="post">{% csrf_token %}
+        {{ user_switch_form.as_p }}
+        <input type="submit" value="Switch" />
+      </form>
     {% endif %}
   </body>
 </html>

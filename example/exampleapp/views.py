@@ -1,15 +1,23 @@
 import django.views.generic as generic
 import django.views.generic.edit as edit
 from django.core.urlresolvers import reverse, reverse_lazy
+from django.contrib.auth import authenticate, login
+from django.shortcuts import redirect
+
 from .models import Party, Parcel
 from django.contrib.auth.models import User
 from tutelary.models import Policy
+
+from .forms import UserSwitchForm
 
 
 class UserMixin:
     def get_context_data(self, **kwargs):
         context = super(UserMixin, self).get_context_data(**kwargs)
         context['users'] = User.objects.all()
+        context['user_switch_form'] = UserSwitchForm(
+            initial={'username': self.request.user.username}
+        )
         return context
 
 
@@ -46,6 +54,14 @@ class UserList(CreateView):
 class UserDelete(DeleteView):
     model = User
     success_url = reverse_lazy('user-list')
+
+
+class SwitchUser(generic.View):
+    def post(self, request, *args, **kwargs):
+        newuser = authenticate(username=request.POST['username'])
+        print(newuser)
+        login(request, newuser)
+        return redirect('index')
 
 
 class PolicyList(ListView):
