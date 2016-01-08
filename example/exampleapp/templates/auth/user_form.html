@@ -1,13 +1,22 @@
 {% extends "exampleapp/base.html" %}
 
-{% block title %}Create user{% endblock %}
+{% block title %}User list{% endblock %}
 
 {% block back %}
-<a href="{% url 'user-list' %}">Back to user list</a>
+<a href="{% url 'index' %}">Back to index</a>
 <hr>
 {% endblock %}
 
 {% block content %}
+<ul>
+  {% for user in users %}
+    <li>{{ user.username }}  [<a href="{% url 'user-delete' user.pk %}">Delete</a>]</li>
+  {% endfor %}
+</ul>
+
+<hr>
+<h4>Create user</h4>
+
 <form action="" method="post">{% csrf_token %}
   {{ form.as_p }}
   <input type="submit" value="Create" />

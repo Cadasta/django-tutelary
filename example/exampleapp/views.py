@@ -37,29 +37,10 @@ class IndexView(UserMixin, generic.TemplateView):
     template_name = 'exampleapp/index.html'
 
 
-class UserList(ListView):
+class UserList(CreateView):
     model = User
-
-
-class UserDetail(DetailView):
-    model = User
-
-
-class UserCreate(CreateView):
-    model = User
-    fields = ['username', 'email']
-
-    def get_success_url(self):
-        return reverse('user-detail', kwargs={'pk': self.object.pk})
-
-
-class UserUpdate(UpdateView):
-    model = User
-    fields = ['username', 'email']
-    template_name_suffix = '_update_form'
-
-    def get_success_url(self):
-        return reverse('user-detail', kwargs={'pk': self.object.pk})
+    fields = ['username']
+    success_url = reverse_lazy('user-list')
 
 
 class UserDelete(DeleteView):
