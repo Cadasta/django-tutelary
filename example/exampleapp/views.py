@@ -1,14 +1,40 @@
-from django.shortcuts import render
-from django.views.generic import ListView, DetailView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+import django.views.generic as generic
+import django.views.generic.edit as edit
 from django.core.urlresolvers import reverse, reverse_lazy
 from .models import Party, Parcel
 from django.contrib.auth.models import User
 from tutelary.models import Policy
 
 
-def index(request):
-    return render(request, 'exampleapp/index.html', {})
+class UserMixin:
+    def get_context_data(self, **kwargs):
+        context = super(UserMixin, self).get_context_data(**kwargs)
+        context['users'] = User.objects.all()
+        return context
+
+
+class ListView(UserMixin, generic.ListView):
+    pass
+
+
+class DetailView(UserMixin, generic.DetailView):
+    pass
+
+
+class CreateView(UserMixin, edit.CreateView):
+    pass
+
+
+class UpdateView(UserMixin, edit.UpdateView):
+    pass
+
+
+class DeleteView(UserMixin, edit.DeleteView):
+    pass
+
+
+class IndexView(UserMixin, generic.TemplateView):
+    template_name = 'exampleapp/index.html'
 
 
 class UserList(ListView):

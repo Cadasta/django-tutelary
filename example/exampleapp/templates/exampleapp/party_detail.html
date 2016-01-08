@@ -1,7 +1,13 @@
+{% extends "exampleapp/base.html" %}
+
+{% block title %}Party details{% endblock %}
+
+{% block back %}
 <a href="{% url 'party-list' %}">Back to party list</a>
-
 <hr>
+{% endblock %}
 
+{% block content %}
 <table>
   <tr>
     <td>Name:</td>
@@ -21,3 +27,4 @@
 
 <a href="{% url 'party-update' object.pk %}">Edit</a>
 <a href="{% url 'party-delete' object.pk %}">Delete</a>
+{% endblock %}

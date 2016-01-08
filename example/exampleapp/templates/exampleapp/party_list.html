@@ -1,16 +1,20 @@
+{% extends "exampleapp/base.html" %}
+
+{% block title %}Party list{% endblock %}
+
+{% block back %}
 <a href="{% url 'index' %}">Back to index</a>
-
 <hr>
-
-{% block content %}
-    <h2>Parties</h2>
-    <ul>
-        {% for party in object_list %}
-            <li><a href="{% url 'party-detail' party.id %}">
-                {{ party.name }}
-            </a></li>
-        {% endfor %}
-    </ul>
 {% endblock %}
 
+{% block content %}
+<ul>
+  {% for party in object_list %}
+    <li><a href="{% url 'party-detail' party.id %}">
+      {{ party.name }}
+    </a></li>
+  {% endfor %}
+</ul>
+
 <a href="{% url 'party-add' %}">Create new party</a>
+{% endblock %}

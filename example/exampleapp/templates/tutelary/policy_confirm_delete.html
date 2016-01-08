@@ -1,7 +1,13 @@
+{% extends "exampleapp/base.html" %}
+
+{% block title %}Confirm policy delete{% endblock %}
+
+{% block back %}
 <a href="{% url 'policy-list' %}">Back to policy list</a>
-
 <hr>
+{% endblock %}
 
+{% block content %}
 <form action="" method="post">{% csrf_token %}
   <p>Are you sure you want to delete policy "{{ object.name }}"?</p>
   <input type="submit" value="Confirm" />
@@ -9,3 +15,4 @@
     <input type="button" value="Cancel" />
   </a>
 </form>
+{% endblock %}

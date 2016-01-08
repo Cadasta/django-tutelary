@@ -1,7 +1,13 @@
+{% extends "exampleapp/base.html" %}
+
+{% block title %}Policy details{% endblock %}
+
+{% block back %}
 <a href="{% url 'policy-list' %}">Back to policy list</a>
-
 <hr>
+{% endblock %}
 
+{% block content %}
 <p>Name: {{ object.name }}</p>
 
 <pre>
@@ -12,3 +18,4 @@
 
 <a href="{% url 'policy-update' object.pk %}">Edit</a>
 <a href="{% url 'policy-delete' object.pk %}">Delete</a>
+{% endblock %}

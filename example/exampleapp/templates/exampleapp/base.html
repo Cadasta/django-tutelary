@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Tutelary example app</title>
+  </head>
+
+  <body>
+    <div id="container">
+
+      {% block back %}{% endblock %}
+
+      <h2>{% block title %}{% endblock %}</h2>
+
+      {% block content %}{% endblock %}
+    </div>
+
+    {% if users %}
+    <hr>
+    <label for="usersel">Switch user:</label>
+    <select id="usersel" name="user">
+      {% for user in users %}
+      <option value="{{ user.username }}">{{ user.username }}</option>
+      {% endfor %}
+    </select>
+    {% endif %}
+  </body>
+</html>

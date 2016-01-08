@@ -1,16 +1,20 @@
+{% extends "exampleapp/base.html" %}
+
+{% block title %}User list{% endblock %}
+
+{% block back %}
 <a href="{% url 'index' %}">Back to index</a>
-
 <hr>
-
-{% block content %}
-    <h2>Users</h2>
-    <ul>
-        {% for user in object_list %}
-            <li><a href="{% url 'user-detail' user.id %}">
-                {{ user.username }}
-            </a></li>
-        {% endfor %}
-    </ul>
 {% endblock %}
 
+{% block content %}
+<ul>
+  {% for user in object_list %}
+    <li><a href="{% url 'user-detail' user.id %}">
+      {{ user.username }}
+    </a></li>
+  {% endfor %}
+</ul>
+
 <a href="{% url 'user-add' %}">Create new user</a>
+{% endblock %}

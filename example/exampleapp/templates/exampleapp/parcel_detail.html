@@ -1,7 +1,13 @@
+{% extends "exampleapp/base.html" %}
+
+{% block title %}Parcel details{% endblock %}
+
+{% block back %}
 <a href="{% url 'parcel-list' %}">Back to parcel list</a>
-
 <hr>
+{% endblock %}
 
+{% block content %}
 <table>
   <tr>
     <td>Status:</td>
@@ -17,3 +23,4 @@
 
 <a href="{% url 'parcel-update' object.pk %}">Edit</a>
 <a href="{% url 'parcel-delete' object.pk %}">Delete</a>
+{% endblock %}

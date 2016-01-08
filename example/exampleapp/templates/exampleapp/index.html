@@ -1,8 +1,12 @@
-<h1>Home page</h1>
+{% extends "exampleapp/base.html" %}
 
+{% block title %}Home page{% endblock %}
+
+{% block content %}
 <ul>
   <li><a href="{% url 'user-list' %}">Users</a></li>
   <li><a href="{% url 'policy-list' %}">Policies</a></li>
   <li><a href="{% url 'party-list' %}">Parties</a></li>
   <li><a href="{% url 'parcel-list' %}">Parcels</a></li>
 </ul>
+{% endblock %}
