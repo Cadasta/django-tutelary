@@ -16,15 +16,15 @@ def test_permission_set_policies(datadir):  # noqa
     v = {'organisation': 'Cadasta', 'project': 'Test'}
     pnames = ['default-policy.json', 'org-policy.json', 'project-policy.json']
 
-    sapols = map(lambda f: Policy(json=datadir.join(f).read(), vars=v),
+    sapols = map(lambda f: Policy(json=datadir.join(f).read(), variables=v),
                  pnames + ['sys-admin-policy.json'])
     sapset = PermissionSet(policies=sapols)
 
-    oapols = map(lambda f: Policy(json=datadir.join(f).read(), vars=v),
+    oapols = map(lambda f: Policy(json=datadir.join(f).read(), variables=v),
                  pnames + ['org-admin-policy.json'])
     oapset = PermissionSet(policies=oapols)
 
-    dcpols = map(lambda f: Policy(json=datadir.join(f).read(), vars=v),
+    dcpols = map(lambda f: Policy(json=datadir.join(f).read(), variables=v),
                  pnames + ['data-collector-policy.json'])
     dcpset = PermissionSet(policies=dcpols)
 
