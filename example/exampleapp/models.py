@@ -2,34 +2,74 @@ from django.core.urlresolvers import reverse
 from django.db import models
 
 
-class Party(models.Model):
+class Organisation(models.Model):
     name = models.CharField(max_length=100)
-    address = models.CharField(max_length=200)
-    status = models.CharField(max_length=40)
 
     class Meta:
         ordering = ('name',)
+        permissions = (('org.create', "Can create organisations"),
+                       ('org.delete', "Can delete organisations"))
+
+    class TutelaryMeta:
+        type = 'organisation'
+        path_fields = ('name',)
+
+    def __str__(self):
+        return self.name
+
+
+class Project(models.Model):
+    name = models.CharField(max_length=100)
+    organisation = models.ForeignKey(Organisation)
+
+    class Meta:
+        ordering = ('organisation', 'name')
+        permissions = (('project.create', "Can create projects"),
+                       ('project.delete', "Can delete projects"))
+
+    class TutelaryMeta:
+        type = 'project'
+        path_fields = ('organisation', 'name')
+
+    def __str__(self):
+        return self.name
+
+
+class Party(models.Model):
+    project = models.ForeignKey(Project)
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        ordering = ('project', 'name')
         permissions = (('party.list', "Can list existing parties"),
                        ('party.view', "Can view details of a party"),
                        ('party.create', "Can create parties"),
                        ('party.edit', "Can update existing parties"),
                        ('party.delete', "Can delete parties"))
 
+    class TutelaryMeta:
+        type = 'party'
+        path_fields = ('project', 'pk')
+
     def get_absolute_url(self):
         return reverse('party-detail', kwargs={'pk': self.pk})
 
 
 class Parcel(models.Model):
+    project = models.ForeignKey(Project)
     address = models.CharField(max_length=200)
-    status = models.CharField(max_length=40)
 
     class Meta:
-        ordering = ('status', 'address')
+        ordering = ('project', 'address')
         permissions = (('parcel.list', "Can list existing parcels"),
                        ('parcel.view', "Can view details of a parcel"),
                        ('parcel.create', "Can create parcels"),
                        ('parcel.edit', "Can update existing parcels"),
                        ('parcel.delete', "Can delete parcels"))
+
+    class TutelaryMeta:
+        type = 'parcel'
+        path_fields = ('project', 'pk')
 
     def get_absolute_url(self):
         return reverse('parcel-detail', kwargs={'pk': self.pk})

@@ -1,0 +1,18 @@
+{% extends "exampleapp/base.html" %}
+
+{% block title %}Create project{% endblock %}
+
+{% block back %}
+<a href="{% url 'project-list' %}">Back to project list</a>
+<hr>
+{% endblock %}
+
+{% block content %}
+<form action="" method="post">{% csrf_token %}
+  {{ form.as_p }}
+  <input type="submit" value="Create" />
+  <a href="{% url 'project-list' %}">
+    <input type="button" value="Cancel" />
+  </a>
+</form>
+{% endblock %}

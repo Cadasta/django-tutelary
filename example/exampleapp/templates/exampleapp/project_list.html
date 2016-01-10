@@ -1,0 +1,20 @@
+{% extends "exampleapp/base.html" %}
+
+{% block title %}Project list{% endblock %}
+
+{% block back %}
+<a href="{% url 'index' %}">Back to index</a>
+<hr>
+{% endblock %}
+
+{% block content %}
+<ul>
+  {% for proj in object_list %}
+    <li>
+      {{ proj.name }} ({{ proj.organisation.name }}) [<a href="{% url 'project-delete' proj.pk %}">Delete</a>]
+    </a></li>
+  {% endfor %}
+</ul>
+
+<a href="{% url 'project-add' %}">Create new project</a>
+{% endblock %}

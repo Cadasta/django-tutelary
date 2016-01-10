@@ -2,14 +2,20 @@ import django.views.generic as generic
 import django.views.generic.edit as edit
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth import authenticate, login
+from django.forms import ModelForm, ModelChoiceField
 from django.shortcuts import redirect
 
-from .models import Party, Parcel
+from .models import Organisation, Project, Party, Parcel
 from django.contrib.auth.models import User
 from tutelary.models import Policy
 
 from .forms import UserSwitchForm
 
+
+# ----------------------------------------------------------------------
+#
+#  BASE CLASSES
+#
 
 class UserMixin:
     def get_context_data(self, **kwargs):
@@ -41,9 +47,19 @@ class DeleteView(UserMixin, edit.DeleteView):
     pass
 
 
+# ----------------------------------------------------------------------
+#
+#  HOME PAGE
+#
+
 class IndexView(UserMixin, generic.TemplateView):
     template_name = 'exampleapp/index.html'
 
+
+# ----------------------------------------------------------------------
+#
+#  USERS
+#
 
 class UserList(CreateView):
     model = User
@@ -63,6 +79,11 @@ class SwitchUser(generic.View):
         login(request, newuser)
         return redirect('index')
 
+
+# ----------------------------------------------------------------------
+#
+#  POLICIES
+#
 
 class PolicyList(ListView):
     model = Policy
@@ -94,6 +115,63 @@ class PolicyDelete(DeleteView):
     success_url = reverse_lazy('policy-list')
 
 
+# ----------------------------------------------------------------------
+#
+#  ORGANISATIONS
+#
+
+class OrganisationList(ListView):
+    model = Organisation
+
+
+class OrganisationCreate(CreateView):
+    model = Organisation
+    fields = ['name']
+    success_url = reverse_lazy('organisation-list')
+
+
+class OrganisationDelete(DeleteView):
+    model = Organisation
+    success_url = reverse_lazy('organisation-list')
+
+
+# ----------------------------------------------------------------------
+#
+#  PROJECTS
+#
+
+class ProjectList(ListView):
+    model = Project
+
+
+class ProjectForm(ModelForm):
+    class Meta:
+        model = Project
+        fields = ('name', 'organisation')
+
+    def __init__(self, *args, **kwargs):
+        super(ProjectForm, self).__init__(*args, **kwargs)
+        self.fields['organisation'] = ModelChoiceField(
+            queryset=Organisation.objects.all(), empty_label=None
+        )
+
+
+class ProjectCreate(CreateView):
+    model = Project
+    form_class = ProjectForm
+    success_url = reverse_lazy('project-list')
+
+
+class ProjectDelete(DeleteView):
+    model = Project
+    success_url = reverse_lazy('project-list')
+
+
+# ----------------------------------------------------------------------
+#
+#  PARTIES
+#
+
 class PartyList(ListView):
     model = Party
 
@@ -102,14 +180,26 @@ class PartyDetail(DetailView):
     model = Party
 
 
+class PartyForm(ModelForm):
+    class Meta:
+        model = Party
+        fields = ('name', 'project')
+
+    def __init__(self, *args, **kwargs):
+        super(PartyForm, self).__init__(*args, **kwargs)
+        self.fields['project'] = ModelChoiceField(
+            queryset=Project.objects.all(), empty_label=None
+        )
+
+
 class PartyCreate(CreateView):
     model = Party
-    fields = ['name', 'address', 'status']
+    form_class = PartyForm
 
 
 class PartyUpdate(UpdateView):
     model = Party
-    fields = ['name', 'address', 'status']
+    form_class = PartyForm
     template_name_suffix = '_update_form'
 
 
@@ -117,6 +207,11 @@ class PartyDelete(DeleteView):
     model = Party
     success_url = reverse_lazy('party-list')
 
+
+# ----------------------------------------------------------------------
+#
+#  PARCELS
+#
 
 class ParcelList(ListView):
     model = Parcel
@@ -126,14 +221,26 @@ class ParcelDetail(DetailView):
     model = Parcel
 
 
+class ParcelForm(ModelForm):
+    class Meta:
+        model = Parcel
+        fields = ('address', 'project')
+
+    def __init__(self, *args, **kwargs):
+        super(ParcelForm, self).__init__(*args, **kwargs)
+        self.fields['project'] = ModelChoiceField(
+            queryset=Project.objects.all(), empty_label=None
+        )
+
+
 class ParcelCreate(CreateView):
     model = Parcel
-    fields = ['address', 'status']
+    form_class = ParcelForm
 
 
 class ParcelUpdate(UpdateView):
     model = Parcel
-    fields = ['address', 'status']
+    form_class = ParcelForm
     template_name_suffix = '_update_form'
 
 

@@ -1,6 +1,7 @@
 import json
 from django.contrib.auth.models import User
 from tutelary.models import Policy, PolicyInstance, PermissionSet
+from exampleapp.models import Organisation, Project, Party, Parcel
 
 
 user1 = User.objects.create(username='user1')
@@ -60,3 +61,23 @@ pset3 = PermissionSet.objects.get_hashed(policies=[default_p, org_p, proj_p],
                                          variables=vs)
 pset3.users.add(user3)
 pset3.save()
+
+
+org = Organisation(name='Cadasta')
+org.save()
+proj = Project(name='TestProj', organisation=org)
+proj.save()
+
+party1 = Party(project=proj, name='Jim Jones')
+party1.save()
+party2 = Party(project=proj, name='Sally Smith')
+party2.save()
+party3 = Party(project=proj, name='Bob Bennett')
+party3.save()
+
+parcel1 = Parcel(project=proj, address='1 Beach Terrace')
+parcel1.save()
+parcel2 = Parcel(project=proj, address='5 Sandy Road')
+parcel2.save()
+parcel3 = Parcel(project=proj, address='10 Chorley Street')
+parcel3.save()

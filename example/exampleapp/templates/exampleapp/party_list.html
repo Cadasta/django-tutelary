@@ -10,9 +10,10 @@
 {% block content %}
 <ul>
   {% for party in object_list %}
-    <li><a href="{% url 'party-detail' party.id %}">
-      {{ party.name }}
-    </a></li>
+    <li>
+      <a href="{% url 'party-detail' party.id %}">{{ party.name }}</a>
+      [{{ party.project.name }}]
+    </li>
   {% endfor %}
 </ul>
 

@@ -1,0 +1,20 @@
+{% extends "exampleapp/base.html" %}
+
+{% block title %}Organisation list{% endblock %}
+
+{% block back %}
+<a href="{% url 'index' %}">Back to index</a>
+<hr>
+{% endblock %}
+
+{% block content %}
+<ul>
+  {% for org in object_list %}
+    <li>
+      {{ org.name }} [<a href="{% url 'organisation-delete' org.pk %}">Delete</a>]
+    </a></li>
+  {% endfor %}
+</ul>
+
+<a href="{% url 'organisation-add' %}">Create new organisation</a>
+{% endblock %}

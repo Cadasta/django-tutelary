@@ -3,6 +3,8 @@ from django.conf.urls import url
 from .views import (
     IndexView,
     UserList, UserDelete, SwitchUser,
+    OrganisationList, OrganisationCreate, OrganisationDelete,
+    ProjectList, ProjectCreate, ProjectDelete,
     PolicyList, PolicyDetail, PolicyCreate, PolicyUpdate, PolicyDelete,
     PartyList, PartyDetail, PartyCreate, PartyUpdate, PartyDelete,
     ParcelList, ParcelDetail, ParcelCreate, ParcelUpdate, ParcelDelete)
@@ -23,6 +25,18 @@ urlpatterns = [
         name='policy-update'),
     url(r'^policy/(?P<pk>\d+)/delete/$', PolicyDelete.as_view(),
         name='policy-delete'),
+
+    url(r'^organisation/$', OrganisationList.as_view(),
+        name='organisation-list'),
+    url(r'^organisation/add/$', OrganisationCreate.as_view(),
+        name='organisation-add'),
+    url(r'^organisation/(?P<pk>\d+)/delete/$', OrganisationDelete.as_view(),
+        name='organisation-delete'),
+
+    url(r'^project/$', ProjectList.as_view(), name='project-list'),
+    url(r'^project/add/$', ProjectCreate.as_view(), name='project-add'),
+    url(r'^project/(?P<pk>\d+)/delete/$', ProjectDelete.as_view(),
+        name='project-delete'),
 
     url(r'^party/$', PartyList.as_view(), name='party-list'),
     url(r'^party/(?P<pk>\d+)/$', PartyDetail.as_view(), name='party-detail'),

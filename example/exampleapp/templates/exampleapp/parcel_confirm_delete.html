@@ -4,7 +4,7 @@
 
 {% block content %}
 <form action="" method="post">{% csrf_token %}
-  <p>Are you sure you want to delete parcel "{{ object }}"?</p>
+  <p>Are you sure you want to delete parcel "{{ object.address }}"?</p>
   <input type="submit" value="Confirm" />
   <a href="{% url 'parcel-detail' object.pk %}">
     <input type="button" value="Cancel" />
