@@ -27,11 +27,25 @@ class UserMixin:
         return context
 
 
-class ListView(UserMixin, generic.ListView):
+class PermissionPathMixin:
+    def get_context_data(self, **kwargs):
+        context = super(PermissionPathMixin, self).get_context_data(**kwargs)
+        if 'object' in context:
+            obj = context['object']
+            if hasattr(obj, 'get_permissions_path'):
+                obj.permissions_path = obj.get_permissions_path()
+        elif 'object_list' in context:
+            for obj in context['object_list']:
+                if hasattr(obj, 'get_permissions_path'):
+                    obj.permissions_path = obj.get_permissions_path()
+        return context
+
+
+class ListView(UserMixin, PermissionPathMixin, generic.ListView):
     pass
 
 
-class DetailView(UserMixin, generic.DetailView):
+class DetailView(UserMixin, PermissionPathMixin, generic.DetailView):
     pass
 
 

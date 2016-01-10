@@ -1,7 +1,9 @@
 from django.core.urlresolvers import reverse
 from django.db import models
+from tutelary.decorators import permissioned_model
 
 
+@permissioned_model
 class Organisation(models.Model):
     name = models.CharField(max_length=100)
 
@@ -18,6 +20,7 @@ class Organisation(models.Model):
         return self.name
 
 
+@permissioned_model
 class Project(models.Model):
     name = models.CharField(max_length=100)
     organisation = models.ForeignKey(Organisation)
@@ -35,6 +38,7 @@ class Project(models.Model):
         return self.name
 
 
+@permissioned_model
 class Party(models.Model):
     project = models.ForeignKey(Project)
     name = models.CharField(max_length=100)
@@ -55,6 +59,7 @@ class Party(models.Model):
         return reverse('party-detail', kwargs={'pk': self.pk})
 
 
+@permissioned_model
 class Parcel(models.Model):
     project = models.ForeignKey(Project)
     address = models.CharField(max_length=200)
