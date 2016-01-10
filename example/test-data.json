@@ -1,0 +1,296 @@
+[
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "user1",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2016-01-10T02:59:29.622",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 2,
+  "fields": {
+    "password": "",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "user2",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2016-01-10T02:59:29.672",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 3,
+  "fields": {
+    "password": "",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "user3",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2016-01-10T02:59:29.702",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "tutelary.policyauditlogentry",
+  "pk": 1,
+  "fields": {
+    "id": 1,
+    "name": "default",
+    "body": "{\"clause\": []}",
+    "action_user": null,
+    "action_date": "2016-01-10T02:59:29.763",
+    "action_type": "I"
+  }
+},
+{
+  "model": "tutelary.policyauditlogentry",
+  "pk": 2,
+  "fields": {
+    "id": 2,
+    "name": "org-default",
+    "body": "{\"clause\": [{\"action\": [\"party.*\"], \"effect\": \"allow\", \"object\": [\"party/$organisation/*/*\"]}, {\"action\": [\"parcel.*\"], \"effect\": \"allow\", \"object\": [\"parcel/$organisation/*/*\"]}]}",
+    "action_user": null,
+    "action_date": "2016-01-10T02:59:29.797",
+    "action_type": "I"
+  }
+},
+{
+  "model": "tutelary.policyauditlogentry",
+  "pk": 3,
+  "fields": {
+    "id": 3,
+    "name": "project-default",
+    "body": "{\"clause\": [{\"action\": [\"party.edit\"], \"effect\": \"deny\", \"object\": [\"party/$organisation/$project/*\"]}, {\"action\": [\"parcel.edit\"], \"effect\": \"deny\", \"object\": [\"parcel/$organisation/$project/*\"]}]}",
+    "action_user": null,
+    "action_date": "2016-01-10T02:59:29.836",
+    "action_type": "I"
+  }
+},
+{
+  "model": "tutelary.policy",
+  "pk": 1,
+  "fields": {
+    "name": "default",
+    "body": "{\"clause\": []}"
+  }
+},
+{
+  "model": "tutelary.policy",
+  "pk": 2,
+  "fields": {
+    "name": "org-default",
+    "body": "{\"clause\": [{\"action\": [\"party.*\"], \"effect\": \"allow\", \"object\": [\"party/$organisation/*/*\"]}, {\"action\": [\"parcel.*\"], \"effect\": \"allow\", \"object\": [\"parcel/$organisation/*/*\"]}]}"
+  }
+},
+{
+  "model": "tutelary.policy",
+  "pk": 3,
+  "fields": {
+    "name": "project-default",
+    "body": "{\"clause\": [{\"action\": [\"party.edit\"], \"effect\": \"deny\", \"object\": [\"party/$organisation/$project/*\"]}, {\"action\": [\"parcel.edit\"], \"effect\": \"deny\", \"object\": [\"parcel/$organisation/$project/*\"]}]}"
+  }
+},
+{
+  "model": "tutelary.policyinstance",
+  "pk": 1,
+  "fields": {
+    "policy": 1,
+    "policy_text": "{\"clause\": [], \"version\": \"2015-12-10\"}",
+    "variables": "{\"organisation\": \"Cadasta\", \"project\": \"TestProj\"}",
+    "hash": "9f6b1573fc95f9a4a6a35361224d8dc3"
+  }
+},
+{
+  "model": "tutelary.policyinstance",
+  "pk": 2,
+  "fields": {
+    "policy": 2,
+    "policy_text": "{\"clause\": [{\"action\": [\"party.*\"], \"effect\": \"allow\", \"object\": [\"party/Cadasta/*/*\"]}, {\"action\": [\"parcel.*\"], \"effect\": \"allow\", \"object\": [\"parcel/Cadasta/*/*\"]}], \"version\": \"2015-12-10\"}",
+    "variables": "{\"organisation\": \"Cadasta\", \"project\": \"TestProj\"}",
+    "hash": "ee2a06d3983d092d484c3c570e3cb71f"
+  }
+},
+{
+  "model": "tutelary.policyinstance",
+  "pk": 3,
+  "fields": {
+    "policy": 3,
+    "policy_text": "{\"clause\": [{\"action\": [\"party.edit\"], \"effect\": \"deny\", \"object\": [\"party/Cadasta/TestProj/*\"]}, {\"action\": [\"parcel.edit\"], \"effect\": \"deny\", \"object\": [\"parcel/Cadasta/TestProj/*\"]}], \"version\": \"2015-12-10\"}",
+    "variables": "{\"organisation\": \"Cadasta\", \"project\": \"TestProj\"}",
+    "hash": "fd2ac5b5ca198a7ae06cff437196a28d"
+  }
+},
+{
+  "model": "tutelary.policyinstanceassign",
+  "pk": 1,
+  "fields": {
+    "policy_instance": 1,
+    "permission_set": 1,
+    "index": 0
+  }
+},
+{
+  "model": "tutelary.policyinstanceassign",
+  "pk": 2,
+  "fields": {
+    "policy_instance": 1,
+    "permission_set": 2,
+    "index": 0
+  }
+},
+{
+  "model": "tutelary.policyinstanceassign",
+  "pk": 3,
+  "fields": {
+    "policy_instance": 2,
+    "permission_set": 2,
+    "index": 1
+  }
+},
+{
+  "model": "tutelary.policyinstanceassign",
+  "pk": 4,
+  "fields": {
+    "policy_instance": 1,
+    "permission_set": 3,
+    "index": 0
+  }
+},
+{
+  "model": "tutelary.policyinstanceassign",
+  "pk": 5,
+  "fields": {
+    "policy_instance": 2,
+    "permission_set": 3,
+    "index": 1
+  }
+},
+{
+  "model": "tutelary.policyinstanceassign",
+  "pk": 6,
+  "fields": {
+    "policy_instance": 3,
+    "permission_set": 3,
+    "index": 2
+  }
+},
+{
+  "model": "tutelary.permissionset",
+  "pk": 1,
+  "fields": {
+    "data": "{\"subtrees\": [], \"item\": null}",
+    "hash": "d4bc4f2d1366f97871b5c2889e90251f",
+    "users": [
+      1
+    ]
+  }
+},
+{
+  "model": "tutelary.permissionset",
+  "pk": 2,
+  "fields": {
+    "data": "{\"subtrees\": [[\"parcel\", {\"subtrees\": [[\"*\", {\"subtrees\": [[\"parcel\", {\"subtrees\": [[\"Cadasta\", {\"subtrees\": [[\"*\", {\"subtrees\": [[\"*\", {\"subtrees\": [], \"item\": \"allow\"}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}], [\"party\", {\"subtrees\": [[\"*\", {\"subtrees\": [[\"party\", {\"subtrees\": [[\"Cadasta\", {\"subtrees\": [[\"*\", {\"subtrees\": [[\"*\", {\"subtrees\": [], \"item\": \"allow\"}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}",
+    "hash": "8aa0b39fb205568202f21e6cbd8423c5",
+    "users": [
+      2
+    ]
+  }
+},
+{
+  "model": "tutelary.permissionset",
+  "pk": 3,
+  "fields": {
+    "data": "{\"subtrees\": [[\"parcel\", {\"subtrees\": [[\"edit\", {\"subtrees\": [[\"parcel\", {\"subtrees\": [[\"Cadasta\", {\"subtrees\": [[\"TestProj\", {\"subtrees\": [[\"*\", {\"subtrees\": [], \"item\": \"deny\"}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}], [\"*\", {\"subtrees\": [[\"parcel\", {\"subtrees\": [[\"Cadasta\", {\"subtrees\": [[\"*\", {\"subtrees\": [[\"*\", {\"subtrees\": [], \"item\": \"allow\"}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}], [\"party\", {\"subtrees\": [[\"edit\", {\"subtrees\": [[\"party\", {\"subtrees\": [[\"Cadasta\", {\"subtrees\": [[\"TestProj\", {\"subtrees\": [[\"*\", {\"subtrees\": [], \"item\": \"deny\"}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}], [\"*\", {\"subtrees\": [[\"party\", {\"subtrees\": [[\"Cadasta\", {\"subtrees\": [[\"*\", {\"subtrees\": [[\"*\", {\"subtrees\": [], \"item\": \"allow\"}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}",
+    "hash": "b7fbe5f0d20d58d31506142488fd10f6",
+    "users": [
+      3
+    ]
+  }
+},
+{
+  "model": "exampleapp.organisation",
+  "pk": 1,
+  "fields": {
+    "name": "Cadasta"
+  }
+},
+{
+  "model": "exampleapp.project",
+  "pk": 1,
+  "fields": {
+    "name": "TestProj",
+    "organisation": 1
+  }
+},
+{
+  "model": "exampleapp.party",
+  "pk": 1,
+  "fields": {
+    "project": 1,
+    "name": "Jim Jones"
+  }
+},
+{
+  "model": "exampleapp.party",
+  "pk": 2,
+  "fields": {
+    "project": 1,
+    "name": "Sally Smith"
+  }
+},
+{
+  "model": "exampleapp.party",
+  "pk": 3,
+  "fields": {
+    "project": 1,
+    "name": "Bob Bennett"
+  }
+},
+{
+  "model": "exampleapp.parcel",
+  "pk": 1,
+  "fields": {
+    "project": 1,
+    "address": "1 Beach Terrace"
+  }
+},
+{
+  "model": "exampleapp.parcel",
+  "pk": 2,
+  "fields": {
+    "project": 1,
+    "address": "5 Sandy Road"
+  }
+},
+{
+  "model": "exampleapp.parcel",
+  "pk": 3,
+  "fields": {
+    "project": 1,
+    "address": "10 Chorley Street"
+  }
+}
+]

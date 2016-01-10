@@ -1,12 +1,12 @@
 import django.views.generic as generic
 import django.views.generic.edit as edit
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.forms import ModelForm, ModelChoiceField
 from django.shortcuts import redirect
 
 from .models import Organisation, Project, Party, Parcel
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from tutelary.models import Policy
 
 from .forms import UserSwitchForm
@@ -75,9 +75,11 @@ class UserDelete(DeleteView):
 class SwitchUser(generic.View):
     def post(self, request, *args, **kwargs):
         newuser = authenticate(username=request.POST['username'])
-        print(newuser)
-        login(request, newuser)
-        return redirect('index')
+        if newuser is not None:
+            login(request, newuser)
+        else:
+            logout(request)
+        return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
 # ----------------------------------------------------------------------
