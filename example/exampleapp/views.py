@@ -1,3 +1,4 @@
+import json
 import django.views.generic as generic
 import django.views.generic.edit as edit
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -6,7 +7,7 @@ from django.forms import ModelForm, ModelChoiceField
 from django.shortcuts import redirect
 
 from .models import Organisation, Project, Party, Parcel
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import User
 from tutelary.models import Policy
 
 from .forms import UserSwitchForm
@@ -107,6 +108,12 @@ class PolicyList(ListView):
 
 class PolicyDetail(DetailView):
     model = Policy
+
+    def get_context_data(self, **kwargs):
+        context = super(PolicyDetail, self).get_context_data(**kwargs)
+        context['pretty_body'] = json.dumps(json.loads(context['object'].body),
+                                            indent=2)
+        return context
 
 
 class PolicyCreate(CreateView):
