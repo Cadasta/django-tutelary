@@ -1,6 +1,6 @@
 {% extends "exampleapp/base.html" %}
 
-{% block title %}Create user{% endblock %}
+{% block title %}Update user{% endblock %}
 
 {% block back %}
 <a href="{% url 'user-list' %}">Back to user list</a>
@@ -20,15 +20,15 @@
     </thead>
     <tbody>
       {% for pf in policy_forms %}
-        <tr>
-          <td>{{ pf.policy }}</td>
-          <td>{{ pf.organisation }}</td>
-          <td>{{ pf.project }}</td>
-        </tr>
+      <tr>
+        <td>{{ pf.policy }}</td>
+        <td>{{ pf.organisation }}</td>
+        <td>{{ pf.project }}</td>
+      </tr>
       {% endfor %}
     </tbody>
   </table>
-  <input type="submit" value="Create" />
+  <input type="submit" value="Update" />
   <a href="{% url 'user-list' %}">
     <input type="button" value="Cancel" />
   </a>

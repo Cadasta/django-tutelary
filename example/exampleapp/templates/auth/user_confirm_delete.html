@@ -4,9 +4,9 @@
 
 {% block content %}
 <form action="" method="post">{% csrf_token %}
-  <p>Are you sure you want to delete user "{{ object }}"?</p>
+  <p>Are you sure you want to delete user "{{ object.username }}"?</p>
   <input type="submit" value="Confirm" />
-  <a href="{% url 'user-list' %}">
+  <a href="{% url 'user-detail' object.pk %}">
     <input type="button" value="Cancel" />
   </a>
 </form>

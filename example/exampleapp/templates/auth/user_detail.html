@@ -1,0 +1,33 @@
+{% extends "exampleapp/base.html" %}
+
+{% block title %}User details{% endblock %}
+
+{% block back %}
+<a href="{% url 'user-list' %}">Back to user list</a>
+<hr>
+{% endblock %}
+
+{% block content %}
+<p>Username: {{ object.username }}</p>
+
+<p>Policies</p>
+<ul>
+  {% for policy in policies %}
+    <li>
+      {{ policy.policy.name }}
+      {% if policy.organisation and policy.project %}
+      (org = {{ policy.organisation.name }}, proj = {{ policy.project.name }})
+      {% elif policy.organisation %}
+      (org = {{ policy.organisation.name }})
+      {% elif policy.project %}
+      (proj = {{ policy.project.name }})
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>
+
+<br>
+
+<a href="{% url 'user-update' object.pk %}">Edit</a>
+<a href="{% url 'user-delete' object.pk %}">Delete</a>
+{% endblock %}

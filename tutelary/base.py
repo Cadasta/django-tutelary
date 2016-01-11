@@ -31,7 +31,15 @@ class SimpleSeparated(Sequence):
 
     """
     def __init__(self, s):
-        self.components = s.split(self.separator)
+        if isinstance(s, str):
+            self.components = self._split_components(s)
+        elif isinstance(s, Sequence):
+            self.components = s
+        else:
+            raise ValueError('invalid initialiser for separated sequence')
+
+    def _split_components(self, s):
+        return s.split(self.separator)
 
     def __len__(self):
         return len(self.components)
@@ -64,14 +72,14 @@ class EscapeSeparated(SimpleSeparated):
     other escaping mechanism is supported.
 
     """
-    def __init__(self, s):
+    def _split_components(self, s):
         # Generate regexp lazily for each derived class so that we can
         # compile it.
         if not hasattr(self, 'regex'):
             type(self).regex = make_regex(self.separator)
-        self.components = self.regex.split(s)[1::2]
-        self.components = [unescape(s, self.separator)
-                           for s in self.components]
+        components = self.regex.split(s)[1::2]
+        components = [unescape(s, self.separator) for s in components]
+        return components
 
     def __str__(self):
         return self.separator.join([escape(s, self.separator)

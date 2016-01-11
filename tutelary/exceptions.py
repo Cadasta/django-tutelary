@@ -10,9 +10,9 @@ class EffectException(TutelaryException):
 
 
 class PatternOverlapException(TutelaryException):
-    def __init__(self, type):
+    def __init__(self, exc_type):
         super(PatternOverlapException, self).__init__(
-            "overlapping " + type + " patterns in policy clause"
+            "overlapping " + exc_type + " patterns in policy clause"
         )
 
 
@@ -37,4 +37,11 @@ class VariableSubstitutionException(TutelaryException):
     def __init__(self):
         super(VariableSubstitutionException, self).__init__(
             "illegal variable substitution in policy body"
+        )
+
+
+class DecoratorException(TutelaryException):
+    def __init__(self, decorator, msg):
+        super(DecoratorException, self).__init__(
+            "error expanding decorator '" + decorator + "': " + msg
         )

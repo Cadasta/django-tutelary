@@ -17,6 +17,9 @@ class Policy(models.Model):
     body = models.TextField()
     audit_log = AuditLog()
 
+    def __str__(self):
+        return self.name
+
 
 class PolicyInstanceManager(models.Manager):
     """
@@ -70,12 +73,18 @@ class PolicyInstanceAssign(models.Model):
 
 
 class PermissionSetManager(models.Manager):
-    def get_hashed(self, policies, variables=None):
+    def get_hashed(self, policies):
         def make_pi(p):
-            return PolicyInstance.objects.get_hashed(p, variables)
+            if isinstance(p, tuple):
+                return PolicyInstance.objects.get_hashed(p[0], p[1])
+            else:
+                return PolicyInstance.objects.get_hashed(p)
 
         def make_pol(p):
-            return base.Policy(json=p.body, variables=variables)
+            if isinstance(p, tuple):
+                return base.Policy(json=p[0].body, variables=p[1])
+            else:
+                return base.Policy(json=p[0].body)
 
         # Make policy instances for each of the sequence of policies
         # on which this permission set is based, and extract their
@@ -128,7 +137,7 @@ class PermissionSet(models.Model):
 
     # Ordered set of policies used to generate this permission set.
     policy_assign = models.ManyToManyField(PolicyInstance,
-                                           through='PolicyInstanceAssign')
+                                           through=PolicyInstanceAssign)
 
     # Users to which this permission set is attached: a user has only
     # one permission set, so this is really an 1:m relation, not an
@@ -143,3 +152,8 @@ class PermissionSet(models.Model):
     def policy_instances(self):
         pis = self.policy_assign.all()
         return pis
+
+
+def assign_user_policies(user, *policies):
+    pset = PermissionSet.objects.get_hashed(policies)
+    pset.user.add(user)

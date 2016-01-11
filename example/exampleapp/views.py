@@ -1,16 +1,19 @@
 import json
+import itertools
 import django.views.generic as generic
 import django.views.generic.edit as edit
+from django.db import transaction
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth import authenticate, login, logout
 from django.forms import ModelForm, ModelChoiceField
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
+from django.http import HttpResponseRedirect
 
-from .models import Organisation, Project, Party, Parcel
+from .models import Organisation, Project, Party, Parcel, UserPolicyAssignment
 from django.contrib.auth.models import User
 from tutelary.models import Policy
 
-from .forms import UserSwitchForm
+from .forms import UserSwitchForm, UserForm, UserPolicyForm
 
 
 # ----------------------------------------------------------------------
@@ -33,12 +36,12 @@ class PermissionPathMixin:
         context = super(PermissionPathMixin, self).get_context_data(**kwargs)
         if 'object' in context:
             obj = context['object']
-            if hasattr(obj, 'get_permissions_path'):
-                obj.permissions_path = obj.get_permissions_path()
+            if hasattr(obj, 'get_permissions_object'):
+                obj.permissions_path = str(obj.get_permissions_object())
         elif 'object_list' in context:
             for obj in context['object_list']:
-                if hasattr(obj, 'get_permissions_path'):
-                    obj.permissions_path = obj.get_permissions_path()
+                if hasattr(obj, 'get_permissions_object'):
+                    obj.permissions_path = str(obj.get_permissions_object())
         return context
 
 
@@ -76,10 +79,97 @@ class IndexView(UserMixin, generic.TemplateView):
 #  USERS
 #
 
-class UserList(CreateView):
+class UserList(ListView):
     model = User
-    fields = ['username']
-    success_url = reverse_lazy('user-list')
+
+
+class UserDetail(DetailView):
+    model = User
+
+    def get_context_data(self, **kwargs):
+        context = super(UserDetail, self).get_context_data(**kwargs)
+        context['policies'] = UserPolicyAssignment.objects.filter(
+            user=context['user']
+        )
+        return context
+
+
+class UserEdit(generic.FormView):
+    model = User
+    form_class = UserForm
+
+    def get_success_url(self):
+        return reverse('user-detail', kwargs={'pk': self.object.pk})
+
+    def process(self, request, action, user=None):
+        main_form = UserForm(request.POST, instance=user)
+        policy_forms = [UserPolicyForm(request.POST, prefix=str(i))
+                        for i in range(UserPolicyForm.MAX_POLICIES)]
+        if main_form.is_valid() and all([pf.is_valid()
+                                         for pf in policy_forms]):
+            with transaction.atomic():
+                self.object = main_form.save()
+                if action == 'update':
+                    UserPolicyAssignment.objects.filter(
+                        user=self.object
+                    ).delete()
+                for pf, i in zip(policy_forms, itertools.count()):
+                    if pf.cleaned_data['policy'] is None:
+                        break
+                    user_policy = UserPolicyAssignment.objects.create(
+                        user=self.object,
+                        policy=pf.cleaned_data['policy'],
+                        organisation=pf.cleaned_data['organisation'],
+                        project=pf.cleaned_data['project'],
+                        index=i)
+                    user_policy.save()
+            print('REDIRECTING:', self.get_success_url())
+            return HttpResponseRedirect(self.get_success_url())
+        print('RENDERING')
+        return render(request, self.template_name,
+                      {'main_form': main_form,
+                       'policy_forms': policy_forms})
+
+
+class UserCreate(UserEdit):
+    template_name = 'auth/user_form.html'
+
+    def get(self, request, *args, **kwargs):
+        main_form = UserForm()
+        policy_forms = [UserPolicyForm(prefix=str(i))
+                        for i in range(UserPolicyForm.MAX_POLICIES)]
+        return render(request, self.template_name,
+                      {'main_form': main_form,
+                       'policy_forms': policy_forms})
+
+    def post(self, request, *args, **kwargs):
+        return self.process(request, 'create')
+
+
+class UserUpdate(edit.SingleObjectMixin, UserEdit):
+    model = User
+    template_name = 'auth/user_update_form.html'
+
+    def get(self, request, *args, **kwargs):
+        def init_data(p, i):
+            r = dict()
+            r[str(i) + '-policy'] = p.policy if p else None
+            r[str(i) + '-organisation'] = p.organisation if p else None
+            r[str(i) + '-project'] = p.project if p else None
+            return r
+        user = self.get_object()
+        pols = list(UserPolicyAssignment.objects.filter(user=user))
+        pols += [None] * (UserPolicyForm.MAX_POLICIES - len(pols))
+        pols = list(map(init_data, pols, itertools.count()))
+        main_form = UserForm(instance=user)
+        policy_forms = [UserPolicyForm(pols[i], prefix=str(i))
+                        for i in range(UserPolicyForm.MAX_POLICIES)]
+        return render(request, self.template_name,
+                      {'main_form': main_form,
+                       'policy_forms': policy_forms})
+
+    def post(self, request, *args, **kwargs):
+        return self.process(request, 'update', self.get_object())
 
 
 class UserDelete(DeleteView):

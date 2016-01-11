@@ -1,5 +1,7 @@
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.contrib.auth.models import User
+from tutelary.models import Policy
 from tutelary.decorators import permissioned_model
 
 
@@ -13,7 +15,7 @@ class Organisation(models.Model):
                        ('org.delete', "Can delete organisations"))
 
     class TutelaryMeta:
-        type = 'organisation'
+        perm_type = 'organisation'
         path_fields = ('name',)
 
     def __str__(self):
@@ -31,7 +33,7 @@ class Project(models.Model):
                        ('project.delete', "Can delete projects"))
 
     class TutelaryMeta:
-        type = 'project'
+        perm_type = 'project'
         path_fields = ('organisation', 'name')
 
     def __str__(self):
@@ -52,7 +54,7 @@ class Party(models.Model):
                        ('party.delete', "Can delete parties"))
 
     class TutelaryMeta:
-        type = 'party'
+        perm_type = 'party'
         path_fields = ('project', 'pk')
 
     def get_absolute_url(self):
@@ -73,8 +75,23 @@ class Parcel(models.Model):
                        ('parcel.delete', "Can delete parcels"))
 
     class TutelaryMeta:
-        type = 'parcel'
+        perm_type = 'parcel'
         path_fields = ('project', 'pk')
 
     def get_absolute_url(self):
         return reverse('parcel-detail', kwargs={'pk': self.pk})
+
+
+class UserPolicyAssignment(models.Model):
+    user = models.ForeignKey(User)
+    policy = models.ForeignKey(Policy)
+    organisation = models.ForeignKey(Organisation, null=True, blank=True)
+    project = models.ForeignKey(Project, null=True, blank=True)
+    index = models.IntegerField()
+
+    class Meta:
+        ordering = ('index',)
+
+
+permissioned_model(Policy, 'policy', ['name'])
+permissioned_model(User, 'user', ['username'])

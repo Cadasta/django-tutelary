@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from .views import (
     IndexView,
-    UserList, UserDelete, SwitchUser,
+    UserList, UserDetail, UserCreate, UserUpdate, UserDelete, SwitchUser,
     OrganisationList, OrganisationCreate, OrganisationDelete,
     ProjectList, ProjectCreate, ProjectDelete,
     PolicyList, PolicyDetail, PolicyCreate, PolicyUpdate, PolicyDelete,
@@ -13,6 +13,10 @@ urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
 
     url(r'^user/$', UserList.as_view(), name='user-list'),
+    url(r'^user/(?P<pk>\d+)/$', UserDetail.as_view(), name='user-detail'),
+    url(r'^user/add/', UserCreate.as_view(), name='user-add'),
+    url(r'^user/(?P<pk>\d+)/edit/$', UserUpdate.as_view(),
+        name='user-update'),
     url(r'^user/(?P<pk>\d+)/delete/$', UserDelete.as_view(),
         name='user-delete'),
     url(r'^switch-user/$', SwitchUser.as_view(), name='user-switch'),
