@@ -3,7 +3,6 @@ import hashlib
 import itertools
 from django.db import models
 from django.conf import settings
-from django.apps.registry import apps
 from audit_log.models.managers import AuditLog
 import tutelary.base as base
 
