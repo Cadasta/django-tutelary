@@ -12,7 +12,7 @@
     "email": "",
     "is_staff": false,
     "is_active": true,
-    "date_joined": "2016-01-10T02:59:29.622",
+    "date_joined": "2016-01-13T06:52:04.348",
     "groups": [],
     "user_permissions": []
   }
@@ -30,7 +30,7 @@
     "email": "",
     "is_staff": false,
     "is_active": true,
-    "date_joined": "2016-01-10T02:59:29.672",
+    "date_joined": "2016-01-13T06:52:04.490",
     "groups": [],
     "user_permissions": []
   }
@@ -48,7 +48,7 @@
     "email": "",
     "is_staff": false,
     "is_active": true,
-    "date_joined": "2016-01-10T02:59:29.702",
+    "date_joined": "2016-01-13T06:52:04.693",
     "groups": [],
     "user_permissions": []
   }
@@ -61,7 +61,7 @@
     "name": "default",
     "body": "{\"clause\": []}",
     "action_user": null,
-    "action_date": "2016-01-10T02:59:29.763",
+    "action_date": "2016-01-13T06:52:04.241",
     "action_type": "I"
   }
 },
@@ -71,9 +71,9 @@
   "fields": {
     "id": 2,
     "name": "org-default",
-    "body": "{\"clause\": [{\"action\": [\"party.*\"], \"effect\": \"allow\", \"object\": [\"party/$organisation/*/*\"]}, {\"action\": [\"parcel.*\"], \"effect\": \"allow\", \"object\": [\"parcel/$organisation/*/*\"]}]}",
+    "body": "{\"clause\": [{\"object\": [\"party/$organisation/*/*\"], \"effect\": \"allow\", \"action\": [\"party.*\"]}, {\"object\": [\"parcel/$organisation/*/*\"], \"effect\": \"allow\", \"action\": [\"parcel.*\"]}]}",
     "action_user": null,
-    "action_date": "2016-01-10T02:59:29.797",
+    "action_date": "2016-01-13T06:52:04.259",
     "action_type": "I"
   }
 },
@@ -83,9 +83,9 @@
   "fields": {
     "id": 3,
     "name": "project-default",
-    "body": "{\"clause\": [{\"action\": [\"party.edit\"], \"effect\": \"deny\", \"object\": [\"party/$organisation/$project/*\"]}, {\"action\": [\"parcel.edit\"], \"effect\": \"deny\", \"object\": [\"parcel/$organisation/$project/*\"]}]}",
+    "body": "{\"clause\": [{\"object\": [\"party/$organisation/$project/*\"], \"effect\": \"deny\", \"action\": [\"party.edit\"]}, {\"object\": [\"parcel/$organisation/$project/*\"], \"effect\": \"deny\", \"action\": [\"parcel.edit\"]}]}",
     "action_user": null,
-    "action_date": "2016-01-10T02:59:29.836",
+    "action_date": "2016-01-13T06:52:04.289",
     "action_type": "I"
   }
 },
@@ -102,7 +102,7 @@
   "pk": 2,
   "fields": {
     "name": "org-default",
-    "body": "{\"clause\": [{\"action\": [\"party.*\"], \"effect\": \"allow\", \"object\": [\"party/$organisation/*/*\"]}, {\"action\": [\"parcel.*\"], \"effect\": \"allow\", \"object\": [\"parcel/$organisation/*/*\"]}]}"
+    "body": "{\"clause\": [{\"object\": [\"party/$organisation/*/*\"], \"effect\": \"allow\", \"action\": [\"party.*\"]}, {\"object\": [\"parcel/$organisation/*/*\"], \"effect\": \"allow\", \"action\": [\"parcel.*\"]}]}"
   }
 },
 {
@@ -110,7 +110,7 @@
   "pk": 3,
   "fields": {
     "name": "project-default",
-    "body": "{\"clause\": [{\"action\": [\"party.edit\"], \"effect\": \"deny\", \"object\": [\"party/$organisation/$project/*\"]}, {\"action\": [\"parcel.edit\"], \"effect\": \"deny\", \"object\": [\"parcel/$organisation/$project/*\"]}]}"
+    "body": "{\"clause\": [{\"object\": [\"party/$organisation/$project/*\"], \"effect\": \"deny\", \"action\": [\"party.edit\"]}, {\"object\": [\"parcel/$organisation/$project/*\"], \"effect\": \"deny\", \"action\": [\"parcel.edit\"]}]}"
   }
 },
 {
@@ -119,7 +119,7 @@
   "fields": {
     "policy": 1,
     "policy_text": "{\"clause\": [], \"version\": \"2015-12-10\"}",
-    "variables": "{\"organisation\": \"Cadasta\", \"project\": \"TestProj\"}",
+    "variables": "null",
     "hash": "9f6b1573fc95f9a4a6a35361224d8dc3"
   }
 },
@@ -128,9 +128,9 @@
   "pk": 2,
   "fields": {
     "policy": 2,
-    "policy_text": "{\"clause\": [{\"action\": [\"party.*\"], \"effect\": \"allow\", \"object\": [\"party/Cadasta/*/*\"]}, {\"action\": [\"parcel.*\"], \"effect\": \"allow\", \"object\": [\"parcel/Cadasta/*/*\"]}], \"version\": \"2015-12-10\"}",
-    "variables": "{\"organisation\": \"Cadasta\", \"project\": \"TestProj\"}",
-    "hash": "ee2a06d3983d092d484c3c570e3cb71f"
+    "policy_text": "{\"clause\": [{\"object\": [\"party/Cadasta/*/*\"], \"effect\": \"allow\", \"action\": [\"party.*\"]}, {\"object\": [\"parcel/Cadasta/*/*\"], \"effect\": \"allow\", \"action\": [\"parcel.*\"]}], \"version\": \"2015-12-10\"}",
+    "variables": "{\"organisation\": \"Cadasta\"}",
+    "hash": "20331f7985603a49ef61b1e2611593d8"
   }
 },
 {
@@ -138,9 +138,9 @@
   "pk": 3,
   "fields": {
     "policy": 3,
-    "policy_text": "{\"clause\": [{\"action\": [\"party.edit\"], \"effect\": \"deny\", \"object\": [\"party/Cadasta/TestProj/*\"]}, {\"action\": [\"parcel.edit\"], \"effect\": \"deny\", \"object\": [\"parcel/Cadasta/TestProj/*\"]}], \"version\": \"2015-12-10\"}",
+    "policy_text": "{\"clause\": [{\"object\": [\"party/Cadasta/TestProj/*\"], \"effect\": \"deny\", \"action\": [\"party.edit\"]}, {\"object\": [\"parcel/Cadasta/TestProj/*\"], \"effect\": \"deny\", \"action\": [\"parcel.edit\"]}], \"version\": \"2015-12-10\"}",
     "variables": "{\"organisation\": \"Cadasta\", \"project\": \"TestProj\"}",
-    "hash": "fd2ac5b5ca198a7ae06cff437196a28d"
+    "hash": "54b2a481c146cec87277b7d9f66b81f2"
   }
 },
 {
@@ -213,7 +213,7 @@
   "pk": 2,
   "fields": {
     "data": "{\"subtrees\": [[\"parcel\", {\"subtrees\": [[\"*\", {\"subtrees\": [[\"parcel\", {\"subtrees\": [[\"Cadasta\", {\"subtrees\": [[\"*\", {\"subtrees\": [[\"*\", {\"subtrees\": [], \"item\": \"allow\"}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}], [\"party\", {\"subtrees\": [[\"*\", {\"subtrees\": [[\"party\", {\"subtrees\": [[\"Cadasta\", {\"subtrees\": [[\"*\", {\"subtrees\": [[\"*\", {\"subtrees\": [], \"item\": \"allow\"}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}",
-    "hash": "8aa0b39fb205568202f21e6cbd8423c5",
+    "hash": "afc9a3108ec5bd7637c58d71605ab9aa",
     "users": [
       2
     ]
@@ -224,7 +224,7 @@
   "pk": 3,
   "fields": {
     "data": "{\"subtrees\": [[\"parcel\", {\"subtrees\": [[\"edit\", {\"subtrees\": [[\"parcel\", {\"subtrees\": [[\"Cadasta\", {\"subtrees\": [[\"TestProj\", {\"subtrees\": [[\"*\", {\"subtrees\": [], \"item\": \"deny\"}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}], [\"*\", {\"subtrees\": [[\"parcel\", {\"subtrees\": [[\"Cadasta\", {\"subtrees\": [[\"*\", {\"subtrees\": [[\"*\", {\"subtrees\": [], \"item\": \"allow\"}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}], [\"party\", {\"subtrees\": [[\"edit\", {\"subtrees\": [[\"party\", {\"subtrees\": [[\"Cadasta\", {\"subtrees\": [[\"TestProj\", {\"subtrees\": [[\"*\", {\"subtrees\": [], \"item\": \"deny\"}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}], [\"*\", {\"subtrees\": [[\"party\", {\"subtrees\": [[\"Cadasta\", {\"subtrees\": [[\"*\", {\"subtrees\": [[\"*\", {\"subtrees\": [], \"item\": \"allow\"}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}]], \"item\": null}",
-    "hash": "b7fbe5f0d20d58d31506142488fd10f6",
+    "hash": "a44c066f0322877d7f59e669c1c4a2dd",
     "users": [
       3
     ]
@@ -291,6 +291,72 @@
   "fields": {
     "project": 1,
     "address": "10 Chorley Street"
+  }
+},
+{
+  "model": "exampleapp.userpolicyassignment",
+  "pk": 1,
+  "fields": {
+    "user": 1,
+    "policy": 1,
+    "organisation": null,
+    "project": null,
+    "index": 0
+  }
+},
+{
+  "model": "exampleapp.userpolicyassignment",
+  "pk": 2,
+  "fields": {
+    "user": 2,
+    "policy": 1,
+    "organisation": null,
+    "project": null,
+    "index": 0
+  }
+},
+{
+  "model": "exampleapp.userpolicyassignment",
+  "pk": 3,
+  "fields": {
+    "user": 2,
+    "policy": 2,
+    "organisation": 1,
+    "project": null,
+    "index": 1
+  }
+},
+{
+  "model": "exampleapp.userpolicyassignment",
+  "pk": 4,
+  "fields": {
+    "user": 3,
+    "policy": 1,
+    "organisation": null,
+    "project": null,
+    "index": 0
+  }
+},
+{
+  "model": "exampleapp.userpolicyassignment",
+  "pk": 5,
+  "fields": {
+    "user": 3,
+    "policy": 2,
+    "organisation": 1,
+    "project": null,
+    "index": 1
+  }
+},
+{
+  "model": "exampleapp.userpolicyassignment",
+  "pk": 6,
+  "fields": {
+    "user": 3,
+    "policy": 3,
+    "organisation": 1,
+    "project": 1,
+    "index": 2
   }
 }
 ]

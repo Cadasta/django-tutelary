@@ -93,5 +93,18 @@ class UserPolicyAssignment(models.Model):
         ordering = ('index',)
 
 
+def set_user_policies(user):
+    def do_one(pol_assign):
+        vs = dict()
+        if pol_assign.organisation:
+            vs['organisation'] = pol_assign.organisation.name
+        if pol_assign.project:
+            vs['project'] = pol_assign.project.name
+        pol = Policy.objects.get(name=pol_assign.policy)
+        return (pol, vs) if vs else pol
+    pols = list(map(do_one, UserPolicyAssignment.objects.filter(user=user)))
+    user.assign_policies(*pols)
+
+
 permissioned_model(Policy, 'policy', ['name'])
 permissioned_model(User, 'user', ['username'])

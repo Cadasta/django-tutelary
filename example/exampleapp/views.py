@@ -9,7 +9,10 @@ from django.forms import ModelForm, ModelChoiceField
 from django.shortcuts import redirect, render
 from django.http import HttpResponseRedirect
 
-from .models import Organisation, Project, Party, Parcel, UserPolicyAssignment
+from .models import (
+    Organisation, Project, Party, Parcel, UserPolicyAssignment,
+    set_user_policies
+)
 from django.contrib.auth.models import User
 from tutelary.models import Policy
 
@@ -123,6 +126,7 @@ class UserEdit(generic.FormView):
                         project=pf.cleaned_data['project'],
                         index=i)
                     user_policy.save()
+                set_user_policies(self.object)
             print('REDIRECTING:', self.get_success_url())
             return HttpResponseRedirect(self.get_success_url())
         print('RENDERING')

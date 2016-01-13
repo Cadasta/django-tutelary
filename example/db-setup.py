@@ -1,15 +1,9 @@
 import json
 from django.contrib.auth.models import User
-from tutelary.models import Policy, PolicyInstance, PermissionSet
-from exampleapp.models import Organisation, Project, Party, Parcel
-
-
-user1 = User.objects.create(username='user1')
-user1.save()
-user2 = User.objects.create(username='user2')
-user2.save()
-user3 = User.objects.create(username='user3')
-user3.save()
+from tutelary.models import Policy
+from exampleapp.models import (
+    Organisation, Project, Party, Parcel, UserPolicyAssignment
+)
 
 
 default_p_body = {'clause': []}
@@ -37,36 +31,49 @@ proj_p = Policy(name='project-default', body=json.dumps(proj_p_body))
 proj_p.save()
 
 
-vs = {'organisation': 'Cadasta', 'project': 'TestProj'}
-
-default_pi = PolicyInstance.objects.get_hashed(default_p, vs)
-default_pi.save()
-org_pi = PolicyInstance.objects.get_hashed(org_p, vs)
-org_pi.save()
-proj_pi = PolicyInstance.objects.get_hashed(proj_p, vs)
-proj_pi.save()
-
-
-pset1 = PermissionSet.objects.get_hashed(policies=[default_p],
-                                         variables=vs)
-pset1.users.add(user1)
-pset1.save()
-
-pset2 = PermissionSet.objects.get_hashed(policies=[default_p, org_p],
-                                         variables=vs)
-pset2.users.add(user2)
-pset2.save()
-
-pset3 = PermissionSet.objects.get_hashed(policies=[default_p, org_p, proj_p],
-                                         variables=vs)
-pset3.users.add(user3)
-pset3.save()
-
-
 org = Organisation(name='Cadasta')
 org.save()
 proj = Project(name='TestProj', organisation=org)
 proj.save()
+
+
+user1 = User.objects.create(username='user1')
+user1.assign_policies(default_p)
+user1.save()
+up1_0 = UserPolicyAssignment.objects.create(user=user1, policy=default_p,
+                                            index=0)
+up1_0.save()
+
+user2 = User.objects.create(username='user2')
+user2.assign_policies(default_p,
+                      (org_p, {'organisation': 'Cadasta'}))
+user2.save()
+up2_0 = UserPolicyAssignment.objects.create(user=user2, policy=default_p,
+                                            index=0)
+up2_0.save()
+up2_1 = UserPolicyAssignment.objects.create(user=user2, policy=org_p,
+                                            organisation=org,
+                                            index=1)
+up2_1.save()
+
+user3 = User.objects.create(username='user3')
+user3.save()
+user3.assign_policies(default_p,
+                      (org_p, {'organisation': 'Cadasta'}),
+                      (proj_p, {'organisation': 'Cadasta',
+                                'project': 'TestProj'}))
+up3_0 = UserPolicyAssignment.objects.create(user=user3, policy=default_p,
+                                            index=0)
+up3_0.save()
+up3_1 = UserPolicyAssignment.objects.create(user=user3, policy=org_p,
+                                            organisation=org,
+                                            index=1)
+up3_1.save()
+up3_2 = UserPolicyAssignment.objects.create(user=user3, policy=proj_p,
+                                            organisation=org, project=proj,
+                                            index=2)
+up3_2.save()
+
 
 party1 = Party(project=proj, name='Jim Jones')
 party1.save()

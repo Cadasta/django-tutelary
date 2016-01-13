@@ -3,6 +3,7 @@ import hashlib
 import itertools
 from django.db import models
 from django.conf import settings
+from django.apps.registry import apps
 from audit_log.models.managers import AuditLog
 import tutelary.base as base
 
@@ -84,7 +85,7 @@ class PermissionSetManager(models.Manager):
             if isinstance(p, tuple):
                 return base.Policy(json=p[0].body, variables=p[1])
             else:
-                return base.Policy(json=p[0].body)
+                return base.Policy(json=p.body)
 
         # Make policy instances for each of the sequence of policies
         # on which this permission set is based, and extract their
@@ -142,7 +143,8 @@ class PermissionSet(models.Model):
     # Users to which this permission set is attached: a user has only
     # one permission set, so this is really an 1:m relation, not an
     # n:m relation.
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL)
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL,
+                                   related_name='permissionset')
 
     # Hash field and custom manager to deal with folding together
     # permission sets generated from identical sequences of policies.
@@ -155,5 +157,8 @@ class PermissionSet(models.Model):
 
 
 def assign_user_policies(user, *policies):
+    pset = user.permissionset.first()
+    if pset:
+        pset.users.remove(user)
     pset = PermissionSet.objects.get_hashed(policies)
-    pset.user.add(user)
+    pset.users.add(user)
