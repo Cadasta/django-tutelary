@@ -3,6 +3,8 @@ import hashlib
 import itertools
 from django.db import models
 from django.conf import settings
+from django.db.models.signals import pre_delete, post_delete
+from django.dispatch import receiver
 from audit_log.models.managers import AuditLog
 import tutelary.base as base
 
@@ -33,10 +35,12 @@ class PolicyInstanceManager(models.Manager):
         if existing:
             return existing[0]
         else:
-            return self.create(policy=policy,
-                               policy_text=str(pol),
-                               variables=json.dumps(variables),
-                               hash=pol.hash())
+            result = self.create(policy=policy,
+                                 policy_text=str(pol),
+                                 variables=json.dumps(variables),
+                                 hash=pol.hash())
+            result.save()
+            return result
 
 
 class PolicyInstance(models.Model):
@@ -155,9 +159,28 @@ class PermissionSet(models.Model):
         return pis
 
 
-def assign_user_policies(user, *policies):
+@receiver(post_delete, sender=PolicyInstanceAssign)
+def pa_delete(sender, instance, **kwargs):
+    if instance.policy_instance.permissionset_set.count() == 0:
+        instance.policy_instance.delete()
+
+
+@receiver(pre_delete, sender=settings.AUTH_USER_MODEL)
+def user_delete(sender, instance, **kwargs):
+    print('user_delete:', sender, instance)
+    clear_user_policies(instance)
+
+
+def clear_user_policies(user):
     pset = user.permissionset.first()
     if pset:
         pset.users.remove(user)
+        if pset.users.count() == 0:
+            print('Deleting PSet')
+            pset.delete()
+
+
+def assign_user_policies(user, *policies):
+    clear_user_policies(user)
     pset = PermissionSet.objects.get_hashed(policies)
     pset.users.add(user)

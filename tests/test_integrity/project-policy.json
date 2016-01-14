@@ -1,0 +1,7 @@
+{
+  "version": "2015-12-10",
+  "clause": [
+    { "effect": "deny", "action": ["party.edit"], "object": ["party/$organisation/$project/*"] },
+    { "effect": "deny", "action": ["parcel.edit"], "object": ["parcel/$organisation/$project/*"] }
+  ]
+}
