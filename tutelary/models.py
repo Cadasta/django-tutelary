@@ -93,8 +93,8 @@ class PermissionSetManager(models.Manager):
         # Make policy instances for each of the sequence of policies
         # on which this permission set is based, and extract their
         # hashes.
-        pis = list(map(make_pi, policies))
-        pi_hashes = list(map(lambda pi: pi.hash, pis))
+        pis = [make_pi(p) for p in policies]
+        pi_hashes = [pi.hash for pi in pis]
 
         # Make a "big hash" of all the hashes from the individual
         # policy assignment hashes in the order that they're used.
@@ -109,7 +109,7 @@ class PermissionSetManager(models.Manager):
         else:
             # Make a new base permission set object: this merges the
             # policy instances into a wild card tree for fast lookup.
-            pset = base.PermissionSet(policies=list(map(make_pol, policies)))
+            pset = base.PermissionSet(policies=[make_pol(p) for p in policies])
 
             # The permission set model stores the JSON serialisation
             # of this tree structure.

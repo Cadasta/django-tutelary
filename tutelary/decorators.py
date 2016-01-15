@@ -38,7 +38,7 @@ def get_permissions_object(obj):
             return pf
         else:
             return str(reduce(lambda o, f: getattr(o, f), pf, obj))
-    return Object(list(map(get_one, obj.__class__.TutelaryMeta.pfs)))
+    return Object([get_one(pf) for pf in obj.__class__.TutelaryMeta.pfs])
 
 
 def permissioned_model(cls, perm_type=None, path_fields=None):

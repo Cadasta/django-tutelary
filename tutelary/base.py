@@ -149,8 +149,8 @@ class Clause:
         """
         if dict is not None:
             effect = dict['effect']
-            action = list(map(Action, dict['action']))
-            object = list(map(Object, dict['object']))
+            action = [Action(a) for a in dict['action']]
+            object = [Object(o) for o in dict['object']]
         if effect not in ['allow', 'deny']:
             raise EffectException(effect)
         if any(a1.match(a2) for a1 in action for a2 in action if a1 != a2):
@@ -187,9 +187,9 @@ class Policy(Sequence):
         if 'clause' not in d:
             raise PolicyBodyException(msg="no policy clauses")
         self.clauses = d['clause']
-        self.clauses = list(map(lambda c: Clause(dict=c), self.clauses))
-        self.nitems = sum(map(lambda c: len(c.action) * len(c.object),
-                              self.clauses))
+        self.clauses = [Clause(dict=c) for c in self.clauses]
+        self.nitems = sum([len(c.action) * len(c.object)
+                           for c in self.clauses])
         self.nclauses = len(self.clauses)
         if self.version not in ['2015-12-10']:
             raise PolicyBodyException(msg="version not recognised")
@@ -203,9 +203,9 @@ class Policy(Sequence):
     def __str__(self):
         def one_clause(c):
             return {'effect': c.effect,
-                    'action': list(map(str, c.action)),
-                    'object': list(map(str, c.object))}
-        cs = list(map(one_clause, self.clauses))
+                    'action': [str(a) for a in c.action],
+                    'object': [str(o) for o in c.object]}
+        cs = [one_clause(c) for c in self.clauses]
         return dumps({'version': self.version, 'clause': cs})
 
     def __iter__(self):
