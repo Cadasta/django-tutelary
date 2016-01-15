@@ -167,7 +167,6 @@ def pa_delete(sender, instance, **kwargs):
 
 @receiver(pre_delete, sender=settings.AUTH_USER_MODEL)
 def user_delete(sender, instance, **kwargs):
-    print('user_delete:', sender, instance)
     clear_user_policies(instance)
 
 
@@ -176,7 +175,6 @@ def clear_user_policies(user):
     if pset:
         pset.users.remove(user)
         if pset.users.count() == 0:
-            print('Deleting PSet')
             pset.delete()
 
 

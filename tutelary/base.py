@@ -53,6 +53,9 @@ class SimpleSeparated(Sequence):
     def __eq__(self, other):
         return self.components == other.components
 
+    def __hash__(self):
+        return hash(str(self))
+
     def match(self, other):
         # Two sequences match if they are the same length and
         # corresponding components are either equal, or at least one

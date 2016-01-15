@@ -3,7 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import user_passes_test
 from django.db import models
 
-from .base import Object
+from .base import Object, Action
 from .exceptions import DecoratorException
 
 
@@ -41,16 +41,19 @@ def get_permissions_object(obj):
     return Object([get_one(pf) for pf in obj.__class__.TutelaryMeta.pfs])
 
 
-def permissioned_model(cls, perm_type=None, path_fields=None):
+def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
     if not (hasattr(cls, 'TutelaryMeta') or
-            perm_type is None or path_fields is None):
+            perm_type is None or path_fields is None or actions is None):
         cls.TutelaryMeta = type('TutelaryMeta', (object,),
                                 dict(perm_type=perm_type,
-                                     path_fields=path_fields))
+                                     path_fields=path_fields,
+                                     actions=actions))
     if hasattr(cls, 'TutelaryMeta'):
         cls.TutelaryMeta.pfs = ([cls.TutelaryMeta.perm_type] +
                                 get_path_fields(cls))
         cls.get_permissions_object = get_permissions_object
+        for a in cls.TutelaryMeta.actions:
+            Action.register(a[0])
     else:
         raise DecoratorException('permissioned_model',
                                  "missing TutelaryMeta member in '" +

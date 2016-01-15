@@ -11,12 +11,12 @@ class Organisation(models.Model):
 
     class Meta:
         ordering = ('name',)
-        permissions = (('org.create', "Can create organisations"),
-                       ('org.delete', "Can delete organisations"))
 
     class TutelaryMeta:
         perm_type = 'organisation'
         path_fields = ('name',)
+        actions = (('org.create', "Can create organisations"),
+                   ('org.delete', "Can delete organisations"))
 
     def __str__(self):
         return self.name
@@ -29,12 +29,12 @@ class Project(models.Model):
 
     class Meta:
         ordering = ('organisation', 'name')
-        permissions = (('project.create', "Can create projects"),
-                       ('project.delete', "Can delete projects"))
 
     class TutelaryMeta:
         perm_type = 'project'
         path_fields = ('organisation', 'name')
+        actions = (('project.create', "Can create projects"),
+                   ('project.delete', "Can delete projects"))
 
     def __str__(self):
         return self.name
@@ -47,15 +47,15 @@ class Party(models.Model):
 
     class Meta:
         ordering = ('project', 'name')
-        permissions = (('party.list', "Can list existing parties"),
-                       ('party.view', "Can view details of a party"),
-                       ('party.create', "Can create parties"),
-                       ('party.edit', "Can update existing parties"),
-                       ('party.delete', "Can delete parties"))
 
     class TutelaryMeta:
         perm_type = 'party'
         path_fields = ('project', 'pk')
+        actions = (('party.list', "Can list existing parties"),
+                   ('party.view', "Can view details of a party"),
+                   ('party.create', "Can create parties"),
+                   ('party.edit', "Can update existing parties"),
+                   ('party.delete', "Can delete parties"))
 
     def get_absolute_url(self):
         return reverse('party-detail', kwargs={'pk': self.pk})
@@ -68,15 +68,15 @@ class Parcel(models.Model):
 
     class Meta:
         ordering = ('project', 'address')
-        permissions = (('parcel.list', "Can list existing parcels"),
-                       ('parcel.view', "Can view details of a parcel"),
-                       ('parcel.create', "Can create parcels"),
-                       ('parcel.edit', "Can update existing parcels"),
-                       ('parcel.delete', "Can delete parcels"))
 
     class TutelaryMeta:
         perm_type = 'parcel'
         path_fields = ('project', 'pk')
+        actions = (('parcel.list', "Can list existing parcels"),
+                   ('parcel.view', "Can view details of a parcel"),
+                   ('parcel.create', "Can create parcels"),
+                   ('parcel.edit', "Can update existing parcels"),
+                   ('parcel.delete', "Can delete parcels"))
 
     def get_absolute_url(self):
         return reverse('parcel-detail', kwargs={'pk': self.pk})
@@ -95,16 +95,28 @@ class UserPolicyAssignment(models.Model):
 
 def set_user_policies(user):
     def do_one(pol_assign):
-        vs = dict()
-        if pol_assign.organisation:
-            vs['organisation'] = pol_assign.organisation.name
-        if pol_assign.project:
-            vs['project'] = pol_assign.project.name
+        vs = dict(
+            organisation=(pol_assign.organisation.name
+                          if pol_assign.organisation else None),
+            project=(pol_assign.project.name
+                     if pol_assign.project else None),
+        )
         pol = Policy.objects.get(name=pol_assign.policy)
         return (pol, vs) if vs else pol
-    pols = list(map(do_one, UserPolicyAssignment.objects.filter(user=user)))
+    pols = [do_one(pa)
+            for pa in UserPolicyAssignment.objects.filter(user=user)]
     user.assign_policies(*pols)
 
 
-permissioned_model(Policy, 'policy', ['name'])
-permissioned_model(User, 'user', ['username'])
+permissioned_model(Policy, perm_type='policy', path_fields=['name'],
+                   actions=(('policy.list', "Can list existing policies"),
+                            ('policy.view', "Can view details of a policy"),
+                            ('policy.create', "Can create policies"),
+                            ('policy.edit', "Can update existing policies"),
+                            ('policy.delete', "Can delete policies")))
+permissioned_model(User, perm_type='user', path_fields=['username'],
+                   actions=(('user.list', "Can list existing users"),
+                            ('user.view', "Can view details of a user"),
+                            ('user.create', "Can create users"),
+                            ('user.edit', "Can update existing users"),
+                            ('user.delete', "Can delete users")))
