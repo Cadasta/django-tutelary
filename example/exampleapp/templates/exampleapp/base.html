@@ -2,10 +2,25 @@
 <html>
   <head>
     <title>Tutelary example app</title>
+    <style>
+     .messages {
+       border: 2px solid red;
+       padding: 10px;
+       color: #AA0000;
+     }
+    </style>
   </head>
 
   <body>
     <div id="container">
+
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <p>{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
 
       {% block back %}{% endblock %}
 

@@ -115,7 +115,8 @@ class Action(SimpleSeparated):
         elif isinstance(action, Action):
             Action.registered.add(action)
         else:
-            map(Action.register, action)
+            for a in action:
+                Action.register(a)
 
 
 class Object(EscapeSeparated):

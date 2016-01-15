@@ -5,6 +5,7 @@ import django.views.generic.edit as edit
 from django.db import transaction
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from django.forms import ModelForm, ModelChoiceField
 from django.shortcuts import redirect, render
 from django.http import HttpResponseRedirect
@@ -15,6 +16,7 @@ from .models import (
 )
 from django.contrib.auth.models import User
 from tutelary.models import Policy
+import tutelary.mixins
 
 from .forms import UserSwitchForm, UserForm, UserPolicyForm
 
@@ -25,6 +27,13 @@ from .forms import UserSwitchForm, UserForm, UserPolicyForm
 #
 
 class UserMixin:
+    """
+    Mixin to add a user list and a form for switching users to all
+    views: we're using a custom authentication backend that allows for
+    switching between users without any authentication for demonstration
+    purposes.
+
+    """
     def get_context_data(self, **kwargs):
         context = super(UserMixin, self).get_context_data(**kwargs)
         context['users'] = User.objects.all()
@@ -35,6 +44,11 @@ class UserMixin:
 
 
 class PermissionPathMixin:
+    """
+    Mixin to add the permissions path of objects being displayed to
+    any view.
+
+    """
     def get_context_data(self, **kwargs):
         context = super(PermissionPathMixin, self).get_context_data(**kwargs)
         if 'object' in context:
@@ -48,23 +62,56 @@ class PermissionPathMixin:
         return context
 
 
-class ListView(UserMixin, PermissionPathMixin, generic.ListView):
+class PermissionRequiredMixin(tutelary.mixins.PermissionRequiredMixin):
+    def handle_no_permission(self):
+        print('handle_no_permission:', self.request.META.get('HTTP_REFERER', '/'))
+        if messages.get_messages(self.request):
+            return redirect('/')
+        messages.add_message(self.request, messages.ERROR, "PERMISSION DENIED")
+        return redirect(self.request.META.get('HTTP_REFERER', '/'))
+
+
+class ListView(UserMixin, PermissionPathMixin, PermissionRequiredMixin,
+               generic.ListView):
+    """
+    Generic list view with user list, object permission paths and
+    permission handling.
+
+    """
     pass
 
 
-class DetailView(UserMixin, PermissionPathMixin, generic.DetailView):
+class DetailView(UserMixin, PermissionPathMixin, PermissionRequiredMixin,
+                 generic.DetailView):
+    """
+    Generic detail view with user list, object permission paths and
+    permission handling.
+
+    """
     pass
 
 
-class CreateView(UserMixin, edit.CreateView):
+class CreateView(UserMixin, PermissionRequiredMixin, edit.CreateView):
+    """
+    Generic create view with user list and permission handling.
+
+    """
     pass
 
 
-class UpdateView(UserMixin, edit.UpdateView):
+class UpdateView(UserMixin, PermissionRequiredMixin, edit.UpdateView):
+    """
+    Generic update view with user list and permission handling.
+
+    """
     pass
 
 
-class DeleteView(UserMixin, edit.DeleteView):
+class DeleteView(UserMixin, PermissionRequiredMixin, edit.DeleteView):
+    """
+    Generic delete view with user list and permission handling.
+
+    """
     pass
 
 
@@ -84,10 +131,12 @@ class IndexView(UserMixin, generic.TemplateView):
 
 class UserList(ListView):
     model = User
+    permission_required = 'user.list'
 
 
 class UserDetail(DetailView):
     model = User
+    permission_required = 'user.detail'
 
     def get_context_data(self, **kwargs):
         context = super(UserDetail, self).get_context_data(**kwargs)
@@ -137,6 +186,7 @@ class UserEdit(generic.FormView):
 
 class UserCreate(UserEdit):
     template_name = 'auth/user_form.html'
+    permission_required = 'user.create'
 
     def get(self, request, *args, **kwargs):
         main_form = UserForm()
@@ -153,6 +203,7 @@ class UserCreate(UserEdit):
 class UserUpdate(edit.SingleObjectMixin, UserEdit):
     model = User
     template_name = 'auth/user_update_form.html'
+    permission_required = 'user.edit'
 
     def get(self, request, *args, **kwargs):
         def init_data(p, i):
@@ -179,6 +230,7 @@ class UserUpdate(edit.SingleObjectMixin, UserEdit):
 class UserDelete(DeleteView):
     model = User
     success_url = reverse_lazy('user-list')
+    permission_required = 'user.delete'
 
 
 class SwitchUser(generic.View):
@@ -198,10 +250,12 @@ class SwitchUser(generic.View):
 
 class PolicyList(ListView):
     model = Policy
+    permission_required = 'policy.list'
 
 
 class PolicyDetail(DetailView):
     model = Policy
+    permission_required = 'policy.detail'
 
     def get_context_data(self, **kwargs):
         context = super(PolicyDetail, self).get_context_data(**kwargs)
@@ -213,6 +267,7 @@ class PolicyDetail(DetailView):
 class PolicyCreate(CreateView):
     model = Policy
     fields = ['name', 'body']
+    permission_required = 'policy.create'
 
     def get_success_url(self):
         return reverse('policy-detail', kwargs={'pk': self.object.pk})
@@ -222,6 +277,7 @@ class PolicyUpdate(UpdateView):
     model = Policy
     fields = ['name', 'body']
     template_name_suffix = '_update_form'
+    permission_required = 'policy.edit'
 
     def get_success_url(self):
         return reverse('policy-detail', kwargs={'pk': self.object.pk})
@@ -230,6 +286,7 @@ class PolicyUpdate(UpdateView):
 class PolicyDelete(DeleteView):
     model = Policy
     success_url = reverse_lazy('policy-list')
+    permission_required = 'policy.delete'
 
 
 # ----------------------------------------------------------------------
@@ -239,17 +296,20 @@ class PolicyDelete(DeleteView):
 
 class OrganisationList(ListView):
     model = Organisation
+    permission_required = 'org.list'
 
 
 class OrganisationCreate(CreateView):
     model = Organisation
     fields = ['name']
     success_url = reverse_lazy('organisation-list')
+    permission_required = 'org.create'
 
 
 class OrganisationDelete(DeleteView):
     model = Organisation
     success_url = reverse_lazy('organisation-list')
+    permission_required = 'org.delete'
 
 
 # ----------------------------------------------------------------------
@@ -259,6 +319,7 @@ class OrganisationDelete(DeleteView):
 
 class ProjectList(ListView):
     model = Project
+    permission_required = 'project.list'
 
 
 class ProjectForm(ModelForm):
@@ -277,11 +338,13 @@ class ProjectCreate(CreateView):
     model = Project
     form_class = ProjectForm
     success_url = reverse_lazy('project-list')
+    permission_required = 'project.create'
 
 
 class ProjectDelete(DeleteView):
     model = Project
     success_url = reverse_lazy('project-list')
+    permission_required = 'project.delete'
 
 
 # ----------------------------------------------------------------------
@@ -291,10 +354,12 @@ class ProjectDelete(DeleteView):
 
 class PartyList(ListView):
     model = Party
+    permission_required = 'party.list'
 
 
 class PartyDetail(DetailView):
     model = Party
+    permission_required = 'party.detail'
 
 
 class PartyForm(ModelForm):
@@ -312,17 +377,20 @@ class PartyForm(ModelForm):
 class PartyCreate(CreateView):
     model = Party
     form_class = PartyForm
+    permission_required = 'party.create'
 
 
 class PartyUpdate(UpdateView):
     model = Party
     form_class = PartyForm
     template_name_suffix = '_update_form'
+    permission_required = 'party.edit'
 
 
 class PartyDelete(DeleteView):
     model = Party
     success_url = reverse_lazy('party-list')
+    permission_required = 'party.delete'
 
 
 # ----------------------------------------------------------------------
@@ -332,10 +400,12 @@ class PartyDelete(DeleteView):
 
 class ParcelList(ListView):
     model = Parcel
+    permission_required = 'parcel.list'
 
 
 class ParcelDetail(DetailView):
     model = Parcel
+    permission_required = 'parcel.detail'
 
 
 class ParcelForm(ModelForm):
@@ -353,14 +423,17 @@ class ParcelForm(ModelForm):
 class ParcelCreate(CreateView):
     model = Parcel
     form_class = ParcelForm
+    permission_required = 'parcel.create'
 
 
 class ParcelUpdate(UpdateView):
     model = Parcel
     form_class = ParcelForm
     template_name_suffix = '_update_form'
+    permission_required = 'parcel.edit'
 
 
 class ParcelDelete(DeleteView):
     model = Parcel
     success_url = reverse_lazy('parcel-list')
+    permission_required = 'parcel.delete'

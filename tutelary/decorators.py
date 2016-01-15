@@ -9,7 +9,7 @@ from .exceptions import DecoratorException
 
 def permission_required(*actions, raise_exception=False):
     def check_perms(user):
-        if all(user.has_perms(a) for a in actions):
+        if user.is_authenticated() and all(user.has_perms(a) for a in actions):
             return True
         if raise_exception:
             raise PermissionDenied

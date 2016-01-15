@@ -15,7 +15,8 @@ class Organisation(models.Model):
     class TutelaryMeta:
         perm_type = 'organisation'
         path_fields = ('name',)
-        actions = (('org.create', "Can create organisations"),
+        actions = (('org.list', "Can list existing organisations"),
+                   ('org.create', "Can create organisations"),
                    ('org.delete', "Can delete organisations"))
 
     def __str__(self):
@@ -33,7 +34,8 @@ class Project(models.Model):
     class TutelaryMeta:
         perm_type = 'project'
         path_fields = ('organisation', 'name')
-        actions = (('project.create', "Can create projects"),
+        actions = (('project.list', "Can list existing projects"),
+                   ('project.create', "Can create projects"),
                    ('project.delete', "Can delete projects"))
 
     def __str__(self):
