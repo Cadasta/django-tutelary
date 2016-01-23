@@ -15,6 +15,7 @@ from .models import (
     set_user_policies
 )
 from django.contrib.auth.models import User
+from tutelary.base import Action
 from tutelary.models import Policy
 import tutelary.mixins
 
@@ -446,3 +447,41 @@ class ParcelDelete(DeleteView):
     model = Parcel
     success_url = reverse_lazy('parcel-list')
     permission_required = 'parcel.delete'
+
+
+# ----------------------------------------------------------------------
+#
+#  STATISTICS
+#
+
+def segregate(zs):
+    allres = []
+    curlab = zs[0][0]
+    curres = [zs[0][1]]
+    for i in range(1, len(zs)):
+        if zs[i][0] != curlab:
+            allres.append({'label': curlab, 'actions': curres})
+            curlab = zs[i][0]
+            curres = [zs[i][1]]
+        else:
+            curres.append(zs[i][1])
+    allres.append({'label': curlab, 'actions': curres})
+    return allres
+
+
+class StatisticsView(UserMixin, PermissionRequiredMixin, generic.TemplateView):
+    template_name = 'exampleapp/statistics.html'
+    permission_required = 'statistics'
+
+    def get_context_data(self, **kwargs):
+        context = super(StatisticsView, self).get_context_data(**kwargs)
+        context['counts'] = {'users': User.objects.count(),
+                             'policies': Policy.objects.count(),
+                             'organisations': Organisation.objects.count(),
+                             'projects': Project.objects.count(),
+                             'parties': Party.objects.count(),
+                             'parcels': Parcel.objects.count()}
+        acts = sorted(list(map(str, list(Action.registered))))
+        acts = zip(map(lambda a: a.split('.')[0], acts), acts)
+        context['actions'] = segregate(list(acts))
+        return context

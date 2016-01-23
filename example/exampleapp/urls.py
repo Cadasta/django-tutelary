@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from .views import (
-    IndexView,
+    IndexView, StatisticsView,
     UserList, UserDetail, UserCreate, UserUpdate, UserDelete, SwitchUser,
     OrganisationList, OrganisationCreate, OrganisationDelete,
     ProjectList, ProjectCreate, ProjectDelete,
@@ -11,6 +11,7 @@ from .views import (
 
 urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
+    url(r'^statistics/$', StatisticsView.as_view(), name='statistics'),
 
     url(r'^user/$', UserList.as_view(), name='user-list'),
     url(r'^user/(?P<pk>\d+)/$', UserDetail.as_view(), name='user-detail'),

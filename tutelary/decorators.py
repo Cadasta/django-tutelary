@@ -54,7 +54,6 @@ def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
         cls.TutelaryMeta.allowed_methods = {}
         cls.get_permissions_object = get_permissions_object
         for a in cls.TutelaryMeta.actions:
-            print(a)
             Action.register(a[0])
             if len(a) > 2:
                 cls.TutelaryMeta.allowed_methods[a[0]] = a[2]

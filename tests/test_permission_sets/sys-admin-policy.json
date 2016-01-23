@@ -3,6 +3,7 @@
   "clause": [
     { "effect": "allow",  "action": ["*.edit"], "object": ["*/*/*/*"] },
     { "effect": "allow",  "action": ["*.create"], "object": ["*/*/*"] },
-    { "effect": "allow",  "action": ["admin.*"], "object": ["*", "*/*", "*/*/*"] }
+    { "effect": "allow",  "action": ["admin.*"], "object": ["*", "*/*", "*/*/*"] },
+    { "effect": "allow", "action": "statistics" }
   ]
 }

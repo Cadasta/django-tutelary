@@ -145,7 +145,7 @@ class Clause:
     object patterns to which the effect applies.
 
     """
-    def __init__(self, effect=None, action=None, object=None, dict=None):
+    def __init__(self, effect=None, act=None, obj=None, dict=None):
         """
         A clause can be created either by giving explicit lists of
         ``Action`` and ``Object`` objects or by giving a dictionary
@@ -155,17 +155,21 @@ class Clause:
         """
         if dict is not None:
             effect = dict['effect']
-            action = [Action(a) for a in dict['action']]
-            object = [Object(o) for o in dict['object']]
+            if isinstance(dict['action'], str):
+                act = [Action(dict['action'])]
+            else:
+                act = [Action(a) for a in dict['action']]
+            obj = [Object(o)
+                   for o in dict['object']] if 'object' in dict else []
         if effect not in ['allow', 'deny']:
             raise EffectException(effect)
-        if any(a1.match(a2) for a1 in action for a2 in action if a1 != a2):
+        if any(a1.match(a2) for a1 in act for a2 in act if a1 != a2):
             raise PatternOverlapException('action')
-        if any(o1.match(o2) for o1 in object for o2 in object if o1 != o2):
+        if any(o1.match(o2) for o1 in obj for o2 in obj if o1 != o2):
             raise PatternOverlapException('object')
         self.effect = effect
-        self.action = action
-        self.object = object
+        self.action = act
+        self.object = obj
 
 
 class Policy(Sequence):
@@ -218,8 +222,11 @@ class Policy(Sequence):
         for c in self.clauses:
             e = c.effect
             for a in c.action:
-                for o in c.object:
-                    yield e, a, o
+                if len(c.object) == 0:
+                    yield e, a, None
+                else:
+                    for o in c.object:
+                        yield e, a, o
 
     def hash(self):
         return hashlib.md5(str(self).encode()).hexdigest()
@@ -266,7 +273,7 @@ class PermissionSet:
         """
         return repr(self.tree)
 
-    def add(self, effect=None, action=None, object=None,
+    def add(self, effect=None, act=None, obj=None,
             policy=None, policies=None):
         """
         Insert an individual (effect, action, object) triple or all
@@ -280,18 +287,22 @@ class PermissionSet:
             for e, a, o in policy:
                 self.add(e, a, o)
         else:
-            self.tree[action.components + object.components] = effect
+            objc = obj.components if obj is not None else []
+            self.tree[act.components + objc] = effect
 
-    def allow(self, action, object):
+    def allow(self, act, obj=None):
         """
         Determine where a given action on a given object is allowed.
         """
+        print(act, obj)
+        print(self.tree)
+        objc = obj.components if obj is not None else []
         try:
-            return self.tree[action.components + object.components] == 'allow'
+            return self.tree[act.components + objc] == 'allow'
         except KeyError:
             return False
 
-    def permitted_actions(self, object):
+    def permitted_actions(self, obj):
         """
         Determine permitted actions for a given object pattern.
         """

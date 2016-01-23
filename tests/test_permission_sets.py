@@ -33,6 +33,7 @@ def test_permission_set_policies(datadir):  # noqa
     party_create = Action('party.create')
     admin_assign = Action('admin.assign-role')
     admin_invite = Action('admin.invite')
+    statistics = Action('statistics')
     parties = Object('Cadasta/Test/party')
     parcel123 = Object('Cadasta/Test/parcel/123')
     org = Object('org/Cadasta')
@@ -44,6 +45,7 @@ def test_permission_set_policies(datadir):  # noqa
     assert sapset.allow(admin_assign, useriross)
     assert sapset.allow(admin_invite, useriross)
     assert sapset.allow(admin_invite, org)
+    assert sapset.allow(statistics)
 
     assert oapset.allow(parcel_view, parcel123)
     assert oapset.allow(parcel_edit, parcel123)
@@ -51,6 +53,7 @@ def test_permission_set_policies(datadir):  # noqa
     assert not oapset.allow(admin_assign, useriross)
     assert oapset.allow(admin_invite, useriross)
     assert oapset.allow(admin_invite, org)
+    assert not oapset.allow(statistics)
 
     assert dcpset.allow(parcel_view, parcel123)
     assert dcpset.allow(parcel_edit, parcel123)
@@ -58,3 +61,4 @@ def test_permission_set_policies(datadir):  # noqa
     assert not dcpset.allow(admin_assign, useriross)
     assert not dcpset.allow(admin_invite, useriross)
     assert not dcpset.allow(admin_invite, org)
+    assert dcpset.allow(statistics)

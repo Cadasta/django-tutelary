@@ -1,6 +1,7 @@
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.contrib.auth.models import User
+from tutelary.base import Action
 from tutelary.models import Policy
 from tutelary.decorators import permissioned_model
 
@@ -122,3 +123,5 @@ permissioned_model(User, perm_type='user', path_fields=['username'],
                             ('user.create', "Can create users"),
                             ('user.edit', "Can update existing users"),
                             ('user.delete', "Can delete users")))
+
+Action.register('statistics')

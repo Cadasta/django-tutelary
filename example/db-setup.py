@@ -24,7 +24,9 @@ default_p_body = {'clause':
                     'object': ['user/*']},
                    {'effect': 'allow',
                     'action': ['policy.list', 'policy.detail'],
-                    'object': ['policy/*']}]}
+                    'object': ['policy/*']},
+                   {'effect': 'deny',
+                    'action': 'statistics'}]}
 default_p = Policy(name='default', body=json.dumps(default_p_body))
 default_p.save()
 
@@ -46,7 +48,9 @@ sysadmin_p_body = {'clause':
                      'object': ['user/*']},
                     {'effect': 'allow',
                      'action': ['policy.*'],
-                     'object': ['policy/*']}]}
+                     'object': ['policy/*']},
+                    {'effect': 'allow',
+                     'action': 'statistics'}]}
 sysadmin_p = Policy(name='sys-admin', body=json.dumps(sysadmin_p_body))
 sysadmin_p.save()
 
