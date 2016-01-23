@@ -31,6 +31,8 @@ class SimpleSeparated(Sequence):
 
     """
     def __init__(self, s):
+        if s is None:
+            self.componsnes = []
         if isinstance(s, str):
             self.components = self._split_components(s)
         elif isinstance(s, Sequence):

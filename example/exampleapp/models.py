@@ -55,9 +55,9 @@ class Party(models.Model):
         path_fields = ('project', 'pk')
         actions = (('party.list', "Can list existing parties"),
                    ('party.view', "Can view details of a party"),
-                   ('party.create', "Can create parties"),
-                   ('party.edit', "Can update existing parties"),
-                   ('party.delete', "Can delete parties"))
+                   ('party.create', "Can create parties", ['GET']),
+                   ('party.edit', "Can update existing parties", ['GET']),
+                   ('party.delete', "Can delete parties", ['GET']))
 
     def get_absolute_url(self):
         return reverse('party-detail', kwargs={'pk': self.pk})
@@ -76,9 +76,9 @@ class Parcel(models.Model):
         path_fields = ('project', 'pk')
         actions = (('parcel.list', "Can list existing parcels"),
                    ('parcel.view', "Can view details of a parcel"),
-                   ('parcel.create', "Can create parcels"),
-                   ('parcel.edit', "Can update existing parcels"),
-                   ('parcel.delete', "Can delete parcels"))
+                   ('parcel.create', "Can create parcels", ['GET']),
+                   ('parcel.edit', "Can update existing parcels", ['GET']),
+                   ('parcel.delete', "Can delete parcels", ['GET']))
 
     def get_absolute_url(self):
         return reverse('parcel-detail', kwargs={'pk': self.pk})

@@ -64,8 +64,8 @@ class PermissionPathMixin:
 
 class PermissionRequiredMixin(tutelary.mixins.PermissionRequiredMixin):
     def handle_no_permission(self):
-        print('handle_no_permission:', self.request.META.get('HTTP_REFERER', '/'))
-        if messages.get_messages(self.request):
+        # Stop a redirect loop here.
+        if len(messages.get_messages(self.request)) > 0:
             return redirect('/')
         messages.add_message(self.request, messages.ERROR, "PERMISSION DENIED")
         return redirect(self.request.META.get('HTTP_REFERER', '/'))
@@ -85,6 +85,16 @@ class DetailView(UserMixin, PermissionPathMixin, PermissionRequiredMixin,
                  generic.DetailView):
     """
     Generic detail view with user list, object permission paths and
+    permission handling.
+
+    """
+    pass
+
+
+class FormView(UserMixin, PermissionPathMixin, PermissionRequiredMixin,
+               generic.FormView):
+    """
+    Generic form view with user list, object permission paths and
     permission handling.
 
     """
@@ -146,7 +156,7 @@ class UserDetail(DetailView):
         return context
 
 
-class UserEdit(generic.FormView):
+class UserEdit(FormView):
     model = User
     form_class = UserForm
 
@@ -201,7 +211,6 @@ class UserCreate(UserEdit):
 
 
 class UserUpdate(edit.SingleObjectMixin, UserEdit):
-    model = User
     template_name = 'auth/user_update_form.html'
     permission_required = 'user.edit'
 

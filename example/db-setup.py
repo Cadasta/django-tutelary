@@ -6,9 +6,49 @@ from exampleapp.models import (
 )
 
 
-default_p_body = {'clause': []}
+default_p_body = {'clause':
+                  [{'effect': 'allow',
+                    'action': ['party.list', 'party.detail'],
+                    'object': ['party/*/*/*']},
+                   {'effect': 'allow',
+                    'action': ['parcel.list', 'parcel.detail'],
+                    'object': ['parcel/*/*/*']},
+                   {'effect': 'allow',
+                    'action': ['organisation.list', 'organisation.detail'],
+                    'object': ['organisation/*']},
+                   {'effect': 'allow',
+                    'action': ['project.list', 'project.detail'],
+                    'object': ['project/*/*']},
+                   {'effect': 'allow',
+                    'action': ['user.list', 'user.detail'],
+                    'object': ['user/*']},
+                   {'effect': 'allow',
+                    'action': ['policy.list', 'policy.detail'],
+                    'object': ['policy/*']}]}
 default_p = Policy(name='default', body=json.dumps(default_p_body))
 default_p.save()
+
+sysadmin_p_body = {'clause':
+                   [{'effect': 'allow',
+                     'action': ['party.*'],
+                     'object': ['party/*/*/*']},
+                    {'effect': 'allow',
+                     'action': ['parcel.*'],
+                     'object': ['parcel/*/*/*']},
+                    {'effect': 'allow',
+                     'action': ['organisation.*'],
+                     'object': ['organisation/*']},
+                    {'effect': 'allow',
+                     'action': ['project.*'],
+                     'object': ['project/*/*']},
+                    {'effect': 'allow',
+                     'action': ['user.*'],
+                     'object': ['user/*']},
+                    {'effect': 'allow',
+                     'action': ['policy.*'],
+                     'object': ['policy/*']}]}
+sysadmin_p = Policy(name='sys-admin', body=json.dumps(sysadmin_p_body))
+sysadmin_p.save()
 
 org_p_body = {'clause':
               [{'effect': 'allow',
@@ -16,7 +56,10 @@ org_p_body = {'clause':
                 'object': ['party/$organisation/*/*']},
                {'effect': 'allow',
                 'action': ['parcel.*'],
-                'object': ['parcel/$organisation/*/*']}]}
+                'object': ['parcel/$organisation/*/*']},
+               {'effect': 'allow',
+                'action': ['project.*'],
+                'object': ['project/$organisation/*']}]}
 org_p = Policy(name='org-default', body=json.dumps(org_p_body))
 org_p.save()
 
@@ -26,7 +69,12 @@ proj_p_body = {'clause':
                  'object': ['party/$organisation/$project/*']},
                 {'effect': 'deny',
                  'action': ['parcel.edit'],
-                 'object': ['parcel/$organisation/$project/*']}]}
+                 'object': ['parcel/$organisation/$project/*']},
+                {'effect': 'deny',
+                 'action': ['project.create',
+                            'project.edit',
+                            'project.delete'],
+                 'object': ['project/$organisation/*']}]}
 proj_p = Policy(name='project-default', body=json.dumps(proj_p_body))
 proj_p.save()
 
@@ -36,6 +84,16 @@ org.save()
 proj = Project(name='TestProj', organisation=org)
 proj.save()
 
+
+sysadmin = User.objects.create(username='admin')
+sysadmin.assign_policies(default_p, sysadmin_p)
+sysadmin.save()
+ups_0 = UserPolicyAssignment.objects.create(user=sysadmin, policy=default_p,
+                                            index=0)
+ups_0.save()
+ups_1 = UserPolicyAssignment.objects.create(user=sysadmin, policy=sysadmin_p,
+                                            index=1)
+ups_1.save()
 
 user1 = User.objects.create(username='user1')
 user1.assign_policies(default_p)

@@ -157,6 +157,11 @@ def find_in_tree(tree, key, perfect=False):
         if tree['item'] is not None:
             return tree['item'], ()
         else:
+            for i in range(len(tree['subtrees'])):
+                if not perfect and tree['subtrees'][i][0] == '*':
+                    item, trace = find_in_tree(tree['subtrees'][i][1],
+                                               (), perfect)
+                    return item, (i,) + trace
             raise KeyError(key)
     else:
         head, tail = key[0], key[1:]

@@ -14,7 +14,7 @@
 <ul>
   {% for policy in policies %}
     <li>
-      {{ policy.policy.name }}
+      <a href="{% url 'policy-detail' policy.policy.id %}">{{ policy.policy.name }}</a>
       {% if policy.organisation and policy.project %}
       (org = {{ policy.organisation.name }}, proj = {{ policy.project.name }})
       {% elif policy.organisation %}
