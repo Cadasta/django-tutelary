@@ -4,7 +4,7 @@ import django.views.generic as generic
 import django.views.generic.edit as edit
 from django.db import transaction
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, get_backends
 from django.contrib import messages
 from django.forms import ModelForm, ModelChoiceField
 from django.shortcuts import redirect, render
@@ -44,22 +44,41 @@ class UserMixin:
         return context
 
 
-class PermissionPathMixin:
+class PermissionInfoMixin:
     """
     Mixin to add the permissions path of objects being displayed to
-    any view.
+    any view, along with list of permitted actions.
 
     """
     def get_context_data(self, **kwargs):
-        context = super(PermissionPathMixin, self).get_context_data(**kwargs)
+        context = super(PermissionInfoMixin, self).get_context_data(**kwargs)
         if 'object' in context:
             obj = context['object']
             if hasattr(obj, 'get_permissions_object'):
                 obj.permissions_path = str(obj.get_permissions_object())
+                acts = list(map(str, get_backends()[0].permitted_actions(
+                    self.request.user, obj.get_permissions_object()
+                )))
         elif 'object_list' in context:
+            actcnts = {}
             for obj in context['object_list']:
                 if hasattr(obj, 'get_permissions_object'):
                     obj.permissions_path = str(obj.get_permissions_object())
+                    objacts = get_backends()[0].permitted_actions(
+                        self.request.user, obj.get_permissions_object()
+                    )
+                    for a in objacts:
+                        if a in actcnts:
+                            actcnts[a] += 1
+                        else:
+                            actcnts[a] = 1
+            acts = []
+            for act, cnt in actcnts.items():
+                if cnt == len(context['object_list']):
+                    acts.append(str(act))
+                else:
+                    acts.append('(' + str(act) + ')')
+        context['actions'] = acts
         return context
 
 
@@ -72,7 +91,7 @@ class PermissionRequiredMixin(tutelary.mixins.PermissionRequiredMixin):
         return redirect(self.request.META.get('HTTP_REFERER', '/'))
 
 
-class ListView(UserMixin, PermissionPathMixin, PermissionRequiredMixin,
+class ListView(UserMixin, PermissionInfoMixin, PermissionRequiredMixin,
                generic.ListView):
     """
     Generic list view with user list, object permission paths and
@@ -82,7 +101,7 @@ class ListView(UserMixin, PermissionPathMixin, PermissionRequiredMixin,
     pass
 
 
-class DetailView(UserMixin, PermissionPathMixin, PermissionRequiredMixin,
+class DetailView(UserMixin, PermissionInfoMixin, PermissionRequiredMixin,
                  generic.DetailView):
     """
     Generic detail view with user list, object permission paths and
@@ -92,7 +111,7 @@ class DetailView(UserMixin, PermissionPathMixin, PermissionRequiredMixin,
     pass
 
 
-class FormView(UserMixin, PermissionPathMixin, PermissionRequiredMixin,
+class FormView(UserMixin, PermissionInfoMixin, PermissionRequiredMixin,
                generic.FormView):
     """
     Generic form view with user list, object permission paths and
@@ -481,5 +500,5 @@ class StatisticsView(UserMixin, PermissionRequiredMixin, generic.TemplateView):
                              'parcels': Parcel.objects.count()}
         acts = sorted(list(map(str, list(Action.registered))))
         acts = zip(map(lambda a: a.split('.')[0], acts), acts)
-        context['actions'] = segregate(list(acts))
+        context['action_groups'] = segregate(list(acts))
         return context

@@ -1,4 +1,5 @@
 import json
+import itertools
 from django.contrib.auth.models import User
 from tutelary.models import Policy, assign_user_policies
 from exampleapp.models import (
@@ -8,22 +9,40 @@ from exampleapp.models import (
 
 default_p_body = {'clause':
                   [{'effect': 'allow',
-                    'action': ['party.list', 'party.detail'],
+                    'action': ['party.list'],
+                    'object': ['party/*/*']},
+                   {'effect': 'allow',
+                    'action': ['party.detail'],
                     'object': ['party/*/*/*']},
                    {'effect': 'allow',
-                    'action': ['parcel.list', 'parcel.detail'],
+                    'action': ['parcel.list'],
+                    'object': ['parcel/*/*']},
+                   {'effect': 'allow',
+                    'action': ['parcel.detail'],
                     'object': ['parcel/*/*/*']},
                    {'effect': 'allow',
-                    'action': ['organisation.list', 'organisation.detail'],
+                    'action': ['organisation.list'],
+                    'object': ['organisation']},
+                   {'effect': 'allow',
+                    'action': ['organisation.detail'],
                     'object': ['organisation/*']},
                    {'effect': 'allow',
-                    'action': ['project.list', 'project.detail'],
+                    'action': ['project.list'],
+                    'object': ['project/*']},
+                   {'effect': 'allow',
+                    'action': ['project.detail'],
                     'object': ['project/*/*']},
                    {'effect': 'allow',
-                    'action': ['user.list', 'user.detail'],
+                    'action': ['user.list'],
+                    'object': ['user']},
+                   {'effect': 'allow',
+                    'action': ['user.detail'],
                     'object': ['user/*']},
                    {'effect': 'allow',
-                    'action': ['policy.list', 'policy.detail'],
+                    'action': ['policy.list'],
+                    'object': ['policy']},
+                   {'effect': 'allow',
+                    'action': ['policy.detail'],
                     'object': ['policy/*']},
                    {'effect': 'deny',
                     'action': 'statistics'}]}
@@ -83,73 +102,65 @@ proj_p = Policy(name='project-default', body=json.dumps(proj_p_body))
 proj_p.save()
 
 
-org = Organisation(name='Cadasta')
-org.save()
-proj = Project(name='TestProj', organisation=org)
-proj.save()
+org1 = Organisation(name='Cadasta')
+org1.save()
+org2 = Organisation(name='H4HI')
+org2.save()
+
+proj1 = Project(name='CadastaProj1', organisation=org1)
+proj1.save()
+proj2 = Project(name='CadastaProj2', organisation=org1)
+proj2.save()
+proj3 = Project(name='H4HIProj', organisation=org2)
+proj3.save()
 
 
-sysadmin = User.objects.create(username='admin')
-sysadmin.assign_policies(default_p, sysadmin_p)
-sysadmin.save()
-ups_0 = UserPolicyAssignment.objects.create(user=sysadmin, policy=default_p,
-                                            index=0)
-ups_0.save()
-ups_1 = UserPolicyAssignment.objects.create(user=sysadmin, policy=sysadmin_p,
-                                            index=1)
-ups_1.save()
+users = [('admin', [default_p,
+                    sysadmin_p],
+          None, None),
+         ('user1', [default_p],
+          None, None),
+         ('user2', [default_p,
+                    (org_p, {'organisation': 'Cadasta'})],
+          org1, None),
+         ('user3', [default_p,
+                    (org_p, {'organisation': 'Cadasta'}),
+                    (proj_p, {'organisation': 'Cadasta',
+                              'project': 'CadastaProj1'})],
+          org1, proj1)]
 
-user1 = User.objects.create(username='user1')
-user1.assign_policies(default_p)
-user1.save()
-up1_0 = UserPolicyAssignment.objects.create(user=user1, policy=default_p,
-                                            index=0)
-up1_0.save()
-
-user2 = User.objects.create(username='user2')
-user2.assign_policies(default_p,
-                      (org_p, {'organisation': 'Cadasta'}))
-user2.save()
-up2_0 = UserPolicyAssignment.objects.create(user=user2, policy=default_p,
-                                            index=0)
-up2_0.save()
-up2_1 = UserPolicyAssignment.objects.create(user=user2, policy=org_p,
-                                            organisation=org,
-                                            index=1)
-up2_1.save()
-
-user3 = User.objects.create(username='user3')
-user3.save()
-user3.assign_policies(default_p,
-                      (org_p, {'organisation': 'Cadasta'}),
-                      (proj_p, {'organisation': 'Cadasta',
-                                'project': 'TestProj'}))
-up3_0 = UserPolicyAssignment.objects.create(user=user3, policy=default_p,
-                                            index=0)
-up3_0.save()
-up3_1 = UserPolicyAssignment.objects.create(user=user3, policy=org_p,
-                                            organisation=org,
-                                            index=1)
-up3_1.save()
-up3_2 = UserPolicyAssignment.objects.create(user=user3, policy=proj_p,
-                                            organisation=org, project=proj,
-                                            index=2)
-up3_2.save()
+for uname, pols, org, proj in users:
+    u = User.objects.create(username=uname)
+    u.assign_policies(*pols)
+    u.save()
+    for p, i in zip(pols, itertools.count()):
+        if isinstance(p, tuple):
+            p = p[0]
+        ups = UserPolicyAssignment.objects.create(user=u, policy=p,
+                                                  organisation=org,
+                                                  project=proj, index=i)
+        ups.save()
 
 
 assign_user_policies(None, default_p)
 
 
-party1 = Party(project=proj, name='Jim Jones')
-party1.save()
-party2 = Party(project=proj, name='Sally Smith')
-party2.save()
-party3 = Party(project=proj, name='Bob Bennett')
-party3.save()
+parties = [(proj1, 'Jim Jones'),
+           (proj1, 'Sally Smith'),
+           (proj1, 'Bob Bennett'),
+           (proj2, 'Dave Dawkins'),
+           (proj2, 'Alex Adams'),
+           (proj3, 'Charlie Chapo')]
+for p, n in parties:
+    party = Party(project=p, name=n)
+    party.save()
 
-parcel1 = Parcel(project=proj, address='1 Beach Terrace')
-parcel1.save()
-parcel2 = Parcel(project=proj, address='5 Sandy Road')
-parcel2.save()
-parcel3 = Parcel(project=proj, address='10 Chorley Street')
-parcel3.save()
+parcels = [(proj1, '1 Beach Terrace'),
+           (proj1, '5 Sandy Road'),
+           (proj2, '10 Chorley Street'),
+           (proj2, '7 Sidney Avenue'),
+           (proj3, 'Lanser Strasse 30'),
+           (proj3, 'Obexerstrasse 15')]
+for p, a in parcels:
+    parcel = Parcel(project=p, address=a)
+    parcel.save()

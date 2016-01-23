@@ -300,11 +300,11 @@ class PermissionSet:
         except KeyError:
             return False
 
-    def permitted_actions(self, obj):
+    def permitted_actions(self, obj=None):
         """
         Determine permitted actions for a given object pattern.
         """
-        pass
+        return [a for a in Action.registered if self.allow(a, obj)]
 
 
 # ------------------------------------------------------------------------------

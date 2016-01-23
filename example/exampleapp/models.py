@@ -55,7 +55,7 @@ class Party(models.Model):
         perm_type = 'party'
         path_fields = ('project', 'pk')
         actions = (('party.list', "Can list existing parties"),
-                   ('party.view', "Can view details of a party"),
+                   ('party.detail', "Can view details of a party"),
                    ('party.create', "Can create parties", ['GET']),
                    ('party.edit', "Can update existing parties", ['GET']),
                    ('party.delete', "Can delete parties", ['GET']))
@@ -76,7 +76,7 @@ class Parcel(models.Model):
         perm_type = 'parcel'
         path_fields = ('project', 'pk')
         actions = (('parcel.list', "Can list existing parcels"),
-                   ('parcel.view', "Can view details of a parcel"),
+                   ('parcel.detail', "Can view details of a parcel"),
                    ('parcel.create', "Can create parcels", ['GET']),
                    ('parcel.edit', "Can update existing parcels", ['GET']),
                    ('parcel.delete', "Can delete parcels", ['GET']))
@@ -113,13 +113,13 @@ def set_user_policies(user):
 
 permissioned_model(Policy, perm_type='policy', path_fields=['name'],
                    actions=(('policy.list', "Can list existing policies"),
-                            ('policy.view', "Can view details of a policy"),
+                            ('policy.detail', "Can view details of a policy"),
                             ('policy.create', "Can create policies"),
                             ('policy.edit', "Can update existing policies"),
                             ('policy.delete', "Can delete policies")))
 permissioned_model(User, perm_type='user', path_fields=['username'],
                    actions=(('user.list', "Can list existing users"),
-                            ('user.view', "Can view details of a user"),
+                            ('user.detail', "Can view details of a user"),
                             ('user.create', "Can create users"),
                             ('user.edit', "Can update existing users"),
                             ('user.delete', "Can delete users")))

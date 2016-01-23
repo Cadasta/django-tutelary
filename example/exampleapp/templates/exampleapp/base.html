@@ -5,8 +5,9 @@
     <style>
      .messages {
        border: 2px solid red;
-       padding: 10px;
+       padding: 0px 10px;
        color: #AA0000;
+       margin-bottom: 10px;
      }
     </style>
   </head>
@@ -23,6 +24,13 @@
       {% endif %}
 
       {% block back %}{% endblock %}
+
+        {% if actions %}
+          Actions: {% for a in actions %}
+            {{ a }} &nbsp;
+          {% endfor %}
+          <hr>
+        {% endif %}
 
       <h2>{% block title %}{% endblock %}</h2>
 

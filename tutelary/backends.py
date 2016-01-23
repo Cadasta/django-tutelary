@@ -4,13 +4,21 @@ from .base import Action, PermissionSet
 
 
 class Backend:
-    def has_perm(self, user, perm, obj=None, *args, **kwargs):
+    def get_pset(self, user):
         if user.is_authenticated():
-            pset = PermissionSet(json=user.permissionset.first().data)
+            return PermissionSet(json=user.permissionset.first().data)
         else:
-            try:
-                apset = PermissionSetModel.objects.get(anonymous_user=True)
-            except ObjectDoesNotExist:
-                return False
-            pset = PermissionSet(json=apset.data)
-        return pset.allow(Action(perm), obj)
+            apset = PermissionSetModel.objects.get(anonymous_user=True)
+            return PermissionSet(json=apset.data)
+
+    def has_perm(self, user, perm, obj=None, *args, **kwargs):
+        try:
+            return self.get_pset(user).allow(Action(perm), obj)
+        except ObjectDoesNotExist:
+            return False
+
+    def permitted_actions(self, user, obj=None):
+        try:
+            return self.get_pset(user).permitted_actions(obj)
+        except ObjectDoesNotExist:
+            return []
