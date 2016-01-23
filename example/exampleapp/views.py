@@ -187,9 +187,7 @@ class UserEdit(FormView):
                         index=i)
                     user_policy.save()
                 set_user_policies(self.object)
-            print('REDIRECTING:', self.get_success_url())
             return HttpResponseRedirect(self.get_success_url())
-        print('RENDERING')
         return render(request, self.template_name,
                       {'main_form': main_form,
                        'policy_forms': policy_forms})

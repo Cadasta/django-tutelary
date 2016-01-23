@@ -294,8 +294,6 @@ class PermissionSet:
         """
         Determine where a given action on a given object is allowed.
         """
-        print(act, obj)
-        print(self.tree)
         objc = obj.components if obj is not None else []
         try:
             return self.tree[act.components + objc] == 'allow'

@@ -5,6 +5,7 @@ from django.db import models
 from django.conf import settings
 from django.db.models.signals import pre_delete, post_delete
 from django.dispatch import receiver
+from django.core.exceptions import ObjectDoesNotExist
 from audit_log.models.managers import AuditLog
 import tutelary.base as base
 
@@ -148,6 +149,7 @@ class PermissionSet(models.Model):
     # n:m relation.
     users = models.ManyToManyField(settings.AUTH_USER_MODEL,
                                    related_name='permissionset')
+    anonymous_user = models.BooleanField(default=False)
 
     # Hash field and custom manager to deal with folding together
     # permission sets generated from identical sequences of policies.
@@ -171,9 +173,18 @@ def user_delete(sender, instance, **kwargs):
 
 
 def clear_user_policies(user):
-    pset = user.permissionset.first()
+    if user is None:
+        try:
+            pset = PermissionSet.objects.get(anonymous_user=True)
+            pset.anonymous_user = False
+            pset.save()
+        except ObjectDoesNotExist:
+            return
+    else:
+        pset = user.permissionset.first()
     if pset:
-        pset.users.remove(user)
+        if user is not None:
+            pset.users.remove(user)
         if pset.users.count() == 0:
             pset.delete()
 
@@ -181,4 +192,8 @@ def clear_user_policies(user):
 def assign_user_policies(user, *policies):
     clear_user_policies(user)
     pset = PermissionSet.objects.get_hashed(policies)
-    pset.users.add(user)
+    if user is None:
+        pset.anonymous_user = True
+    else:
+        pset.users.add(user)
+    pset.save()

@@ -1,6 +1,6 @@
 import json
 from django.contrib.auth.models import User
-from tutelary.models import Policy
+from tutelary.models import Policy, assign_user_policies
 from exampleapp.models import (
     Organisation, Project, Party, Parcel, UserPolicyAssignment
 )
@@ -135,6 +135,9 @@ up3_2 = UserPolicyAssignment.objects.create(user=user3, policy=proj_p,
                                             organisation=org, project=proj,
                                             index=2)
 up3_2.save()
+
+
+assign_user_policies(None, default_p)
 
 
 party1 = Party(project=proj, name='Jim Jones')

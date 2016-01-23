@@ -4,12 +4,6 @@ from .base import Object
 
 class PermissionRequiredMixin(base.PermissionRequiredMixin):
     def has_permission(self):
-        # ===> NEED TO DO SOMETHING ABOUT PERMISSIONS FOR ANONYMOUS
-        #      USERS.  IT SHOULD BE POSSIBLE TO DO SOMETHING LIKE
-        #      assign_user_policies(None, *policies) TO SET
-        #      PERMISSIONS FOR UNAUTHENTICATED USERS.
-        if not self.request.user.is_authenticated():
-            return False
         obj = None
         allowed = {}
         if hasattr(self, 'model') and hasattr(self.model, 'TutelaryMeta'):
