@@ -75,7 +75,7 @@ To build the documentation:
 
 .. _tox: http://tox.readthedocs.org/en/latest/
 
-.. |build-status-image| image:: https://secure.travis-ci.org/ian-ross/django-tutelary.svg?branch=master
-   :target: http://travis-ci.org/ian-ross/django-tutelary?branch=master
+.. |build-status-image| image:: https://secure.travis-ci.org/Cadasta/django-tutelary.svg?branch=master
+   :target: http://travis-ci.org/Cadasta/django-tutelary?branch=master
 .. |pypi-version| image:: https://img.shields.io/pypi/v/django-tutelary.svg
    :target: https://pypi.python.org/pypi/django-tutelary
