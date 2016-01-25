@@ -3,8 +3,10 @@
 Models
 ======
 
-.. note: The code described here is in
-   ``example/exampleapp/models.py``.
+.. note:: The code described here is in
+   `example/exampleapp/models.py`_.
+
+.. _example/exampleapp/models.py: https://github.com/Cadasta/django-tutelary/blob/master/example/exampleapp/models.py
 
 The example application is a simple CRUD application managing objects
 of two types: "parties" and "parcels" (the names are taken from the
