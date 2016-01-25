@@ -6,29 +6,40 @@
 Welcome to django-tutelary's documentation!
 ===========================================
 
-.. raw:: html
+The django-tutelary package is a policy-based permission plugin for
+Django, loosely inspired by the way that permissions policies work in
+Amazon's `Identity and Access Management`_ (IAM) system.
 
-   <div class="badges">
-       <a href="http://travis-ci.org/Cadasta/django-tutelary">
-           <img src="https://travis-ci.org/Cadasta/django-tutelary.svg?branch=master">
-       </a>
-       <a href="https://pypi.python.org/pypi/django-tutelary">
-           <img src="https://img.shields.io/pypi/v/django-tutelary.svg">
-       </a>
-   </div>
-   <br>
+.. warning:: This is very much a work in progress.  Use at your own
+   risk.  In particular, django-tutelary currently has the following
+   deficiencies:
 
-django-tutelary is a policy-based permission plugin for Django.
+    - No caching, so performance won't be stellar.  There are a couple
+      of places where there are opportunities for caching both
+      database query results and permissions query results, but I've
+      not yet taken advantage of them.
+    - There is still a little uncertainty about how exactly to
+      associate collective actions (list entities of a given type,
+      create a new entity of a given type, etc.) with an object for
+      permissioning.  For example, if you have projects that contain
+      photos, you might want to restrict the right to create photos in
+      particular projects, as well as controlling what actions can be
+      taken on individual photos.  How this is managed is still a
+      little fluid.
+    - Not enough tests!
+    - So far, it's only been tested with "normal" Django, but not with
+      DRF.  It *should* work fine, but there might be some surprises.
 
 
-Table of contents
------------------
+Documentation
+=============
 
 .. toctree::
    :maxdepth: 2
 
-   guide/quickstart
-   guide/index
+   installation
+   usage/index
+   example/index
    reference/index
 
 
@@ -38,3 +49,6 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
+.. _Identity and Access Management: https://aws.amazon.com/documentation/iam/

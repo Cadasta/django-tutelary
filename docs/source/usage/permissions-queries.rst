@@ -1,4 +1,4 @@
-.. _guide_permissions:
+.. _guide_permissions_queries:
 
 Permissions queries
 ===================

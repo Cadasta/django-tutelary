@@ -51,7 +51,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'django-tutelary'
-copyright = '2015, Ian Ross'
+copyright = '2015, Cadasta Foundation'
 author = 'Ian Ross'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -112,13 +112,24 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx_rtd_theme'
-
+html_theme = 'alabaster'
+html_sidebars = {
+    '**': [
+        'about.html',
+        'navigation.html',
+        'relations.html',
+        'searchbox.html'
+    ]
+}
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
-
+html_theme_options = {
+    'github_user': 'Cadasta',
+    'github_repo': 'django-tutelary',
+    'travis_button': True,
+    'show_related': True
+}
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
 

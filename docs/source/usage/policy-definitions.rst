@@ -1,4 +1,4 @@
-.. _guide_policies:
+.. _guide_policy_definitions:
 
 Policy definitions
 ==================
