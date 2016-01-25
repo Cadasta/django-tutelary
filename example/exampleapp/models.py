@@ -85,6 +85,22 @@ class Parcel(models.Model):
         return reverse('parcel-detail', kwargs={'pk': self.pk})
 
 
+permissioned_model(Policy, perm_type='policy', path_fields=['name'],
+                   actions=(('policy.list', "Can list existing policies"),
+                            ('policy.detail', "Can view details of a policy"),
+                            ('policy.create', "Can create policies"),
+                            ('policy.edit', "Can update existing policies"),
+                            ('policy.delete', "Can delete policies")))
+permissioned_model(User, perm_type='user', path_fields=['username'],
+                   actions=(('user.list', "Can list existing users"),
+                            ('user.detail', "Can view details of a user"),
+                            ('user.create', "Can create users"),
+                            ('user.edit', "Can update existing users"),
+                            ('user.delete', "Can delete users")))
+
+Action.register('statistics')
+
+
 class UserPolicyAssignment(models.Model):
     user = models.ForeignKey(User)
     policy = models.ForeignKey(Policy)
@@ -109,19 +125,3 @@ def set_user_policies(user):
     pols = [do_one(pa)
             for pa in UserPolicyAssignment.objects.filter(user=user)]
     user.assign_policies(*pols)
-
-
-permissioned_model(Policy, perm_type='policy', path_fields=['name'],
-                   actions=(('policy.list', "Can list existing policies"),
-                            ('policy.detail', "Can view details of a policy"),
-                            ('policy.create', "Can create policies"),
-                            ('policy.edit', "Can update existing policies"),
-                            ('policy.delete', "Can delete policies")))
-permissioned_model(User, perm_type='user', path_fields=['username'],
-                   actions=(('user.list', "Can list existing users"),
-                            ('user.detail', "Can view details of a user"),
-                            ('user.create', "Can create users"),
-                            ('user.edit', "Can update existing users"),
-                            ('user.delete', "Can delete users")))
-
-Action.register('statistics')
