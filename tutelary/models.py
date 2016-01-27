@@ -11,9 +11,8 @@ import tutelary.base as base
 
 
 class Policy(models.Model):
-    """
-    An individual policy has a name and a JSON policy body.  Changes
-    to policies are audited.
+    """An individual policy has a name and a JSON policy body.  Changes to
+    policies are audited.
 
     """
     name = models.CharField(max_length=200)
@@ -25,8 +24,7 @@ class Policy(models.Model):
 
 
 class PolicyInstanceManager(models.Manager):
-    """
-    Policy instances have a custom manager that folds all instances
+    """Policy instances have a custom manager that folds all instances
     with the same hash together in the database.
 
     """
@@ -45,8 +43,7 @@ class PolicyInstanceManager(models.Manager):
 
 
 class PolicyInstance(models.Model):
-    """
-    An instance of a policy provides fixed values for any variables
+    """An instance of a policy provides fixed values for any variables
     used in the policy's body.  A hash is calculated from the
     resulting policy body instance for quick comparisons.
 
@@ -62,8 +59,7 @@ class PolicyInstance(models.Model):
 
 
 class PolicyInstanceAssign(models.Model):
-    """
-    Record the sequence of policy instances used to compose a
+    """Record the sequence of policy instances used to compose a
     permission set.
 
     """
@@ -78,8 +74,7 @@ class PolicyInstanceAssign(models.Model):
 
 
 class PermissionSetManager(models.Manager):
-    """
-    Permission sets have a custom manager that folds all instances
+    """Permission sets have a custom manager that folds all instances
     with the same set of policy instances (as determined by the hashes
     of the policy instances) together in the database.
 
@@ -134,8 +129,7 @@ class PermissionSetManager(models.Manager):
 
 
 class PermissionSet(models.Model):
-    """
-    A permission set represents the complete set of permissions
+    """A permission set represents the complete set of permissions
     resulting from the composition of a sequence of policy instances.
     The permission set itself is represented as the JSON serialisation
     of a ``base.PermissionSet`` object, and the sequence of policy
@@ -169,8 +163,7 @@ class PermissionSet(models.Model):
 
 @receiver(post_delete, sender=PolicyInstanceAssign)
 def pa_delete(sender, instance, **kwargs):
-    """
-    Manage link between policy instances and permission sets on policy
+    """Manage link between policy instances and permission sets on policy
     instance deletion.
 
     """
@@ -180,16 +173,12 @@ def pa_delete(sender, instance, **kwargs):
 
 @receiver(pre_delete, sender=settings.AUTH_USER_MODEL)
 def user_delete(sender, instance, **kwargs):
-    """
-    Manage policies on user deletion.
-
-    """
+    """Manage policies on user deletion."""
     clear_user_policies(instance)
 
 
 def clear_user_policies(user):
-    """
-    Remove all policies assigned to a user (or the anonymous user if
+    """Remove all policies assigned to a user (or the anonymous user if
     ``user`` is ``None``).
 
     """
@@ -210,9 +199,9 @@ def clear_user_policies(user):
 
 
 def assign_user_policies(user, *policies):
-    """
-    Assign a sequence of policies to a user (or the anonymous user is
-    ``user`` is ``None``).
+    """Assign a sequence of policies to a user (or the anonymous user is
+    ``user`` is ``None``).  (Also installed as ``assign_policies``
+    method on ``User`` model.
 
     """
     clear_user_policies(user)

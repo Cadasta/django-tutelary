@@ -9,11 +9,9 @@ Actions and objects
 
 .. autoclass:: tutelary.base.Action
    :members:
-   :undoc-members:
 
 .. autoclass:: tutelary.base.Object
    :members:
-   :undoc-members:
 
 
 Policies
@@ -29,6 +27,8 @@ Policies
 WildTree
 --------
 
-.. automodule:: tutelary.wildtree
+.. autoclass:: tutelary.wildtree.WildTree
    :members:
    :special-members:
+
+.. autofunction:: tutelary.wildtree.dominates

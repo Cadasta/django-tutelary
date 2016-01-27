@@ -8,8 +8,12 @@ Policies
 --------
 
 .. autoclass:: tutelary.models.Policy
-   :members:
-   :undoc-members:
+
+   .. py:attribute:: name
+      :annotation: = Policy name field.
+
+   .. py:attribute:: body
+      :annotation: = Policy body field (JSON).
 
 .. autofunction:: tutelary.models.assign_user_policies
 
@@ -30,6 +34,7 @@ Permissions backend
 -------------------
 
 .. autoclass:: tutelary.backends.Backend
+   :members:
 
 
 Exceptions

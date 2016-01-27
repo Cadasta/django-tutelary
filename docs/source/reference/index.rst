@@ -8,3 +8,4 @@ Reference
 
    django/index
    base/index
+   private/index

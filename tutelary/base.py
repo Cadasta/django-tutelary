@@ -139,10 +139,12 @@ class Object(EscapeSeparated):
 #
 
 class Clause:
-    """
-    A clause is a simple container for an effect ("allow" or "deny")
+    """A clause is a simple container for an effect ("allow" or "deny")
     and a list of non-overlapping action patterns and non-overlapping
-    object patterns to which the effect applies.
+    object patterns to which the effect applies.  (The patterns must
+    be non-overlapping because there is no ordering imposed between
+    the different action/object combinations within a clause.
+    Overlapping patterns are thus potentially ambiguous.)
 
     """
     def __init__(self, effect=None, act=None, obj=None, dict=None):

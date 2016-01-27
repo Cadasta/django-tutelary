@@ -3,6 +3,11 @@ from .base import Object
 
 
 class PermissionRequiredMixin(base.PermissionRequiredMixin):
+    """Permission checking mixin -- works just like the
+    ``PermissionRequiredMixin`` in the default Django authentication
+    system.
+
+    """
     def has_permission(self):
         obj = None
         allowed = {}
