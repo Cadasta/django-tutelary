@@ -29,9 +29,8 @@ Install using ``pip``:
 Usage
 -----
 
-Refer to the `documentation`_ for further details!
-
-_documentation:: http://django-tutelary.readthedocs.org/
+Refer to the `documentation http://django-tutelary.readthedocs.org/`_
+for further details!
 
 .. |build-status-image| image:: https://secure.travis-ci.org/Cadasta/django-tutelary.svg?branch=master
    :target: http://travis-ci.org/Cadasta/django-tutelary?branch=master
