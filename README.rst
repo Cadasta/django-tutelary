@@ -29,7 +29,7 @@ Install using ``pip``:
 Usage
 -----
 
-Refer to the `documentation http://django-tutelary.readthedocs.org/`_
+Refer to the `documentation <http://django-tutelary.readthedocs.org/>`_
 for further details!
 
 .. |build-status-image| image:: https://secure.travis-ci.org/Cadasta/django-tutelary.svg?branch=master
