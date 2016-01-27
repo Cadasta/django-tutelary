@@ -9,8 +9,6 @@ Usage
 
    intro
    quick-example
-   actions
-   objects
    permissioning-models
    permissions-for-views
    policy-definitions

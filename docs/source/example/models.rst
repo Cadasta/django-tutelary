@@ -8,6 +8,9 @@ Models
 
 .. _example/exampleapp/models.py: https://github.com/Cadasta/django-tutelary/blob/master/example/exampleapp/models.py
 
+Model classes
+-------------
+
 The example application is a simple CRUD application managing objects
 of two types: "parties" and "parcels" (the names are taken from the
 land tenure application we're using django-tutelary for).  Parties and
@@ -19,6 +22,9 @@ complexity to illustrate how to use django-tutelary.  (The application
 was actually used to help in the development of django-tutelary, since
 it seems nearly impossible to write something like this without an
 example to use it on!)
+
+Registering actions
+-------------------
 
 Each of the ``Organisation`` and ``Project`` models register
 django-tutelary actions for listing entities and creating and deleting
@@ -36,6 +42,9 @@ entities, view details of individual entities, and create, edit and
 delete individual entities.  Here, the object identifiers contain the
 model primary key (represented by a ``pk`` entry in ``path_fields``).
 
+Decorators and metadata
+-----------------------
+
 Each of the models defined within the example application are
 decorated with the ``permissioned_model`` decorator from
 ``tutelary.decorators``.  To enable permissions for models defined in
@@ -45,11 +54,17 @@ modified and passing the ``TutelaryMeta`` metadata as arguments.  This
 can be seen in the way that ``tutelary.models.Policy`` and
 ``django.contrib.auth.models.User`` are both set up for permissioning.
 
+"Free-floating" actions
+-----------------------
+
 In addition to the actions associated with models, it's also possible
 to have "free-floating" actions that aren't associated with any
 particular model or objects.  These can be set up by calling
 ``Action.register``, as is done for the "statistics" action here.
 (``Action`` is in ``tutelary.base``.)
+
+User policy assignments
+-----------------------
 
 The example application has one additional modelling component, which
 is to record the policies that we associate with individual users

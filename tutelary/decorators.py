@@ -42,6 +42,17 @@ def get_permissions_object(obj):
 
 
 def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
+    """
+    Function to set up a model for permissioning.  Can either be
+    called directly, passing a class and suitable values for
+    ``perm_type``, ``path_fields`` and ``actions``, or can be used as
+    a class decorator, taking values for ``perm_type``,
+    ``path_fields`` and ``actions`` from the ``TutelaryMeta`` subclass
+    of the decorated class.
+
+    *More words here...*
+
+    """
     if not (hasattr(cls, 'TutelaryMeta') or
             perm_type is None or path_fields is None or actions is None):
         cls.TutelaryMeta = type('TutelaryMeta', (object,),

@@ -6,5 +6,5 @@ Reference
 
 .. toctree::
 
-   core/index
+   django/index
    base/index

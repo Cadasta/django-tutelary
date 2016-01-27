@@ -78,6 +78,12 @@ class PolicyInstanceAssign(models.Model):
 
 
 class PermissionSetManager(models.Manager):
+    """
+    Permission sets have a custom manager that folds all instances
+    with the same set of policy instances (as determined by the hashes
+    of the policy instances) together in the database.
+
+    """
     def get_hashed(self, policies):
         def make_pi(p):
             if isinstance(p, tuple):
@@ -163,16 +169,30 @@ class PermissionSet(models.Model):
 
 @receiver(post_delete, sender=PolicyInstanceAssign)
 def pa_delete(sender, instance, **kwargs):
+    """
+    Manage link between policy instances and permission sets on policy
+    instance deletion.
+
+    """
     if instance.policy_instance.permissionset_set.count() == 0:
         instance.policy_instance.delete()
 
 
 @receiver(pre_delete, sender=settings.AUTH_USER_MODEL)
 def user_delete(sender, instance, **kwargs):
+    """
+    Manage policies on user deletion.
+
+    """
     clear_user_policies(instance)
 
 
 def clear_user_policies(user):
+    """
+    Remove all policies assigned to a user (or the anonymous user if
+    ``user`` is ``None``).
+
+    """
     if user is None:
         try:
             pset = PermissionSet.objects.get(anonymous_user=True)
@@ -190,6 +210,11 @@ def clear_user_policies(user):
 
 
 def assign_user_policies(user, *policies):
+    """
+    Assign a sequence of policies to a user (or the anonymous user is
+    ``user`` is ``None``).
+
+    """
     clear_user_policies(user)
     pset = PermissionSet.objects.get_hashed(policies)
     if user is None:

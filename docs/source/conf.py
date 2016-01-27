@@ -21,7 +21,11 @@ from os.path import dirname
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
+import django
 sys.path.insert(0, dirname(dirname(dirname(os.path.abspath(__file__)))))
+sys.path.insert(0, dirname(os.path.abspath(__file__)))
+os.environ["DJANGO_SETTINGS_MODULE"] = "settings"
+django.setup()
 
 # -- General configuration ------------------------------------------------
 

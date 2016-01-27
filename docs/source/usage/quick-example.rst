@@ -3,6 +3,9 @@
 A quick example
 ===============
 
+Models
+------
+
 Suppose that we have a Django model called ``Organisation`` we want to
 manage with django-tutelary.  We mark up the basic model definition
 using a decorator (``permissioned_model``) and a metadata class
@@ -29,6 +32,9 @@ Here, an ``Organisation`` with ``name = "Cadasta"`` would be
 represented by the django-tutelary object ``organisation/Cadasta``,
 based on the ``perm_type`` and ``path_fields`` values.
 
+Views
+-----
+
 The link between the view used to perform particular operations on
 Django objects and the django-tutelary permissions required to perform
 those operations is made in the following way::
@@ -54,6 +60,9 @@ used to determine whether the ``org.delete`` action is allowed on the
 organisation in question.  If the action is *allowed*, view processing
 proceeds as normal.  If the action is *denied*, a ``PermissionDenied``
 exception is raised.
+
+Policies
+--------
 
 Policies can be read from JSON files or stored in a database.  Here's
 a simple example of reading a couple of policy documents from files,

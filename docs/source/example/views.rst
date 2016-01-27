@@ -6,6 +6,9 @@ Views
 .. note:: The code described here is in
    `example/exampleapp/views.py`_.
 
+View mixins
+-----------
+
 Most of the views in the example application are pretty
 straightforward, so we'll concentrate on the oddities and differences
 here.  All of the views use Django's class-based views: local classes
@@ -43,6 +46,9 @@ functionality:
   to switch to a user for whom that view *isn't* permitted.  When that
   happens, we get into a redirect loop because we can't redisplay the
   referring view -- instead, we just drop out to the index page.
+
+User forms
+----------
 
 The only views that have any level of complexity are the user forms.
 That's because they allow you to control the assignment of policies to
