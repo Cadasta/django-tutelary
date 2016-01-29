@@ -1,7 +1,7 @@
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.contrib.auth.models import User
-from tutelary.base import Action
+from tutelary.engine import Action
 from tutelary.models import Policy
 from tutelary.decorators import permissioned_model
 

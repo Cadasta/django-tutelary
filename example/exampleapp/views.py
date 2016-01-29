@@ -15,7 +15,7 @@ from .models import (
     set_user_policies
 )
 from django.contrib.auth.models import User
-from tutelary.base import Action
+from tutelary.engine import Action
 from tutelary.models import Policy
 import tutelary.mixins
 

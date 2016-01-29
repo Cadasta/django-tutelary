@@ -1,4 +1,4 @@
-from tutelary.base import Clause, Policy, Action, Object
+from tutelary.engine import Clause, Policy, Action, Object
 from tutelary.exceptions import (EffectException, PatternOverlapException)
 import pytest
 from .datadir import datadir  # noqa

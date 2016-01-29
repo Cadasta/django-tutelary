@@ -61,7 +61,7 @@ In addition to the actions associated with models, it's also possible
 to have "free-floating" actions that aren't associated with any
 particular model or objects.  These can be set up by calling
 ``Action.register``, as is done for the "statistics" action here.
-(``Action`` is in ``tutelary.base``.)
+(``Action`` is in ``tutelary.engine``.)
 
 User policy assignments
 -----------------------

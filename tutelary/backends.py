@@ -1,6 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from .models import PermissionSet as PermissionSetModel
-from .base import Action, PermissionSet
+from .engine import Action, PermissionSet
 
 
 class Backend:
@@ -23,7 +23,7 @@ class Backend:
         :param perm: The action to test.
         :type perm: ``str``
         :param obj: The object path to test.
-        :type obj: ``tutelary.base.Object``
+        :type obj: ``tutelary.engine.Object``
         :returns: ``bool`` -- is the action permitted?
         """
         try:
@@ -38,8 +38,8 @@ class Backend:
         :param user: The user to test.
         :type user: ``User``
         :param obj: The object path to test.
-        :type obj: ``tutelary.base.Object``
-        :returns: ``list(tutelary.base.Action)`` -- permitted actions.
+        :type obj: ``tutelary.engine.Object``
+        :returns: ``list(tutelary.engine.Action)`` -- permitted actions.
 
         """
         try:

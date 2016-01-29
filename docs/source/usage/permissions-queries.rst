@@ -34,7 +34,7 @@ Each instance of a Django model marked up using the
 object path.  This object path can be retrieved using the
 ``get_permissions_object`` method added to the model by the
 ``permissioned_model`` decorator.  The value returned from
-``get_permissions_object`` is of type ``tutelary.base.Object``, a
+``get_permissions_object`` is of type ``tutelary.engine.Object``, a
 low-level type used for representing object paths.  Values of this
 type can be converted to strings, so, assuming that the ``Page`` model
 is set up for django-tutelary versioning (with ``perm_type='page'``
@@ -68,10 +68,10 @@ authentication backend set up, something like this will work::
   ['page.edit', 'page.view', 'page.delete']
 
 The ``permitted_actions`` method takes as arguments a user object and
-an object or object pattern (as a ``tutelary.base.Object`` value,
+an object or object pattern (as a ``tutelary.engine.Object`` value,
 which is why we call ``get_permissions_object`` on the ``Page`` object
 here).  It returns a list of permitted actions as
-``tutelary.base.Action`` values.  These are convertible to strings,
+``tutelary.engine.Action`` values.  These are convertible to strings,
 which is how we display them here.
 
 The ultimate intention of this kind of query is to implement a sort of

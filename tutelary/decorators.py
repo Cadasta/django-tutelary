@@ -3,7 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import user_passes_test
 from django.db import models
 
-from .base import Object, Action
+from .engine import Object, Action
 from .exceptions import DecoratorException
 
 

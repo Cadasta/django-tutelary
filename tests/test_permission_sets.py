@@ -1,4 +1,4 @@
-from tutelary.base import PermissionSet, Policy, Action, Object
+from tutelary.engine import PermissionSet, Policy, Action, Object
 from .datadir import datadir  # noqa
 
 

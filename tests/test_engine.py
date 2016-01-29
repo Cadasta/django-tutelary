@@ -1,4 +1,4 @@
-from tutelary.base import Action, Object
+from tutelary.engine import Action, Object
 
 
 def test_action_creation():

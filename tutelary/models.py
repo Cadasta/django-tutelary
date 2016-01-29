@@ -7,7 +7,7 @@ from django.db.models.signals import pre_delete, post_delete
 from django.dispatch import receiver
 from django.core.exceptions import ObjectDoesNotExist
 from audit_log.models.managers import AuditLog
-import tutelary.base as base
+import tutelary.engine as engine
 
 
 class Policy(models.Model):
@@ -29,7 +29,7 @@ class PolicyInstanceManager(models.Manager):
 
     """
     def get_hashed(self, policy, variables=None):
-        pol = base.Policy(json=policy.body, variables=variables)
+        pol = engine.Policy(json=policy.body, variables=variables)
         existing = self.filter(hash=pol.hash())
         if existing:
             return existing[0]
@@ -88,9 +88,9 @@ class PermissionSetManager(models.Manager):
 
         def make_pol(p):
             if isinstance(p, tuple):
-                return base.Policy(json=p[0].body, variables=p[1])
+                return engine.Policy(json=p[0].body, variables=p[1])
             else:
-                return base.Policy(json=p.body)
+                return engine.Policy(json=p.body)
 
         # Make policy instances for each of the sequence of policies
         # on which this permission set is based, and extract their
@@ -111,7 +111,8 @@ class PermissionSetManager(models.Manager):
         else:
             # Make a new base permission set object: this merges the
             # policy instances into a wild card tree for fast lookup.
-            pset = base.PermissionSet(policies=[make_pol(p) for p in policies])
+            pset = engine.PermissionSet(policies=[make_pol(p)
+                                                  for p in policies])
 
             # The permission set model stores the JSON serialisation
             # of this tree structure.
@@ -132,7 +133,7 @@ class PermissionSet(models.Model):
     """A permission set represents the complete set of permissions
     resulting from the composition of a sequence of policy instances.
     The permission set itself is represented as the JSON serialisation
-    of a ``base.PermissionSet`` object, and the sequence of policy
+    of a ``engine.PermissionSet`` object, and the sequence of policy
     instances is recorded using the ``PolicyInstanceAssign`` model.
 
     """

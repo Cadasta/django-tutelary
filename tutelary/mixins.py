@@ -1,5 +1,5 @@
 import django.contrib.auth.mixins as base
-from .base import Object
+from .engine import Object
 
 
 class PermissionRequiredMixin(base.PermissionRequiredMixin):
