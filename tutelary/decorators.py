@@ -7,9 +7,21 @@ from .engine import Object, Action
 from .exceptions import DecoratorException
 
 
-def permission_required(*actions, raise_exception=False):
+def permission_required(*actions, obj=None, raise_exception=False):
+    """Permission checking decorator -- works like the
+    ``permission_required`` decorator in the default Django
+    authentication system, except that it takes a sequence of actions
+    to check, an object must be supplied, and the user must have
+    permission to perform all of the actions on the given object for
+    the permissions test to pass.  *Not actually sure how useful this
+    is going to be: in any case where obj is not None, it's going to
+    be tricky to get the object into the decoratory.  Class-based
+    views are definitely best here...*
+
+    """
     def check_perms(user):
-        if user.is_authenticated() and all(user.has_perms(a) for a in actions):
+        if user.is_authenticated() and all(user.has_perms(a, obj)
+                                           for a in actions):
             return True
         if raise_exception:
             raise PermissionDenied

@@ -3,7 +3,8 @@
 Permissions for views
 =====================
 
-.. note:: So far, django-tutelary only supports class-based views.
+Class-based views
+-----------------
 
 Using django-tutelary for controlling access to Django views is
 straightforward.  There is a single ``PermissionRequiredMixin`` mixin
@@ -31,3 +32,12 @@ added to the view.  This is either a single action name or a sequence
 of action names.  All of the actions listed in ``permission_required``
 must be *allowed* for the user on the model object for the view to
 succeed.
+
+
+Function views
+--------------
+
+For function views, there is a ``permission_required`` decorator that
+works in a similar way to the ``permission_required`` decorator in
+Django's default permissions system -- see the reference documentation
+for details.

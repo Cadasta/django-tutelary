@@ -88,7 +88,6 @@ attributes ``perm_type``, ``path_fields`` and ``actions``::
   permissioned_model(AnExistingModel,
                      perm_type=..., path_fields=..., actions=...)
 
-
 Action registration
 -------------------
 
