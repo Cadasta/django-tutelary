@@ -8,6 +8,7 @@ Models
 
 .. _example/exampleapp/models.py: https://github.com/Cadasta/django-tutelary/blob/master/example/exampleapp/models.py
 
+
 Model classes
 -------------
 
@@ -23,6 +24,7 @@ was actually used to help in the development of django-tutelary, since
 it seems nearly impossible to write something like this without an
 example to use it on!)
 
+
 Registering actions
 -------------------
 
@@ -36,11 +38,57 @@ if the model field referred to by an entry in ``path_fields`` is a
 foreign key, then the path fields of the model referred to by the
 foreign key are inserted into the object components (i.e. the owning
 organisation's name appears in the object identifier for projects).
+The code to do this looks like this (for the ``Project`` model)::
+
+  @permissioned_model
+  class Project(models.Model):
+      name = models.CharField(max_length=100)
+      organisation = models.ForeignKey(Organisation)
+
+      class Meta:
+          ordering = ('organisation', 'name')
+
+      class TutelaryMeta:
+          perm_type = 'project'
+          path_fields = ('organisation', 'name')
+          actions = (('project.list',
+                      "Can list existing projects"),
+                     ('project.create',
+                      "Can create projects"),
+                     ('project.delete',
+                      "Can delete projects"))
 
 Each of the ``Party`` and ``Parcel`` models registers actions to list
 entities, view details of individual entities, and create, edit and
 delete individual entities.  Here, the object identifiers contain the
 model primary key (represented by a ``pk`` entry in ``path_fields``).
+Here's the definition of the ``Parcel`` model::
+
+  @permissioned_model
+  class Parcel(models.Model):
+      project = models.ForeignKey(Project)
+      address = models.CharField(max_length=200)
+
+      class Meta:
+          ordering = ('project', 'address')
+
+      class TutelaryMeta:
+          perm_type = 'parcel'
+          path_fields = ('project', 'pk')
+          actions = (('parcel.list',
+                     "Can list existing parcels"),
+                     ('parcel.detail',
+                      "Can view details of a parcel"),
+                     ('parcel.create',
+                      "Can create parcels", ['GET']),
+                     ('parcel.edit',
+                      "Can update existing parcels", ['GET']),
+                     ('parcel.delete',
+                      "Can delete parcels", ['GET']))
+
+      def get_absolute_url(self):
+          return reverse('parcel-detail', kwargs={'pk': self.pk})
+
 
 Decorators and metadata
 -----------------------
@@ -52,7 +100,24 @@ other Django applications, the ``permissioned_model`` function is used
 in a different way, calling it directly on the model class to be
 modified and passing the ``TutelaryMeta`` metadata as arguments.  This
 can be seen in the way that ``tutelary.models.Policy`` and
-``django.contrib.auth.models.User`` are both set up for permissioning.
+``django.contrib.auth.models.User`` are both set up for
+permissioning.  For example, the ``User`` model is set up for
+permissioning like this::
+
+  permissioned_model(User,
+                     perm_type='user',
+                     path_fields=['username'],
+                     actions=(('user.list',
+                               "Can list existing users"),
+                              ('user.detail',
+                               "Can view details of a user"),
+                              ('user.create',
+                               "Can create users"),
+                              ('user.edit',
+                               "Can update existing users"),
+                              ('user.delete',
+                               "Can delete users")))
+
 
 "Free-floating" actions
 -----------------------
@@ -60,8 +125,11 @@ can be seen in the way that ``tutelary.models.Policy`` and
 In addition to the actions associated with models, it's also possible
 to have "free-floating" actions that aren't associated with any
 particular model or objects.  These can be set up by calling
-``Action.register``, as is done for the "statistics" action here.
-(``Action`` is in ``tutelary.engine``.)
+``Action.register``, as is done for the "statistics" action here
+(``Action`` is in ``tutelary.engine``)::
+
+  Action.register('statistics')
+
 
 User policy assignments
 -----------------------
@@ -70,9 +138,9 @@ The example application has one additional modelling component, which
 is to record the policies that we associate with individual users
 (using the ``UserPolicyAssignment`` model).  This is
 application-specific, because we allow policies to contain variables
-(making them potentially more like policy templates) and the variables
-and their values are something we'd like to present in the user
-interface of the application, so we need to manage them explicitly.
-We also provide a ``set_user_policies`` function to wrap
+(making them potentially more like policy *templates*) and the
+variables and their values are something we'd like to present in the
+user interface of the application, so we need to manage them
+explicitly.  We also provide a ``set_user_policies`` function to wrap
 django-tutelary's ``User.assign_policies`` functionality, making use
 of the user/policy assignment information that we're recording.

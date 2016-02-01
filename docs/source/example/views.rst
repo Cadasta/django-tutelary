@@ -47,6 +47,38 @@ functionality:
   happens, we get into a redirect loop because we can't redisplay the
   referring view -- instead, we just drop out to the index page.
 
+Using these mixins, defining a typical view class looks something
+like::
+
+  import django.views.generic as generic
+  from django.contrib.auth.models import User
+  import tutelary.mixins as mixins
+
+  ...
+
+  class UserMixin:
+      ...
+
+  class PermissionInfoMixin:
+      ...
+
+  class PermissionRequiredMixin(mixins.PermissionRequiredMixin):
+      ...
+
+  ...
+
+  class ListView(UserMixin, PermissionInfoMixin,
+                 PermissionRequiredMixin,
+                 generic.ListView):
+      pass
+
+  ...
+
+  class UserList(ListView):
+      model = User
+      permission_required = 'user.list'
+
+
 User forms
 ----------
 
