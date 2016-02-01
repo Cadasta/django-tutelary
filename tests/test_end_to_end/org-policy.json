@@ -1,0 +1,7 @@
+{
+  "version": "2015-12-10",
+  "clause": [
+    { "effect": "allow", "action": ["party.*"], "object": ["party/$organisation/*/*"] },
+    { "effect": "allow", "action": ["parcel.*"], "object": ["parcel/$organisation/*/*"] }
+  ]
+}

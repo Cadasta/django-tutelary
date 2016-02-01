@@ -33,6 +33,9 @@ def pytest_configure():
             'tutelary',
             'tests',
         ),
+        AUTHENTICATION_BACKENDS=[
+            'tutelary.backends.Backend'
+        ],
     )
 
     try:
