@@ -56,6 +56,51 @@ model classes to store model metadata, django-tutelary uses a
   at the point where the user submits the form and the object is to be
   created.)
 
+Here's an example of a model definition set up for use with
+django-tutelary::
+
+  @permissioned_model
+  class Party(models.Model):
+      project = models.ForeignKey(Project)
+      name = models.CharField(max_length=100)
+
+      class Meta:
+          ordering = ('project', 'name')
+
+      class TutelaryMeta:
+          perm_type = 'party'
+          path_fields = ('project', 'pk')
+          actions = (('party.list',
+                     "Can list existing parties"),
+                     ('party.detail',
+                      "Can view details of a party"),
+                     ('party.create',
+                      "Can create parties", ['GET']),
+                     ('party.edit',
+                      "Can update existing parties", ['GET']),
+                     ('party.delete',
+                      "Can delete parties", ['GET']))
+
+In this case, as well as the normal Django ``Meta`` class member, we
+also set up a ``TutelaryMeta`` class member.  This gives the
+permission type of the model as ``party`` and the ``path_fields`` as
+``project`` and ``name`` -- together these mean that django-tutelary
+will refer to objects of class ``Party`` as ``party/.../<name>``,
+where the ``...`` will be filled based on the ``path_fields`` of class
+``Project`` (since ``project`` is a foreign key field here).
+
+The ``actions`` list here defines five actions, three of which
+(``party.create``, ``parcty.edit`` and ``party.delete``) have "method
+exception lists", saying that a HTTP GET on any of the views
+permissioned using these actions should succeed.  The result of this
+is that users can access the *forms* for creating, editing and
+deleting parties, but POSTing those forms will not be allowed.  (This
+*is* a little confusing, but it's intended to provide the greatest
+possible fiexibility for users of django-tutelary: if you want to have
+a combined model list and create view, it makes sense for users to be
+able to GET the view, but for only permissioned users to be able to
+POST.)
+
 The ``permissioned_model`` function
 -----------------------------------
 
