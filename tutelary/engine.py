@@ -20,8 +20,7 @@ from .exceptions import (
 #
 
 class SimpleSeparated(Sequence):
-    """
-    Simple sequences of strings delimited by a separator, with
+    """Simple sequences of strings delimited by a separator, with
     wildcarding.
 
     A wildcard component is represented by a ``*`` string and matches
@@ -71,8 +70,7 @@ class SimpleSeparated(Sequence):
 
 
 class EscapeSeparated(SimpleSeparated):
-    """
-    Sequences of strings delimited by a separator that can be
+    """Sequences of strings delimited by a separator that can be
     backslash-escaped.  Backslashes can also be backslash-escaped; no
     other escaping mechanism is supported.
 
@@ -92,8 +90,7 @@ class EscapeSeparated(SimpleSeparated):
 
 
 class Action(SimpleSeparated):
-    """
-    Actions are represented by period-separated sequences of elements
+    """Actions are represented by period-separated sequences of elements
     (e.g. ``parcel.edit``, ``admin.assign-role``) with wildcard
     elements indicated by ``*`` (e.g. ``party.*``).  A list of
     *registered* actions is maintained to support permissions set
@@ -106,8 +103,7 @@ class Action(SimpleSeparated):
     registered = set()
 
     def register(action):
-        """
-        Action registration is used to support generating lists of
+        """Action registration is used to support generating lists of
         permitted actions from a permission set and an object pattern.
         Only registered actions will be returned by such queries.
 
@@ -122,8 +118,7 @@ class Action(SimpleSeparated):
 
 
 class Object(EscapeSeparated):
-    """
-    Objects are represented by slash-separated sequences of elements
+    """Objects are represented by slash-separated sequences of elements
     (e.g. ``Cadasta/Batangas/parcel/123``, ``H4H/PaP/party/118``) with
     wildcard elements indicated by ``*``
     (e.g. ``Cadasta/*/parcel/*``).  Slashes can be backslash-escaped,
@@ -148,8 +143,7 @@ class Clause:
 
     """
     def __init__(self, effect=None, act=None, obj=None, dict=None):
-        """
-        A clause can be created either by giving explicit lists of
+        """A clause can be created either by giving explicit lists of
         ``Action`` and ``Object`` objects or by giving a dictionary
         with ``effect``, ``action`` and ``object`` keys pulled out of
         the JSON representation of a policy.
@@ -175,8 +169,7 @@ class Clause:
 
 
 class Policy(Sequence):
-    """
-    A policy is just a sequence of clauses, possibly with a name.
+    """A policy is just a sequence of clauses, possibly with a name.
     Conversion to and from JSON representations (with
     canonicalisation), and hash generation from the canonical
     representation.
@@ -188,7 +181,7 @@ class Policy(Sequence):
     """
     def __init__(self, json, variables=None):
         try:
-            d = loads(Template(json).substitute(variables))
+            d = loads(strip_comments(Template(json).substitute(variables)))
         except JSONDecodeError as e:
             raise PolicyBodyException(lineno=e.lineno, colno=e.colno)
         except KeyError:
@@ -240,8 +233,7 @@ class Policy(Sequence):
 #
 
 class PermissionSet:
-    """
-    A permission set records, in a compact way, the permissions
+    """A permission set records, in a compact way, the permissions
     associated with a sequence of policy clauses.  The construction of
     permission sets handles the overriding of earlier clauses by later
     clauses and the treatment of wildcards in the action and object
@@ -260,8 +252,7 @@ class PermissionSet:
     """
 
     def __init__(self, policies=None, json=None):
-        """
-        Permission sets are all by default empty, with an optional list of
+        """Permission sets are all by default empty, with an optional list of
         policies added.  They can also be deserialised from JSON.
 
         """
@@ -270,15 +261,14 @@ class PermissionSet:
             self.add(policies=policies)
 
     def __repr__(self):
-        """
-        Serialisation to JSON.
+        """Serialisation to JSON.
+
         """
         return repr(self.tree)
 
     def add(self, effect=None, act=None, obj=None,
             policy=None, policies=None):
-        """
-        Insert an individual (effect, action, object) triple or all
+        """Insert an individual (effect, action, object) triple or all
         triples for a policy or list of policies.
 
         """
@@ -293,8 +283,8 @@ class PermissionSet:
             self.tree[act.components + objc] = effect
 
     def allow(self, act, obj=None):
-        """
-        Determine where a given action on a given object is allowed.
+        """Determine where a given action on a given object is allowed.
+
         """
         objc = obj.components if obj is not None else []
         try:
@@ -303,8 +293,8 @@ class PermissionSet:
             return False
 
     def permitted_actions(self, obj=None):
-        """
-        Determine permitted actions for a given object pattern.
+        """Determine permitted actions for a given object pattern.
+
         """
         return [a for a in Action.registered if self.allow(a, obj)]
 
@@ -315,9 +305,7 @@ class PermissionSet:
 #
 
 def make_regex(separator):
-
-    """
-    Utility function to create regexp for matching escaped separators
+    """Utility function to create regexp for matching escaped separators
     in strings.
 
     """
@@ -326,14 +314,32 @@ def make_regex(separator):
 
 
 def unescape(s, sep):
-    """
-    Unescape escaped separators and backslashes in strings.
+    """Unescape escaped separators and backslashes in strings.
+
     """
     return s.replace("\\" + sep, sep).replace("\\\\", "\\")
 
 
 def escape(s, sep):
-    """
-    Escape unescapes separators and backslashes in strings.
+    """Escape unescapes separators and backslashes in strings.
+
     """
     return s.replace("\\", "\\\\").replace(sep, "\\" + sep)
+
+
+def strip_comments(text):
+    """Comment stripper for JSON.
+
+    """
+    regex = r'\s*(#|\/{2}).*$'
+    regex_inline = r'(:?(?:\s)*([A-Za-z\d\.{}]*)|((?<=\").*\"),?)(?:\s)*(((#|(\/{2})).*)|)$'  # noqa
+    lines = text.split('\n')
+
+    for index, line in enumerate(lines):
+        if re.search(regex, line):
+            if re.search(r'^' + regex, line, re.IGNORECASE):
+                lines[index] = ""
+            elif re.search(regex_inline, line):
+                lines[index] = re.sub(regex_inline, r'\1', line)
+
+    return '\n'.join(lines)

@@ -10,6 +10,10 @@ used to construct Django ``Policy`` objects (defined in
 is intended for future development; currently its only valid value is
 ``"2015-12-10"``.)
 
+Although policy documents are nominally JSON, for convenience they
+also allow comments: any text outside of a string from ``//`` or ``#``
+to the end of line is ignored.
+
 Clauses
 -------
 
@@ -30,7 +34,6 @@ Each individual *clause* is a JSON object with three fields:
   create and delete actions for ``parcel`` objects.
 
 ``object``
-
   An optional JSON array of object patterns (as strings) representing
   the set of objects to which the clause applies.  For example, if
   ``parcel`` objects are labelled as
@@ -100,10 +103,13 @@ contains a clause allowing the "free-floating" ``statistics`` action::
   {
     "version": "2015-12-10",
     "clause": [
+      // Allow all editing actions for a single organisation.
       { "effect": "allow", "action": ["*.edit"],
         "object": ["*/$organisation/*/*/*"] },
+      // But deny all create actions.
       { "effect": "deny", "action": ["*.create"],
         "object": ["*/$organisation/*/*"] },
+      // Allow the "free-standing" statistics action.
       { "effect": "allow", "action": ["statistics"] }
     ]
   }

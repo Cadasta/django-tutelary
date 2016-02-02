@@ -1,5 +1,7 @@
 {
+  // Here's a test comment.
   "version": "2015-12-10",
+  # Here's another test comment, in a different format.
   "clause": [
     { "effect": "allow",
       "action": [ "*.view", "*.edit" ],
