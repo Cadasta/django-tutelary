@@ -1,7 +1,17 @@
 {
   "version": "2015-12-10",
   "clause": [
-    { "effect": "allow", "action": ["party.*"], "object": ["party/$organisation/*/*"] },
-    { "effect": "allow", "action": ["parcel.*"], "object": ["parcel/$organisation/*/*"] }
+    { "effect": "allow",
+      "action": ["party.list"],
+      "object": ["project/$organisation/*"] },
+    { "effect": "allow",
+      "action": ["party.view", "party.edit"],
+      "object": ["party/$organisation/*/*"] },
+    { "effect": "allow",
+      "action": ["parcel.list"],
+      "object": ["project/$organisation/*"] },
+    { "effect": "allow",
+      "action": ["parcel.view", "parcel.edit"],
+      "object": ["parcel/$organisation/*/*"] }
   ]
 }
