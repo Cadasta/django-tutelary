@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.db import models
 
 from .engine import Object, Action
-from .exceptions import DecoratorException
+from .exceptions import DecoratorException, PermissionObjectException
 
 
 def permission_required(*actions, obj=None, raise_exception=False):
@@ -71,12 +71,28 @@ def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
     if hasattr(cls, 'TutelaryMeta'):
         cls.TutelaryMeta.pfs = ([cls.TutelaryMeta.perm_type] +
                                 get_path_fields(cls))
-        cls.TutelaryMeta.allowed_methods = {}
-        cls.get_permissions_object = get_permissions_object
+        cls.TutelaryMeta.get_allowed = {}
+        cls.TutelaryMeta.perms_obj = {}
         for a in cls.TutelaryMeta.actions:
-            Action.register(a[0])
-            if len(a) > 2:
-                cls.TutelaryMeta.allowed_methods[a[0]] = a[2]
+            an = a
+            ap = {}
+            if isinstance(a, tuple):
+                an = a[0]
+                ap = a[1]
+            Action.register(an)
+            if 'get_allowed' in ap:
+                cls.TutelaryMeta.get_allowed[an] = ap['get_allowed']
+            cls.TutelaryMeta.perms_obj[an] = get_permissions_object
+            if 'permissions_object' in ap:
+                po = ap['permissions_object']
+                if po is not None:
+                    tst_class = getattr(cls, po).field.__class__
+                    if (not hasattr(cls, po) or
+                        (tst_class not in
+                         [models.ForeignKey, models.OneToOneField])):
+                        raise PermissionObjectException(po)
+                cls.TutelaryMeta.perms_obj[an] = po
+
     else:
         raise DecoratorException('permissioned_model',
                                  "missing TutelaryMeta member in '" +

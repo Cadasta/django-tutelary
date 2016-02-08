@@ -63,3 +63,17 @@ class DecoratorException(TutelaryException):
         super(DecoratorException, self).__init__(
             "error expanding decorator '" + decorator + "': " + msg
         )
+
+
+class PermissionObjectException(TutelaryException):
+    """Exception raised by the ``permissioned_model`` decorator if a
+    ``permissions_object`` property in the ``actions`` list refers to
+    a non-existent model field, or to a field that is not a foreign
+    key or one-to-one relation field.
+
+    """
+    def __init__(self, prop):
+        super(PermissionObjectException, self).__init__(
+            "invalid permissions_object property '" + prop +
+            "' in permissioned_model"
+        )

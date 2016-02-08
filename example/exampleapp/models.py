@@ -16,11 +16,11 @@ class Organisation(models.Model):
     class TutelaryMeta:
         perm_type = 'organisation'
         path_fields = ('name',)
-        actions = {
-            'org.list':   {'description': "Can list existing organisations"},
-            'org.create': {'description': "Can create organisations"},
-            'org.delete': {'description': "Can delete organisations"}
-        }
+        actions = [
+            ('org.list',   {'permissions_object': None}),
+            ('org.create', {'permissions_object': None}),
+            'org.delete'
+        ]
 
     def __str__(self):
         return self.name
@@ -37,11 +37,11 @@ class Project(models.Model):
     class TutelaryMeta:
         perm_type = 'project'
         path_fields = ('organisation', 'name')
-        actions = {
-            'project.list':   {'description': "Can list existing projects"},
-            'project.create': {'description': "Can create projects"},
-            'project.delete': {'description': "Can delete projects"}
-        }
+        actions = [
+            ('project.list', {'permissions_object': 'organisation'}),
+            ('project.create', {'permissions_object': 'organisation'}),
+            'project.delete'
+        ]
 
     def __str__(self):
         return self.name
@@ -58,16 +58,18 @@ class Party(models.Model):
     class TutelaryMeta:
         perm_type = 'party'
         path_fields = ('project', 'pk')
-        actions = {
-            'party.list':   {'description': "Can list existing parties"},
-            'party.detail': {'description': "Can view details of a party"},
-            'party.create': {'description': "Can create parties",
-                             'allowed_methods': ['GET']},
-            'party.edit':   {'description': "Can update existing parties",
-                             'allowed_methods': ['GET']},
-            'party.delete': {'description': "Can delete parties",
-                             'allowed_methods': ['GET']}
-        }
+        actions = [
+            ('party.list',   {'description': "List existing parties",
+                              'permissions_object': 'project'}),
+            ('party.create', {'description': "Create parties",
+                              'permissions_object': 'project',
+                              'get_allowed': True}),
+            ('party.detail', {'description': "View details of a party"}),
+            ('party.edit',   {'description': "Update existing parties",
+                              'get_allowed': True}),
+            ('party.delete', {'description': "Delete parties",
+                              'get_allowed': True})
+        ]
 
     def get_absolute_url(self):
         return reverse('party-detail', kwargs={'pk': self.pk})
@@ -84,16 +86,18 @@ class Parcel(models.Model):
     class TutelaryMeta:
         perm_type = 'parcel'
         path_fields = ('project', 'pk')
-        actions = {
-            'parcel.list':   {'description': "Can list existing parcels"},
-            'parcel.detail': {'description': "Can view details of a parcel"},
-            'parcel.create': {'description': "Can create parcels",
-                              'allowed_methods': ['GET']},
-            'parcel.edit':   {'description': "Can update existing parcels",
-                              'allowed_methods': ['GET']},
-            'parcel.delete': {'description': "Can delete parcels",
-                              'allowed_methods': ['GET']}
-        }
+        actions = [
+            ('parcel.list',   {'description': "List existing parcels",
+                               'permissions_object': 'project'}),
+            ('parcel.create', {'description': "Create parcels",
+                               'permissions_object': 'project',
+                               'get_allowed': True}),
+            ('parcel.detail', {'description': "View details of a parcel"}),
+            ('parcel.edit',   {'description': "Update existing parcels",
+                               'get_allowed': True}),
+            ('parcel.delete', {'description': "Delete parcels",
+                               'get_allowed': True})
+        ]
 
     def get_absolute_url(self):
         return reverse('parcel-detail', kwargs={'pk': self.pk})
@@ -101,23 +105,25 @@ class Parcel(models.Model):
 
 permissioned_model(
     Policy, perm_type='policy', path_fields=['name'],
-    actions={
-        'policy.list':   {'description': "Can list existing policies"},
-        'policy.detail': {'description': "Can view details of a policy"},
-        'policy.create': {'description': "Can create policies"},
-        'policy.edit':   {'description': "Can update existing policies"},
-        'policy.delete': {'description': "Can delete policies"}
-    }
+    actions=[
+        ('policy.list', {'description': "Can list existing policies",
+                         'permissions_object': None}),
+        ('policy.create', {'description': "Can create policies",
+                           'permissions_object': None}),
+        ('policy.detail', {'description': "Can view details of a policy"}),
+        ('policy.edit',   {'description': "Can update existing policies"}),
+        ('policy.delete', {'description': "Can delete policies"})
+    ]
 )
 permissioned_model(
     User, perm_type='user', path_fields=['username'],
-    actions={
-        'user.list':   {'description': "Can list existing users"},
-        'user.detail': {'description': "Can view details of a user"},
-        'user.create': {'description': "Can create users"},
-        'user.edit':   {'description': "Can update existing users"},
-        'user.delete': {'description': "Can delete users"}
-    }
+    actions=[
+        ('user.list',   {'permissions_object': None}),
+        ('user.create', {'permissions_object': None}),
+        'user.detail',
+        'user.edit',
+        'user.delete'
+    ]
 )
 
 Action.register('statistics')
