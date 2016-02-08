@@ -16,9 +16,11 @@ class Organisation(models.Model):
     class TutelaryMeta:
         perm_type = 'organisation'
         path_fields = ('name',)
-        actions = (('org.list', "Can list existing organisations"),
-                   ('org.create', "Can create organisations"),
-                   ('org.delete', "Can delete organisations"))
+        actions = {
+            'org.list':   {'description': "Can list existing organisations"},
+            'org.create': {'description': "Can create organisations"},
+            'org.delete': {'description': "Can delete organisations"}
+        }
 
     def __str__(self):
         return self.name
@@ -35,9 +37,11 @@ class Project(models.Model):
     class TutelaryMeta:
         perm_type = 'project'
         path_fields = ('organisation', 'name')
-        actions = (('project.list', "Can list existing projects"),
-                   ('project.create', "Can create projects"),
-                   ('project.delete', "Can delete projects"))
+        actions = {
+            'project.list':   {'description': "Can list existing projects"},
+            'project.create': {'description': "Can create projects"},
+            'project.delete': {'description': "Can delete projects"}
+        }
 
     def __str__(self):
         return self.name
@@ -54,11 +58,16 @@ class Party(models.Model):
     class TutelaryMeta:
         perm_type = 'party'
         path_fields = ('project', 'pk')
-        actions = (('party.list', "Can list existing parties"),
-                   ('party.detail', "Can view details of a party"),
-                   ('party.create', "Can create parties", ['GET']),
-                   ('party.edit', "Can update existing parties", ['GET']),
-                   ('party.delete', "Can delete parties", ['GET']))
+        actions = {
+            'party.list':   {'description': "Can list existing parties"},
+            'party.detail': {'description': "Can view details of a party"},
+            'party.create': {'description': "Can create parties",
+                             'allowed_methods': ['GET']},
+            'party.edit':   {'description': "Can update existing parties",
+                             'allowed_methods': ['GET']},
+            'party.delete': {'description': "Can delete parties",
+                             'allowed_methods': ['GET']}
+        }
 
     def get_absolute_url(self):
         return reverse('party-detail', kwargs={'pk': self.pk})
@@ -75,28 +84,41 @@ class Parcel(models.Model):
     class TutelaryMeta:
         perm_type = 'parcel'
         path_fields = ('project', 'pk')
-        actions = (('parcel.list', "Can list existing parcels"),
-                   ('parcel.detail', "Can view details of a parcel"),
-                   ('parcel.create', "Can create parcels", ['GET']),
-                   ('parcel.edit', "Can update existing parcels", ['GET']),
-                   ('parcel.delete', "Can delete parcels", ['GET']))
+        actions = {
+            'parcel.list':   {'description': "Can list existing parcels"},
+            'parcel.detail': {'description': "Can view details of a parcel"},
+            'parcel.create': {'description': "Can create parcels",
+                              'allowed_methods': ['GET']},
+            'parcel.edit':   {'description': "Can update existing parcels",
+                              'allowed_methods': ['GET']},
+            'parcel.delete': {'description': "Can delete parcels",
+                              'allowed_methods': ['GET']}
+        }
 
     def get_absolute_url(self):
         return reverse('parcel-detail', kwargs={'pk': self.pk})
 
 
-permissioned_model(Policy, perm_type='policy', path_fields=['name'],
-                   actions=(('policy.list', "Can list existing policies"),
-                            ('policy.detail', "Can view details of a policy"),
-                            ('policy.create', "Can create policies"),
-                            ('policy.edit', "Can update existing policies"),
-                            ('policy.delete', "Can delete policies")))
-permissioned_model(User, perm_type='user', path_fields=['username'],
-                   actions=(('user.list', "Can list existing users"),
-                            ('user.detail', "Can view details of a user"),
-                            ('user.create', "Can create users"),
-                            ('user.edit', "Can update existing users"),
-                            ('user.delete', "Can delete users")))
+permissioned_model(
+    Policy, perm_type='policy', path_fields=['name'],
+    actions={
+        'policy.list':   {'description': "Can list existing policies"},
+        'policy.detail': {'description': "Can view details of a policy"},
+        'policy.create': {'description': "Can create policies"},
+        'policy.edit':   {'description': "Can update existing policies"},
+        'policy.delete': {'description': "Can delete policies"}
+    }
+)
+permissioned_model(
+    User, perm_type='user', path_fields=['username'],
+    actions={
+        'user.list':   {'description': "Can list existing users"},
+        'user.detail': {'description': "Can view details of a user"},
+        'user.create': {'description': "Can create users"},
+        'user.edit':   {'description': "Can update existing users"},
+        'user.delete': {'description': "Can delete users"}
+    }
+)
 
 Action.register('statistics')
 
