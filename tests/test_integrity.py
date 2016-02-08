@@ -62,15 +62,24 @@ def debug(db):
     return fn
 
 
+def check(nuser=None, npol=None, npolin=None, npset=None, npolinassign=None):
+    if nuser is not None:
+        assert User.objects.count() == nuser
+    if npol is not None:
+        assert Policy.objects.count() == npol
+    if npolin is not None:
+        assert PolicyInstance.objects.count() == npolin
+    if npset is not None:
+        assert PermissionSet.objects.count() == npset
+    if npolinassign is not None:
+        assert PolicyInstanceAssign.objects.count() == npolinassign
+
+
 @pytest.mark.django_db  # noqa
 def test_permission_set_creation(datadir, setup):
     user1, user2, user3, def_pol, org_pol, prj_pol = setup
 
-    assert User.objects.count() == 3
-    assert Policy.objects.count() == 3
-    assert PolicyInstance.objects.count() == 3
-    assert PermissionSet.objects.count() == 3
-    assert PolicyInstanceAssign.objects.count() == 6
+    check(nuser=3, npol=3, npolin=3, npset=3, npolinassign=6)
 
 
 @pytest.mark.django_db  # noqa
@@ -82,11 +91,7 @@ def test_permission_set_change(datadir, setup, debug):
                           (org_pol, {'organisation': 'DummyCorp'}))
     debug('AFTER')
 
-    assert User.objects.count() == 3
-    assert Policy.objects.count() == 3
-    assert PolicyInstance.objects.count() == 4
-    assert PermissionSet.objects.count() == 3
-    assert PolicyInstanceAssign.objects.count() == 6
+    check(nuser=3, npol=3, npolin=4, npset=3, npolinassign=6)
 
 
 @pytest.mark.django_db  # noqa
@@ -99,12 +104,8 @@ def test_permission_set_clear(datadir, setup, debug):
     user3.assign_policies()
     debug('AFTER')
 
-    assert User.objects.count() == 3
-    assert Policy.objects.count() == 3
-    assert PolicyInstance.objects.count() == 0
-    assert PolicyInstanceAssign.objects.count() == 0
     # Remember the empty permission set!
-    assert PermissionSet.objects.count() == 1
+    check(nuser=3, npol=3, npolin=0, npset=1, npolinassign=0)
 
 
 @pytest.mark.django_db  # noqa
@@ -115,12 +116,8 @@ def test_permission_set_clear2(datadir, setup, debug):
     user1.assign_policies()
     debug('AFTER')
 
-    assert User.objects.count() == 3
-    assert Policy.objects.count() == 3
-    assert PolicyInstance.objects.count() == 3
-    assert PolicyInstanceAssign.objects.count() == 5
     # Remember the empty permission set!
-    assert PermissionSet.objects.count() == 3
+    check(nuser=3, npol=3, npolin=3, npset=3, npolinassign=5)
 
 
 @pytest.mark.django_db  # noqa
@@ -131,12 +128,8 @@ def test_permission_user_deletion(datadir, setup, debug):
     user3.delete()
     debug('AFTER')
 
-    assert User.objects.count() == 2
-    assert Policy.objects.count() == 3
-    assert PolicyInstance.objects.count() == 2
-    assert PolicyInstanceAssign.objects.count() == 3
     # No empty permission set here: the user is gone!
-    assert PermissionSet.objects.count() == 2
+    check(nuser=2, npol=3, npolin=2, npset=2, npolinassign=3)
 
 
 @pytest.mark.django_db  # noqa
@@ -149,9 +142,5 @@ def test_permission_user_deletion2(datadir, setup, debug):
     user3.delete()
     debug('AFTER')
 
-    assert User.objects.count() == 0
-    assert Policy.objects.count() == 3
-    assert PolicyInstance.objects.count() == 0
-    assert PolicyInstanceAssign.objects.count() == 0
     # No empty permission set here: the users are gone!
-    assert PermissionSet.objects.count() == 0
+    check(nuser=0, npol=3, npolin=0, npset=0, npolinassign=0)
