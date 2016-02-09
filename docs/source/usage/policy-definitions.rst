@@ -108,7 +108,7 @@ contains a clause allowing the "free-floating" ``statistics`` action::
         "object": ["*/$organisation/*/*/*"] },
       // But deny all create actions.
       { "effect": "deny", "action": ["*.create"],
-        "object": ["*/$organisation/*/*"] },
+        "object": ["*/$organisation/*"] },
       // Allow the "free-standing" statistics action.
       { "effect": "allow", "action": ["statistics"] }
     ]

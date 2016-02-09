@@ -17,9 +17,9 @@ class Organisation(models.Model):
         perm_type = 'organisation'
         path_fields = ('name',)
         actions = [
-            ('org.list',   {'permissions_object': None}),
-            ('org.create', {'permissions_object': None}),
-            'org.delete'
+            ('organisation.list',   {'permissions_object': None}),
+            ('organisation.create', {'permissions_object': None}),
+            'organisation.delete'
         ]
 
     def __str__(self):

@@ -18,14 +18,6 @@ Amazon's `Identity and Access Management`_ (IAM) system.
       of places where there are opportunities for caching both
       database query results and permissions query results, but I've
       not yet taken advantage of them.
-    - There is still a little uncertainty about how exactly to
-      associate collective actions (list entities of a given type,
-      create a new entity of a given type, etc.) with an object for
-      permissioning.  For example, if you have projects that contain
-      photos, you might want to restrict the right to create photos in
-      particular projects, as well as controlling what actions can be
-      taken on individual photos.  How this is managed is still a
-      little fluid.
     - Not enough tests!
     - So far, it's only been tested with "normal" Django, but not with
       DRF.  It *should* work fine, but there might be some surprises.

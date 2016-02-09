@@ -51,12 +51,14 @@ The code to do this looks like this (for the ``Project`` model)::
       class TutelaryMeta:
           perm_type = 'project'
           path_fields = ('organisation', 'name')
-          actions = (('project.list',
-                      "Can list existing projects"),
+          actions = [('project.list',
+                      {'description': "Can list existing projects",
+                       'permissions_object': 'organisation'}),
                      ('project.create',
-                      "Can create projects"),
+                      {'description': "Can create projects",
+                       'permissions_object': 'organisation'}),
                      ('project.delete',
-                      "Can delete projects"))
+                      {'description': "Can delete projects"})]
 
 Each of the ``Party`` and ``Parcel`` models registers actions to list
 entities, view details of individual entities, and create, edit and
@@ -75,16 +77,21 @@ Here's the definition of the ``Parcel`` model::
       class TutelaryMeta:
           perm_type = 'parcel'
           path_fields = ('project', 'pk')
-          actions = (('parcel.list',
-                     "Can list existing parcels"),
-                     ('parcel.detail',
-                      "Can view details of a parcel"),
+          actions = [('parcel.list',
+                      {'description': "Can list existing parcels",
+                       'permissions_object': 'project'}),
                      ('parcel.create',
-                      "Can create parcels", ['GET']),
+                      {'description': "Can create parcels",
+                       'allow_get': True,
+                       'permissions_object': 'project'}),
+                     ('parcel.detail',
+                      {'description': "Can view details of a parcel"}),
                      ('parcel.edit',
-                      "Can update existing parcels", ['GET']),
+                      {'description': "Can update existing parcels",
+                       'allow_get': True}),
                      ('parcel.delete',
-                      "Can delete parcels", ['GET']))
+                      {'description': "Can delete parcels",
+                       'allow_get': True})]
 
       def get_absolute_url(self):
           return reverse('parcel-detail', kwargs={'pk': self.pk})
@@ -104,19 +111,16 @@ can be seen in the way that ``tutelary.models.Policy`` and
 permissioning.  For example, the ``User`` model is set up for
 permissioning like this::
 
-  permissioned_model(User,
-                     perm_type='user',
-                     path_fields=['username'],
-                     actions=(('user.list',
-                               "Can list existing users"),
-                              ('user.detail',
-                               "Can view details of a user"),
-                              ('user.create',
-                               "Can create users"),
-                              ('user.edit',
-                               "Can update existing users"),
-                              ('user.delete',
-                               "Can delete users")))
+  permissioned_model(
+      User, perm_type='user', path_fields=['username'],
+      actions=[
+          ('user.list',   {'permissions_object': None}),
+          ('user.create', {'permissions_object': None}),
+          'user.detail',
+          'user.edit',
+          'user.delete'
+      ]
+  )
 
 
 "Free-floating" actions

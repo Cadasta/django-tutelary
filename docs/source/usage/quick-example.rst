@@ -21,9 +21,9 @@ using a decorator (``permissioned_model``) and a metadata class
       class TutelaryMeta:
           perm_type = 'organisation'
           path_fields = ('name',)
-          actions = (('org.list', "List existing organisations"),
-                     ('org.create', "Create organisations"),
-                     ('org.delete', "Delete organisations"))
+          actions = [('org.list',   {'permissions_object': None}),
+                     ('org.create', {'permissions_object': None}),
+                     'org.delete']
 
 Here, the ``TutelaryMeta`` class carries metadata describing the
 actions that can be performed on an ``Organisation`` object, and how

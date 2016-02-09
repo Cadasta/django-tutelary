@@ -31,6 +31,10 @@ def permission_required(*actions, obj=None, raise_exception=False):
 
 
 def get_path_fields(cls, base=[]):
+    """Get object fields used for calculation of django-tutelary object
+    paths.
+
+    """
     pfs = []
     for pf in cls.TutelaryMeta.path_fields:
         if pf == 'pk':
@@ -44,13 +48,30 @@ def get_path_fields(cls, base=[]):
     return pfs
 
 
-def get_permissions_object(obj):
+def get_perms_object(obj):
+    """Get the django-tutelary path for an object, based on the fields
+    listed in ``TutelaryMeta.pfs``.
+
+    """
     def get_one(pf):
         if isinstance(pf, str):
             return pf
         else:
             return str(reduce(lambda o, f: getattr(o, f), pf, obj))
     return Object([get_one(pf) for pf in obj.__class__.TutelaryMeta.pfs])
+
+
+def make_get_perms_object(perms_objs):
+    """Make a function to delegate permission object rendering to some
+    other (foreign key) field of an object.
+
+    """
+    def retfn(action, obj):
+        if action in perms_objs:
+            return getattr(obj, perms_objs[action]).get_perms_object()
+        else:
+            return get_perms_object(obj)
+    return retfn
 
 
 def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
@@ -72,7 +93,7 @@ def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
         cls.TutelaryMeta.pfs = ([cls.TutelaryMeta.perm_type] +
                                 get_path_fields(cls))
         cls.TutelaryMeta.get_allowed = {}
-        cls.TutelaryMeta.perms_obj = {}
+        perms_objs = {}
         for a in cls.TutelaryMeta.actions:
             an = a
             ap = {}
@@ -82,7 +103,6 @@ def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
             Action.register(an)
             if 'get_allowed' in ap:
                 cls.TutelaryMeta.get_allowed[an] = ap['get_allowed']
-            cls.TutelaryMeta.perms_obj[an] = get_permissions_object
             if 'permissions_object' in ap:
                 po = ap['permissions_object']
                 if po is not None:
@@ -91,8 +111,11 @@ def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
                         (tst_class not in
                          [models.ForeignKey, models.OneToOneField])):
                         raise PermissionObjectException(po)
-                cls.TutelaryMeta.perms_obj[an] = po
-
+                perms_objs[an] = po
+        if len(perms_objs) == 0:
+            cls.get_permissions_object = get_perms_object
+        else:
+            cls.get_permissions_object = make_get_perms_object(perms_objs)
     else:
         raise DecoratorException('permissioned_model',
                                  "missing TutelaryMeta member in '" +

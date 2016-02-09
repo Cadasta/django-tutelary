@@ -42,19 +42,34 @@ model classes to store model metadata, django-tutelary uses a
   ``pk`` can be used to refer to the model's primary key.)
 
 ``actions``
-  A sequence of (*action-label*, *action-description*) pairs, where
-  *action-label* is a string giving the name of an action
+  A sequence of *action-label* or (*action-label*, *action-options*)
+  pairs, where *action-label* is a string giving the name of an action
   (e.g. ``parcel.list``, ``board.solder``, ``page.create``) and
-  *action-description* is a human readable free-text description of
-  the action.  Each pair may optionally include a third item, listing
-  HTTP methods for which permissions should not be applied -- this may
-  be useful for cases where it's desirable for unpermissioned users to
-  be able to access the forms to perform particular actions, even if
-  the actions then subsequently fail when form data is POSTed.  (For
-  example, you might want to allow any user to access the form for
-  creation of new entities, and for permissioning only to be applied
-  at the point where the user submits the form and the object is to be
-  created.)
+  *action-options* is a dictionary of action options.  Possible
+  options are: ``description``, ``get_allowed`` and
+  ``permissions_object``.  The ``description`` option gives a
+  human-readable free-text description of the action.  The
+  ``get_allowed`` option is a binary flag marking whether permissions
+  should not be applied for HTTP GETs -- this may be useful for cases
+  where it's desirable for unpermissioned users to be able to access
+  the forms to perform particular actions, even if the actions then
+  subsequently fail when form data is POSTed.  (For example, you might
+  want to allow any user to access the form for creation of new
+  entities, and for permissioning only to be applied at the point
+  where the user submits the form and the object is to be created.)
+  The ``permissions_object`` option is either ``None`` (indicating the
+  the action is "free-floating" and not associated with any particular
+  object) or is a string giving the name of a foreign key field in the
+  model being configured.  The result of setting the
+  ``permissions_object`` option is that permissions for the relevant
+  action are *not* checked on the object of the class the ``actions``
+  list is attached to, but to the alternative object referred to by
+  the appropriate foreign key field.  This capability is intended for
+  use with "collective" actions.  For example, if all "``board``"
+  entities belong to a "``project``" entity, a "``board.create``"
+  action should really be referred to the ``project``, not to any
+  individual board -- is the user allowed to create new boards for
+  this project?
 
 Here's an example of a model definition set up for use with
 django-tutelary::
@@ -70,16 +85,18 @@ django-tutelary::
       class TutelaryMeta:
           perm_type = 'party'
           path_fields = ('project', 'pk')
-          actions = (('party.list',
-                     "Can list existing parties"),
-                     ('party.detail',
-                      "Can view details of a party"),
-                     ('party.create',
-                      "Can create parties", ['GET']),
-                     ('party.edit',
-                      "Can update existing parties", ['GET']),
-                     ('party.delete',
-                      "Can delete parties", ['GET']))
+          actions = [
+              ('party.list',   {'description': "List existing parties",
+                                'permissions_object': 'project'}),
+              ('party.create', {'description': "Create parties",
+                                'permissions_object': 'project',
+                                'get_allowed': True}),
+              ('party.detail', {'description': "View details of a party"}),
+              ('party.edit',   {'description': "Update existing parties",
+                                'get_allowed': True}),
+              ('party.delete', {'description': "Delete parties",
+                                'get_allowed': True})
+          ]
 
 In this case, as well as the normal Django ``Meta`` class member, we
 also set up a ``TutelaryMeta`` class member.  This gives the
@@ -90,8 +107,8 @@ where the ``...`` will be filled based on the ``path_fields`` of class
 ``Project`` (since ``project`` is a foreign key field here).
 
 The ``actions`` list here defines five actions, three of which
-(``party.create``, ``parcty.edit`` and ``party.delete``) have "method
-exception lists", saying that a HTTP GET on any of the views
+(``party.create``, ``party.edit`` and ``party.delete``) have
+``get_allowed`` true, saying that a HTTP GET on any of the views
 permissioned using these actions should succeed.  The result of this
 is that users can access the *forms* for creating, editing and
 deleting parties, but POSTing those forms will not be allowed.  (This
@@ -100,6 +117,10 @@ possible fiexibility for users of django-tutelary: if you want to have
 a combined model list and create view, it makes sense for users to be
 able to GET the view, but for only permissioned users to be able to
 POST.)
+
+Two of the actions defined here (``party.list`` and ``party.create``)
+are "collective" actions, meaning that they are permissioned on the
+``project`` field of the ``Party`` model.
 
 The ``permissioned_model`` function
 -----------------------------------
@@ -173,9 +194,11 @@ permissions as follows::
       class TutelaryMeta:
           perm_type = 'organisation'
           path_fields = ('name',)
-          actions = (('org.list', "List existing organisations"),
-                     ('org.create', "Create organisations"),
-                     ('org.delete', "Delete organisations"))
+          actions = [
+              ('org.list',   {'permissions_object': None}),
+              ('org.create', {'permissions_object': None}),
+              'org.delete'
+          ]
 
 
   @permissioned_model
@@ -189,9 +212,11 @@ permissions as follows::
       class TutelaryMeta:
           perm_type = 'project'
           path_fields = ('organisation', 'name')
-          actions = (('project.list', "List existing projects"),
-                     ('project.create', "Create projects"),
-                     ('project.delete', "Delete projects"))
+          actions = [
+              ('project.list',   {'permissions_object': 'organisation'}),
+              ('project.create', {'permissions_object': 'organisation'}),
+              'project.delete'
+          ]
 
 In policies, ``Organisation`` objects are then represented as
 ``organisation/<org-name>`` and projects as
@@ -205,10 +230,22 @@ To add django-tutelary permissioning metadata to an existing Django
 model, such as the ``User`` model, we can do something like this::
 
   permissioned_model(
-    User, perm_type='user', path_fields=['username'],
-    actions=(('user.list', "Can list existing users"),
-             ('user.detail', "Can view details of a user"),
-             ('user.create', "Can create users", ['GET']),
-             ('user.edit', "Can update existing users", ['GET']),
-             ('user.delete', "Can delete users", ['GET']))
+      User, perm_type='user', path_fields=['username'],
+      actions=[
+          ('user.list',
+           {'description': "Can list existing users",
+            'permissions_object': None}),
+          ('user.detail',
+           {'description': "Can view details of a user"}),
+          ('user.create',
+           {'description': "Can create users",
+            'permissions_object': None,
+            'allow_get': True}),
+          ('user.edit',
+           {'description': "Can update existing users",
+            'allow_get': True}),
+          ('user.delete',
+           {'description': "Can delete users",
+            'allow_get': True})
+      ]
   )
