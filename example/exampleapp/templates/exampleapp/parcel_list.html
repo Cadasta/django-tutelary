@@ -12,7 +12,6 @@
   {% for parcel in object_list %}
     <li>
       <a href="{% url 'parcel-detail' parcel.id %}">{{ parcel.address }}</a>
-      [{{ parcel.permissions_path }}]
     </li>
   {% endfor %}
 </ul>

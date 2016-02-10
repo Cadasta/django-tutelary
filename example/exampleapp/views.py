@@ -46,42 +46,40 @@ class UserMixin:
 
 class PermissionInfoMixin:
     """
-    Mixin to add the permissions path of objects being displayed to
-    any view, along with list of permitted actions.
+    Mixin to add list of permitted actions to views.
 
     """
     def get_context_data(self, **kwargs):
         context = super(PermissionInfoMixin, self).get_context_data(**kwargs)
         context['actions'] = []
+        if 'object' in context:
+            obj = context['object']
+            if hasattr(obj, 'get_permissions_object'):
+                acts = list(map(str, get_backends()[0].permitted_actions(
+                    self.request.user,
+                    lambda a: obj.get_permissions_object(a)
+                )))
+        elif 'object_list' in context:
+            actcnts = {}
+            for obj in context['object_list']:
+                if hasattr(obj, 'get_permissions_object'):
+                    objacts = get_backends()[0].permitted_actions(
+                        self.request.user,
+                        lambda a: obj.get_permissions_object(a)
+                    )
+                    for a in objacts:
+                        if a in actcnts:
+                            actcnts[a] += 1
+                        else:
+                            actcnts[a] = 1
+            acts = []
+            for act, cnt in actcnts.items():
+                if cnt == len(context['object_list']):
+                    acts.append(str(act))
+                else:
+                    acts.append('(' + str(act) + ')')
+        context['actions'] = acts
         return context
-        # if 'object' in context:
-        #     obj = context['object']
-        #     if hasattr(obj, 'get_permissions_object'):
-        #         obj.permissions_path = str(obj.get_permissions_object())
-        #         acts = list(map(str, get_backends()[0].permitted_actions(
-        #             self.request.user, obj.get_permissions_object()
-        #         )))
-        # elif 'object_list' in context:
-        #     actcnts = {}
-        #     for obj in context['object_list']:
-        #         if hasattr(obj, 'get_permissions_object'):
-        #             obj.permissions_path = str(obj.get_permissions_object())
-        #             objacts = get_backends()[0].permitted_actions(
-        #                 self.request.user, obj.get_permissions_object()
-        #             )
-        #             for a in objacts:
-        #                 if a in actcnts:
-        #                     actcnts[a] += 1
-        #                 else:
-        #                     actcnts[a] = 1
-        #     acts = []
-        #     for act, cnt in actcnts.items():
-        #         if cnt == len(context['object_list']):
-        #             acts.append(str(act))
-        #         else:
-        #             acts.append('(' + str(act) + ')')
-        # context['actions'] = acts
-        # return context
 
 
 class PermissionRequiredMixin(tutelary.mixins.PermissionRequiredMixin):

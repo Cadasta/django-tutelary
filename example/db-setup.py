@@ -164,29 +164,44 @@ proj3.save()
 
 
 users = [('admin', [default_p,
-                    sysadmin_p],
-          None, None),
-         ('user1', [default_p],
-          None, None),
+                    sysadmin_p]),
+         ('user1', [default_p]),
          ('user2', [default_p,
-                    (org_p, {'organisation': 'Cadasta'})],
-          org1, None),
+                    (org_p, {'organisation': 'Cadasta'})]),
          ('user3', [default_p,
                     (org_p, {'organisation': 'Cadasta'}),
                     (proj_p, {'organisation': 'Cadasta',
-                              'project': 'CadastaProj1'})],
-          org1, proj1)]
+                              'project': 'CadastaProj1'})])]
 
-for uname, pols, org, proj in users:
+for uname, pols in users:
     u = User.objects.create(username=uname)
     u.assign_policies(*pols)
     u.save()
     for p, i in zip(pols, itertools.count()):
+        attrs = {}
         if isinstance(p, tuple):
+            attrs = p[1]
             p = p[0]
-        ups = UserPolicyAssignment.objects.create(user=u, policy=p,
-                                                  organisation=org,
-                                                  project=proj, index=i)
+        org = None
+        proj = None
+        if 'organisation' in attrs:
+            org = Organisation.objects.get(name=attrs['organisation'])
+        if 'project' in attrs:
+            proj = Project.objects.get(name=attrs['project'])
+        if org is not None and proj is not None:
+            ups = UserPolicyAssignment.objects.create(
+                user=u, policy=p, index=i,
+                organisation=org, project=proj
+            )
+        elif org is not None:
+            ups = UserPolicyAssignment.objects.create(
+                user=u, policy=p, index=i,
+                organisation=org
+            )
+        else:
+            ups = UserPolicyAssignment.objects.create(
+                user=u, policy=p, index=i
+            )
         ups.save()
 
 

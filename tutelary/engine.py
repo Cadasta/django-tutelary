@@ -296,7 +296,8 @@ class PermissionSet:
         """Determine permitted actions for a given object pattern.
 
         """
-        return [a for a in Action.registered if self.allow(a, obj)]
+        return [a for a in Action.registered
+                if self.allow(a, obj(str(a)) if obj is not None else None)]
 
 
 # ------------------------------------------------------------------------------

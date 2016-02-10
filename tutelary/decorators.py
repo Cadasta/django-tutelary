@@ -48,7 +48,7 @@ def get_path_fields(cls, base=[]):
     return pfs
 
 
-def get_perms_object(obj):
+def get_perms_object(obj, action):
     """Get the django-tutelary path for an object, based on the fields
     listed in ``TutelaryMeta.pfs``.
 
@@ -66,11 +66,15 @@ def make_get_perms_object(perms_objs):
     other (foreign key) field of an object.
 
     """
-    def retfn(action, obj):
+    def retfn(obj, action):
         if action in perms_objs:
-            return getattr(obj, perms_objs[action]).get_perms_object()
+            if perms_objs[action] is None:
+                return None
+            else:
+                return get_perms_object(getattr(obj, perms_objs[action]),
+                                        action)
         else:
-            return get_perms_object(obj)
+            return get_perms_object(obj, action)
     return retfn
 
 

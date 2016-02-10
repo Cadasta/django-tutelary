@@ -12,7 +12,6 @@
   {% for party in object_list %}
     <li>
       <a href="{% url 'party-detail' party.id %}">{{ party.name }}</a>
-      [{{ party.permissions_path }}]
     </li>
   {% endfor %}
 </ul>

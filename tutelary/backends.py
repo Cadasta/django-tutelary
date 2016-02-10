@@ -37,8 +37,9 @@ class Backend:
 
         :param user: The user to test.
         :type user: ``User``
-        :param obj: The object path to test.
-        :type obj: ``tutelary.engine.Object``
+        :param obj: A function mapping from action names to object
+                    paths to test.
+        :type obj: callable
         :returns: ``list(tutelary.engine.Action)`` -- permitted actions.
 
         """
