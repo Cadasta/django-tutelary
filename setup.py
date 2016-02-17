@@ -74,7 +74,10 @@ setup(
     author_email=author_email,
     packages=get_packages(package),
     package_data=get_package_data(package),
-    install_requires=[],
+    install_requires=[
+        'django-audit-log==0.7.0',
+        'simplejson==3.8.1'
+    ],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Environment :: Web Environment',
