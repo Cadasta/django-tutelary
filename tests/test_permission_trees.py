@@ -1,10 +1,10 @@
-from tutelary.engine import PermissionSet, Policy, Action, Object
+from tutelary.engine import PermissionTree, PolicyBody, Action, Object
 from .datadir import datadir  # noqa
 
 
 def test_permission_set_creation(datadir):  # noqa
-    pol = Policy(json=datadir.join('test-policy-1.json').read())
-    pset = PermissionSet()
+    pol = PolicyBody(json=datadir.join('test-policy-1.json').read())
+    pset = PermissionTree()
     pset.add(policy=pol)
     assert pset.allow(Action('parcel.view'),
                       Object('Cadasta/Batangas/parcel/123'))
@@ -16,17 +16,20 @@ def test_permission_set_policies(datadir):  # noqa
     v = {'organisation': 'Cadasta', 'project': 'Test'}
     pnames = ['default-policy.json', 'org-policy.json', 'project-policy.json']
 
-    sapols = map(lambda f: Policy(json=datadir.join(f).read(), variables=v),
+    sapols = map(lambda f: PolicyBody(json=datadir.join(f).read(),
+                                      variables=v),
                  pnames + ['sys-admin-policy.json'])
-    sapset = PermissionSet(policies=sapols)
+    sapset = PermissionTree(policies=sapols)
 
-    oapols = map(lambda f: Policy(json=datadir.join(f).read(), variables=v),
+    oapols = map(lambda f: PolicyBody(json=datadir.join(f).read(),
+                                      variables=v),
                  pnames + ['org-admin-policy.json'])
-    oapset = PermissionSet(policies=oapols)
+    oapset = PermissionTree(policies=oapols)
 
-    dcpols = map(lambda f: Policy(json=datadir.join(f).read(), variables=v),
+    dcpols = map(lambda f: PolicyBody(json=datadir.join(f).read(),
+                                      variables=v),
                  pnames + ['data-collector-policy.json'])
-    dcpset = PermissionSet(policies=dcpols)
+    dcpset = PermissionTree(policies=dcpols)
 
     parcel_view = Action('parcel.view')
     parcel_edit = Action('parcel.edit')

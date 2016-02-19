@@ -1,4 +1,4 @@
-from tutelary.engine import Clause, Policy, Action, Object
+from tutelary.engine import Clause, PolicyBody, Action, Object
 from tutelary.exceptions import (EffectException, PatternOverlapException)
 import pytest
 from .datadir import datadir  # noqa
@@ -30,7 +30,7 @@ def test_policy_read(datadir):  # noqa
     """
     Test basic policy construction from a string.
     """
-    p = Policy(json=datadir.join('test-policy-1.json').read())
+    p = PolicyBody(json=datadir.join('test-policy-1.json').read())
     assert len(p) == 4
 
 
@@ -38,7 +38,7 @@ def test_policy_elements(datadir):  # noqa
     """
     Check policy element access.
     """
-    p = Policy(json=datadir.join('test-policy-1.json').read())
+    p = PolicyBody(json=datadir.join('test-policy-1.json').read())
     assert p.nclauses == 2
     assert len(p) == 4
     assert p[0].effect == 'allow'
@@ -51,9 +51,9 @@ def test_policy_serialisation(datadir):  # noqa
     deserialisation.
 
     """
-    p = Policy(json=datadir.join('test-policy-1.json').read())
+    p = PolicyBody(json=datadir.join('test-policy-1.json').read())
     pstr = str(p)
-    pchk = Policy(pstr)
+    pchk = PolicyBody(pstr)
     assert str(pchk) == pstr
 
 
@@ -61,8 +61,8 @@ def test_policy_hashing(datadir):  # noqa
     """
     Test hashing of normalised policy representations.
     """
-    p1 = Policy(json=datadir.join('test-policy-1.json').read())
-    p2 = Policy(json=datadir.join('test-policy-2.json').read())
+    p1 = PolicyBody(json=datadir.join('test-policy-1.json').read())
+    p2 = PolicyBody(json=datadir.join('test-policy-2.json').read())
     assert p1.hash() != p2.hash()
 
 
@@ -70,7 +70,7 @@ def test_policy_iteration(datadir):  # noqa
     """
     Test iteration over policies.
     """
-    p = Policy(json=datadir.join('test-policy-1.json').read())
+    p = PolicyBody(json=datadir.join('test-policy-1.json').read())
     i = 0
     for e, a, o in p:
         if i == 0 or i == 1:

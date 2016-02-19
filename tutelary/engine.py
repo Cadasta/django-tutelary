@@ -168,8 +168,8 @@ class Clause:
         self.object = obj
 
 
-class Policy(Sequence):
-    """A policy is just a sequence of clauses, possibly with a name.
+class PolicyBody(Sequence):
+    """A policy body is just a sequence of clauses, possibly with a name.
     Conversion to and from JSON representations (with
     canonicalisation), and hash generation from the canonical
     representation.
@@ -232,19 +232,19 @@ class Policy(Sequence):
 #  Permission sets
 #
 
-class PermissionSet:
-    """A permission set records, in a compact way, the permissions
+class PermissionTree:
+    """A permission tree records, in a compact way, the permissions
     associated with a sequence of policy clauses.  The construction of
-    permission sets handles the overriding of earlier clauses by later
+    permission trees handles the overriding of earlier clauses by later
     clauses and the treatment of wildcards in the action and object
     patterns for individual policy clauses.
 
     Can:
-     - Create empty permissions sets.
-     - Compose statements and policies into permission set.
-     - Test an (action, object) pair against a permission set.
+     - Create empty permissions trees.
+     - Compose statements and policies into a permission tree.
+     - Test an (action, object) pair against a permission tree.
      - Determine the list of allowed actions for an object pattern from
-       a permission set.
+       a permission tree.
 
     Most of the functionality needed here is implemented in the
     ``WildTree`` class.
@@ -252,7 +252,7 @@ class PermissionSet:
     """
 
     def __init__(self, policies=None, json=None):
-        """Permission sets are all by default empty, with an optional list of
+        """Permission trees are all by default empty, with an optional list of
         policies added.  They can also be deserialised from JSON.
 
         """
