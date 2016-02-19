@@ -1,6 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from .models import PermissionSet
-from .engine import Action, PermissionTree
+from .engine import Action
 
 
 class Backend:
@@ -10,10 +10,9 @@ class Backend:
     """
     def _get_pset(self, user):
         if user.is_authenticated():
-            return PermissionTree(json=user.permissionset.first().data)
+            return user.permissionset.first().tree()
         else:
-            apset = PermissionSet.objects.get(anonymous_user=True)
-            return PermissionTree(json=apset.data)
+            return PermissionSet.objects.get(anonymous_user=True).tree()
 
     def has_perm(self, user, perm, obj=None, *args, **kwargs):
         """Test user permissions for a single action and object.

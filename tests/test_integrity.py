@@ -1,5 +1,5 @@
 from tutelary.models import (
-    PermissionSet, Policy, PolicyInstance, PolicyInstanceAssign
+    PermissionSet, Policy, PolicyInstance
 )
 from django.contrib.auth.models import User
 import pytest
@@ -51,18 +51,13 @@ def debug(db):
                                  str(pset.pk) + ': ' + pset.data, psets)))
         pis = PolicyInstance.objects.all()
         print('PolInsts:', list(map(lambda pi:
-                                    str(pi.pk) + ': ' + pi.policy.name + ' ' +
+                                    str(pi.pk) + ': ' + str(pi.pset.id) + ' ' +
+                                    pi.policy.name + ' ' +
                                     str(pi.variables), pis)))
-        pas = PolicyInstanceAssign.objects.all()
-        print('PolInstAssigns:', list(map(lambda pa:
-                                          str(pa.pk) + ': PI ' +
-                                          str(pa.policy_instance.pk) +
-                                          ' -> PSet ' +
-                                          str(pa.permission_set.pk), pas)))
     return fn
 
 
-def check(nuser=None, npol=None, npolin=None, npset=None, npolinassign=None):
+def check(nuser=None, npol=None, npolin=None, npset=None):
     if nuser is not None:
         assert User.objects.count() == nuser
     if npol is not None:
@@ -71,15 +66,14 @@ def check(nuser=None, npol=None, npolin=None, npset=None, npolinassign=None):
         assert PolicyInstance.objects.count() == npolin
     if npset is not None:
         assert PermissionSet.objects.count() == npset
-    if npolinassign is not None:
-        assert PolicyInstanceAssign.objects.count() == npolinassign
 
 
 @pytest.mark.django_db  # noqa
-def test_permission_set_creation(datadir, setup):
+def test_permission_set_creation(datadir, setup, debug):
     user1, user2, user3, def_pol, org_pol, prj_pol = setup
 
-    check(nuser=3, npol=3, npolin=3, npset=3, npolinassign=6)
+    debug('CREATION')
+    check(nuser=3, npol=3, npolin=6, npset=3)
 
 
 @pytest.mark.django_db  # noqa
@@ -91,7 +85,7 @@ def test_permission_set_change(datadir, setup, debug):
                           (org_pol, {'organisation': 'DummyCorp'}))
     debug('AFTER')
 
-    check(nuser=3, npol=3, npolin=4, npset=3, npolinassign=6)
+    check(nuser=3, npol=3, npolin=6, npset=3)
 
 
 @pytest.mark.django_db  # noqa
@@ -105,7 +99,7 @@ def test_permission_set_clear(datadir, setup, debug):
     debug('AFTER')
 
     # Remember the empty permission set!
-    check(nuser=3, npol=3, npolin=0, npset=1, npolinassign=0)
+    check(nuser=3, npol=3, npolin=0, npset=1)
 
 
 @pytest.mark.django_db  # noqa
@@ -117,7 +111,7 @@ def test_permission_set_clear2(datadir, setup, debug):
     debug('AFTER')
 
     # Remember the empty permission set!
-    check(nuser=3, npol=3, npolin=3, npset=3, npolinassign=5)
+    check(nuser=3, npol=3, npolin=5, npset=3)
 
 
 @pytest.mark.django_db  # noqa
@@ -129,7 +123,7 @@ def test_permission_user_deletion(datadir, setup, debug):
     debug('AFTER')
 
     # No empty permission set here: the user is gone!
-    check(nuser=2, npol=3, npolin=2, npset=2, npolinassign=3)
+    check(nuser=2, npol=3, npolin=3, npset=2)
 
 
 @pytest.mark.django_db  # noqa
@@ -143,4 +137,4 @@ def test_permission_user_deletion2(datadir, setup, debug):
     debug('AFTER')
 
     # No empty permission set here: the users are gone!
-    check(nuser=0, npol=3, npolin=0, npset=0, npolinassign=0)
+    check(nuser=0, npol=3, npolin=0, npset=0)
