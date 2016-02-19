@@ -47,8 +47,10 @@ def debug(db):
     def fn(s):
         print(s)
         psets = PermissionSet.objects.all()
-        print('PSets:', list(map(lambda pset:
-                                 str(pset.pk) + ': ' + pset.data, psets)))
+        print('PSets:', list(map(
+            lambda pset: str(pset.pk) + ': ' + repr(pset.tree()),
+            psets)
+        ))
         pis = PolicyInstance.objects.all()
         print('PolInsts:', list(map(lambda pi:
                                     str(pi.pk) + ': ' + str(pi.pset.id) + ' ' +

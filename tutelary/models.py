@@ -1,6 +1,6 @@
 import json
 import itertools
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
@@ -24,6 +24,14 @@ class Policy(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            super(Policy, self).save(*args, **kwargs)
+            psets = [pi.pset
+                     for pi in PolicyInstance.objects.filter(policy=self)]
+            for pset in psets:
+                PermissionSet.objects.refresh(pset)
 
 
 class PolicyInstance(models.Model):
@@ -53,7 +61,7 @@ class PolicyInstance(models.Model):
         ordering = ['index']
 
 
-def policy_psets(policies):
+def _policy_psets(policies):
     """Find the IDs of all permission sets making use of all of a list of
     policies.  The input is a list of (policy, variables) pairs.
 
@@ -95,7 +103,7 @@ class PermissionSetManager(models.Manager):
         # policies and variable assignments.  First step is to find a
         # list of permission set IDs using all the same policies as
         # appear in the supplied policy list.
-        for psetid in policy_psets(canonpols):
+        for psetid in _policy_psets(canonpols):
             # Now, for each permission set candidate, check whether
             # the policy instance rows correspond exactly to the input
             # policy+variable assignment list.
@@ -114,42 +122,39 @@ class PermissionSetManager(models.Manager):
         # the exact combination of policies and variable assignments
         # used here.  So we create one.
 
-        # Make a new base permission set object: this merges the
-        # policy instances into a wild card tree for fast lookup.
-        def make_pol(p):
-            if isinstance(p, tuple):
-                return engine.PolicyBody(json=p[0].body, variables=p[1])
-            else:
-                return engine.PolicyBody(json=p.body)
-        ptree = engine.PermissionTree(
-            policies=[make_pol(p) for p in policies]
-        )
-
         # The permission set model stores the JSON serialisation of
         # this tree structure.
-        obj = self.create(data=repr(ptree))
-        obj.ptree = ptree
+
+        # Make a temporary object and save it for use in building the
+        # relevant PolicyInstance objects.
+        obj = self.create()
         obj.save()
 
+        # Set up policy instance references.
         for p, i in zip(canonpols, itertools.count()):
             PolicyInstance.objects.create(pset=obj, policy=p[0],
                                           index=i, variables=p[1])
 
+        # The construction of the permission tree for this permission
+        # set happens lazily when needed, so at this point we just
+        # return the newly constructed object.
         return obj
+
+    def refresh(self, pset):
+        print('REFRESH PermissionSet', pset.id)
+        if hasattr(pset, 'ptree'):
+            del pset.ptree
 
 
 class PermissionSet(models.Model):
     """A permission set represents the complete set of permissions
     resulting from the composition of a sequence of policy instances.
-    The permission set itself is represented as the JSON serialisation
-    of a ``engine.PermissionTree`` object, and the sequence of policy
-    instances is recorded using the ``PolicyInstanceAssign`` model.
+    The sequence of policy instances is recorded using the
+    ``PolicyInstance`` model and the permission tree is constructed
+    lazily from this information when the permission set is read from
+    the database.
 
     """
-    # JSON serialisation of wildcard tree representation of permission
-    # set.
-    data = models.TextField()
-
     # Ordered set of policies used to generate this permission set.
     policy_assign = models.ManyToManyField(Policy, through=PolicyInstance)
 
@@ -166,7 +171,11 @@ class PermissionSet(models.Model):
 
     def tree(self):
         if not hasattr(self, 'ptree'):
-            self.ptree = engine.PermissionTree(json=self.data)
+            self.ptree = engine.PermissionTree(
+                policies=[engine.PolicyBody(json=pi.policy.body,
+                                            variables=json.loads(pi.variables))
+                          for pi in PolicyInstance.objects.filter(pset=self)]
+            )
         return self.ptree
 
 

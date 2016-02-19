@@ -101,10 +101,13 @@ def test_policy_update_2(datadir, setup):  # noqa
     obj1 = Object('parcel/Cadasta/TestProj/123')
     obj2 = Object('parcel/Cadasta/Proj2/114')
     obj3 = Object('parcel/SkunkWorks/SR-71/Area51')
+    obj4 = Object('party/Cadasta/TestProj/345')
 
     assert user3.has_perm('parcel.edit', obj1)
+    assert not user3.has_perm('parcel.view', obj1)
     assert user3.has_perm('parcel.view', obj2)
     assert not user3.has_perm('parcel.view', obj3)
+    assert not user3.has_perm('party.view', obj4)
 
     prj_pol.body = datadir.join('project-policy-2.json').read()
     prj_pol.save()
@@ -112,5 +115,7 @@ def test_policy_update_2(datadir, setup):  # noqa
     check(nuser=3, npol=3, npolin=6, npset=3)
 
     assert user3.has_perm('parcel.edit', obj1)
-    assert not user3.has_perm('parcel.view', obj2)
+    assert not user3.has_perm('parcel.view', obj1)
+    assert user3.has_perm('parcel.view', obj2)
     assert not user3.has_perm('parcel.view', obj3)
+    assert user3.has_perm('party.view', obj4)
