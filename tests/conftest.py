@@ -10,7 +10,6 @@ def pytest_configure():
         USE_I18N=True,
         USE_L10N=True,
         STATIC_URL='/static/',
-        ROOT_URLCONF='tests.urls',
         TEMPLATE_LOADERS=(
             'django.template.loaders.filesystem.Loader',
             'django.template.loaders.app_directories.Loader',

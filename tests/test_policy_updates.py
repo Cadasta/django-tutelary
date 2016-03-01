@@ -4,33 +4,20 @@ from tutelary.models import (
 from tutelary.engine import Object
 from django.contrib.auth.models import User
 import pytest
+from .factories import UserFactory, PolicyFactory
 from .datadir import datadir  # noqa
 
 
 @pytest.fixture(scope="function")  # noqa
 def setup(datadir, db):
-    user1 = User.objects.create(username='user1')
-    user1.save()
-    user2 = User.objects.create(username='user2')
-    user1.save()
-    user3 = User.objects.create(username='user3')
-    user1.save()
+    user1 = UserFactory.create(username='user1')
+    user2 = UserFactory.create(username='user2')
+    user3 = UserFactory.create(username='user3')
 
-    def_pol = Policy.objects.create(
-        name='def',
-        body=datadir.join('default-policy.json').read()
-    )
-    def_pol.save()
-    org_pol = Policy.objects.create(
-        name='org',
-        body=datadir.join('org-policy-1.json').read()
-    )
-    org_pol.save()
-    prj_pol = Policy.objects.create(
-        name='prj',
-        body=datadir.join('project-policy-1.json').read()
-    )
-    prj_pol.save()
+    PolicyFactory.set_directory(str(datadir))
+    def_pol = PolicyFactory.create(name='def', file='default-policy.json')
+    org_pol = PolicyFactory.create(name='org', file='org-policy-1.json')
+    prj_pol = PolicyFactory.create(name='prj', file='project-policy-1.json')
 
     user1.assign_policies(def_pol)
     user2.assign_policies(def_pol,
@@ -75,6 +62,7 @@ def test_policy_update_1(datadir, setup):  # noqa
     assert not user2.has_perm('parcel.view', obj3)
     assert not user3.has_perm('parcel.view', obj3)
 
+    assert str(org_pol) == 'org'
     org_pol.body = datadir.join('org-policy-2.json').read()
     org_pol.save()
 

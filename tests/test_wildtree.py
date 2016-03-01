@@ -8,9 +8,14 @@ def test_wildtree_1():
     t[('a', 'b', 'd')] = 2
     t[('a', 'b', 'e')] = 3
     assert len(t) == 3
+    assert ('a', 'b', 'c') in t
+    assert ('a', 'b', 'x') not in t
     assert t[('a', 'b', 'c')] == 1
     assert t[('a', 'b', 'd')] == 2
     assert t[('a', 'b', 'e')] == 3
+    del t[('a', 'b', 'e')]
+    assert ('a', 'b', 'e') not in t
+    assert t.find(('a', 'b', 'd'))[0] == 2
     with pytest.raises(KeyError):
         assert t[('a', 'c', 'e')] == 1
     assert WildTree(json=repr(t)) == t

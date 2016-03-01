@@ -1,5 +1,7 @@
 import django.contrib.auth.mixins as base
 
+from .models import check_perms
+
 
 class PermissionRequiredMixin(base.PermissionRequiredMixin):
     """Permission checking mixin -- works just like the
@@ -17,14 +19,8 @@ class PermissionRequiredMixin(base.PermissionRequiredMixin):
                 objs = [self.get_object()]
             except:
                 pass
-        elif hasattr(self, 'get_queryset'):
+        if objs == [None] and hasattr(self, 'get_queryset'):
             objs = self.get_queryset()
-        for p in self.get_permission_required():
-            for o in objs:
-                test_obj = None
-                if o is not None:
-                    test_obj = o.get_permissions_object(p)
-                if not self.request.user.has_perm(p, test_obj):
-                    if not (p in get_allowed and self.request.method == 'GET'):
-                        return False
-        return True
+        return check_perms(self.request.user,
+                           self.get_permission_required(),
+                           objs, get_allowed, self.request.method)

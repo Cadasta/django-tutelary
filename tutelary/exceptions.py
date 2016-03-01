@@ -31,14 +31,10 @@ class PolicyBodyException(TutelaryException):
             super(PolicyBodyException, self).__init__(
                 "illegal policy body: " + msg
             )
-        elif lineno is not None:
+        else:
             super(PolicyBodyException, self).__init__(
                 "illegal policy body: " +
                 "line " + str(lineno) + ", column " + str(colno)
-            )
-        else:
-            super(PolicyBodyException, self).__init__(
-                "illegal policy body"
             )
 
 

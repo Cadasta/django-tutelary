@@ -1,6 +1,6 @@
 import json
 import itertools
-from django.db import models, transaction
+from django.db import models
 from django.conf import settings
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
@@ -24,14 +24,6 @@ class Policy(models.Model):
 
     def __str__(self):
         return self.name
-
-    def save(self, *args, **kwargs):
-        with transaction.atomic():
-            super(Policy, self).save(*args, **kwargs)
-            psets = [pi.pset
-                     for pi in PolicyInstance.objects.filter(policy=self)]
-            for pset in psets:
-                PermissionSet.objects.refresh(pset)
 
 
 class PolicyInstance(models.Model):
@@ -140,11 +132,6 @@ class PermissionSetManager(models.Manager):
         # return the newly constructed object.
         return obj
 
-    def refresh(self, pset):
-        print('REFRESH PermissionSet', pset.id)
-        if hasattr(pset, 'ptree'):
-            del pset.ptree
-
 
 class PermissionSet(models.Model):
     """A permission set represents the complete set of permissions
@@ -219,3 +206,16 @@ def assign_user_policies(user, *policies):
     else:
         pset.users.add(user)
     pset.save()
+
+
+def check_perms(user, actions, objs, get_allowed=None, method=None):
+    for a in actions:
+        for o in objs:
+            test_obj = None
+            if o is not None:
+                test_obj = o.get_permissions_object(a)
+            if not user.has_perm(a, test_obj):
+                if (get_allowed is None or
+                   not (a in get_allowed and method == 'GET')):
+                    return False
+    return True

@@ -31,8 +31,8 @@ class SimpleSeparated(Sequence):
     """
     def __init__(self, s):
         if s is None:
-            self.componsnes = []
-        if isinstance(s, str):
+            self.components = []
+        elif isinstance(s, str):
             self.components = self._split_components(s)
         elif isinstance(s, Sequence):
             self.components = s
@@ -184,9 +184,7 @@ class PolicyBody(Sequence):
             d = loads(strip_comments(Template(json).substitute(variables)))
         except JSONDecodeError as e:
             raise PolicyBodyException(lineno=e.lineno, colno=e.colno)
-        except KeyError:
-            raise VariableSubstitutionException()
-        except ValueError:
+        except (KeyError, TypeError, ValueError):
             raise VariableSubstitutionException()
         self.version = 'version' in d and d['version'] or '2015-12-10'
         if 'clause' not in d:

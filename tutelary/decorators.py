@@ -1,9 +1,10 @@
-from functools import reduce
+from functools import reduce, wraps
 from django.core.exceptions import PermissionDenied
-from django.contrib.auth.decorators import user_passes_test
 from django.db import models
+from django.utils.decorators import available_attrs
 
 from .engine import Object, Action
+from .models import check_perms
 from .exceptions import DecoratorException, PermissionObjectException
 
 
@@ -15,19 +16,26 @@ def permission_required(*actions, obj=None, raise_exception=False):
     permission to perform all of the actions on the given object for
     the permissions test to pass.  *Not actually sure how useful this
     is going to be: in any case where obj is not None, it's going to
-    be tricky to get the object into the decoratory.  Class-based
-    views are definitely best here...*
+    be tricky to get the object into the decorator.  Class-based views
+    are definitely best here...*
 
     """
-    def check_perms(user):
-        if user.is_authenticated() and all(user.has_perms(a, obj)
-                                           for a in actions):
-            return True
-        if raise_exception:
+    def checker(user):
+        ok = False
+        if user.is_authenticated() and check_perms(user, actions, [obj]):
+            ok = True
+        if raise_exception and not ok:
             raise PermissionDenied
         else:
-            return False
-    return user_passes_test(check_perms)
+            return ok
+
+    def decorator(view_func):
+        @wraps(view_func, assigned=available_attrs(view_func))
+        def _wrapped_view(request, *args, **kwargs):
+            if checker(request.user):
+                return view_func(request, *args, **kwargs)
+        return _wrapped_view
+    return decorator
 
 
 def get_path_fields(cls, base=[]):
@@ -87,13 +95,25 @@ def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
     class.
 
     """
-    if not (hasattr(cls, 'TutelaryMeta') or
-            perm_type is None or path_fields is None or actions is None):
-        cls.TutelaryMeta = type('TutelaryMeta', (object,),
-                                dict(perm_type=perm_type,
-                                     path_fields=path_fields,
-                                     actions=actions))
-    if hasattr(cls, 'TutelaryMeta'):
+    if not issubclass(cls, models.Model):
+        raise DecoratorException(
+            'permissioned_model',
+            "class '" + cls.__name__ + "' is not a Django model"
+        )
+    added = False
+    try:
+        if not hasattr(cls, 'TutelaryMeta'):
+            if perm_type is None or path_fields is None or actions is None:
+                raise DecoratorException(
+                    'permissioned_model',
+                    ("missing argument: all of perm_type, path_fields and " +
+                     "actions must be supplied")
+                )
+            added = True
+            cls.TutelaryMeta = type('TutelaryMeta', (object,),
+                                    dict(perm_type=perm_type,
+                                         path_fields=path_fields,
+                                         actions=actions))
         cls.TutelaryMeta.pfs = ([cls.TutelaryMeta.perm_type] +
                                 get_path_fields(cls))
         cls.TutelaryMeta.get_allowed = {}
@@ -110,18 +130,19 @@ def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
             if 'permissions_object' in ap:
                 po = ap['permissions_object']
                 if po is not None:
-                    tst_class = getattr(cls, po).field.__class__
-                    if (not hasattr(cls, po) or
-                        (tst_class not in
-                         [models.ForeignKey, models.OneToOneField])):
+                    try:
+                        t = cls._meta.get_field(po).__class__
+                        if t not in [models.ForeignKey,
+                                     models.OneToOneField]:
+                            raise PermissionObjectException(po)
+                    except:
                         raise PermissionObjectException(po)
                 perms_objs[an] = po
         if len(perms_objs) == 0:
             cls.get_permissions_object = get_perms_object
         else:
             cls.get_permissions_object = make_get_perms_object(perms_objs)
-    else:
-        raise DecoratorException('permissioned_model',
-                                 "missing TutelaryMeta member in '" +
-                                 cls.__name__ + "'")
-    return cls
+        return cls
+    finally:
+        if added:
+            del cls.TutelaryMeta

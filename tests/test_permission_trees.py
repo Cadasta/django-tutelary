@@ -12,7 +12,7 @@ def test_permission_set_creation(datadir):  # noqa
                           Object('Cadasta/Batangas/parcel/123'))
 
 
-def test_permission_set_policies(datadir):  # noqa
+def test_permission_set_policies_1(datadir):  # noqa
     v = {'organisation': 'Cadasta', 'project': 'Test'}
     pnames = ['default-policy.json', 'org-policy.json', 'project-policy.json']
 
@@ -20,16 +20,6 @@ def test_permission_set_policies(datadir):  # noqa
                                       variables=v),
                  pnames + ['sys-admin-policy.json'])
     sapset = PermissionTree(policies=sapols)
-
-    oapols = map(lambda f: PolicyBody(json=datadir.join(f).read(),
-                                      variables=v),
-                 pnames + ['org-admin-policy.json'])
-    oapset = PermissionTree(policies=oapols)
-
-    dcpols = map(lambda f: PolicyBody(json=datadir.join(f).read(),
-                                      variables=v),
-                 pnames + ['data-collector-policy.json'])
-    dcpset = PermissionTree(policies=dcpols)
 
     parcel_view = Action('parcel.view')
     parcel_edit = Action('parcel.edit')
@@ -50,6 +40,27 @@ def test_permission_set_policies(datadir):  # noqa
     assert sapset.allow(admin_invite, org)
     assert sapset.allow(statistics)
 
+
+def test_permission_set_policies_2(datadir):  # noqa
+    v = {'organisation': 'Cadasta', 'project': 'Test'}
+    pnames = ['default-policy.json', 'org-policy.json', 'project-policy.json']
+
+    oapols = map(lambda f: PolicyBody(json=datadir.join(f).read(),
+                                      variables=v),
+                 pnames + ['org-admin-policy.json'])
+    oapset = PermissionTree(policies=oapols)
+
+    parcel_view = Action('parcel.view')
+    parcel_edit = Action('parcel.edit')
+    party_create = Action('party.create')
+    admin_assign = Action('admin.assign-role')
+    admin_invite = Action('admin.invite')
+    statistics = Action('statistics')
+    parties = Object('Cadasta/Test/party')
+    parcel123 = Object('Cadasta/Test/parcel/123')
+    org = Object('org/Cadasta')
+    useriross = Object('user/iross')
+
     assert oapset.allow(parcel_view, parcel123)
     assert oapset.allow(parcel_edit, parcel123)
     assert oapset.allow(party_create, parties)
@@ -57,6 +68,27 @@ def test_permission_set_policies(datadir):  # noqa
     assert oapset.allow(admin_invite, useriross)
     assert oapset.allow(admin_invite, org)
     assert not oapset.allow(statistics)
+
+
+def test_permission_set_policies_3(datadir):  # noqa
+    v = {'organisation': 'Cadasta', 'project': 'Test'}
+    pnames = ['default-policy.json', 'org-policy.json', 'project-policy.json']
+
+    dcpols = map(lambda f: PolicyBody(json=datadir.join(f).read(),
+                                      variables=v),
+                 pnames + ['data-collector-policy.json'])
+    dcpset = PermissionTree(policies=dcpols)
+
+    parcel_view = Action('parcel.view')
+    parcel_edit = Action('parcel.edit')
+    party_create = Action('party.create')
+    admin_assign = Action('admin.assign-role')
+    admin_invite = Action('admin.invite')
+    statistics = Action('statistics')
+    parties = Object('Cadasta/Test/party')
+    parcel123 = Object('Cadasta/Test/parcel/123')
+    org = Object('org/Cadasta')
+    useriross = Object('user/iross')
 
     assert dcpset.allow(parcel_view, parcel123)
     assert dcpset.allow(parcel_edit, parcel123)

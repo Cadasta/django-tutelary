@@ -3,33 +3,20 @@ from tutelary.models import (
 )
 from django.contrib.auth.models import User
 import pytest
+from .factories import UserFactory, PolicyFactory
 from .datadir import datadir  # noqa
 
 
 @pytest.fixture(scope="function")  # noqa
 def setup(datadir, db):
-    user1 = User.objects.create(username='user1')
-    user1.save()
-    user2 = User.objects.create(username='user2')
-    user1.save()
-    user3 = User.objects.create(username='user3')
-    user1.save()
+    user1 = UserFactory.create(username='user1')
+    user2 = UserFactory.create(username='user2')
+    user3 = UserFactory.create(username='user3')
 
-    def_pol = Policy.objects.create(
-        name='def',
-        body=datadir.join('default-policy.json').read()
-    )
-    def_pol.save()
-    org_pol = Policy.objects.create(
-        name='org',
-        body=datadir.join('org-policy.json').read()
-    )
-    org_pol.save()
-    prj_pol = Policy.objects.create(
-        name='prj',
-        body=datadir.join('project-policy.json').read()
-    )
-    prj_pol.save()
+    PolicyFactory.set_directory(str(datadir))
+    def_pol = PolicyFactory.create(name='def', file='default-policy.json')
+    org_pol = PolicyFactory.create(name='org', file='org-policy.json')
+    prj_pol = PolicyFactory.create(name='prj', file='project-policy.json')
 
     user1.assign_policies(def_pol)
     user2.assign_policies(def_pol,
@@ -91,7 +78,7 @@ def test_permission_set_change(datadir, setup, debug):
 
 
 @pytest.mark.django_db  # noqa
-def test_permission_set_clear(datadir, setup, debug):
+def test_permission_set_clear_all(datadir, setup, debug):
     user1, user2, user3, def_pol, org_pol, prj_pol = setup
 
     debug('BEFORE')
@@ -105,7 +92,7 @@ def test_permission_set_clear(datadir, setup, debug):
 
 
 @pytest.mark.django_db  # noqa
-def test_permission_set_clear2(datadir, setup, debug):
+def test_permission_set_clear_single(datadir, setup, debug):
     user1, user2, user3, def_pol, org_pol, prj_pol = setup
 
     debug('BEFORE')
@@ -117,7 +104,7 @@ def test_permission_set_clear2(datadir, setup, debug):
 
 
 @pytest.mark.django_db  # noqa
-def test_permission_user_deletion(datadir, setup, debug):
+def test_permission_user_deletion_single(datadir, setup, debug):
     user1, user2, user3, def_pol, org_pol, prj_pol = setup
 
     debug('BEFORE')
@@ -129,7 +116,7 @@ def test_permission_user_deletion(datadir, setup, debug):
 
 
 @pytest.mark.django_db  # noqa
-def test_permission_user_deletion2(datadir, setup, debug):
+def test_permission_user_deletion_all(datadir, setup, debug):
     user1, user2, user3, def_pol, org_pol, prj_pol = setup
 
     debug('BEFORE')

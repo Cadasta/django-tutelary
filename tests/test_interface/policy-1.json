@@ -1,0 +1,11 @@
+{
+  "version": "2015-12-10",
+  "clause": [
+    { "effect": "allow", "action": ["check.list"] },
+    { "effect": "allow", "action": ["check.detail"], "object": ["check/*"] },
+    { "effect": "allow", "action": ["check2.list"], "object": ["check/*"] },
+    { "effect": "allow", "action": ["check2.detail"], "object": ["check2/*"] },
+    { "effect": "allow", "action": ["check4.list"] },
+    { "effect": "allow", "action": ["check5.detail"], "object": ["check5/*"] }
+  ]
+}

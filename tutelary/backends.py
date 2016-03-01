@@ -9,10 +9,13 @@ class Backend:
 
     """
     def _get_pset(self, user):
-        if user.is_authenticated():
-            return user.permissionset.first().tree()
-        else:
-            return PermissionSet.objects.get(anonymous_user=True).tree()
+        try:
+            if user.is_authenticated():
+                return user.permissionset.first().tree()
+            else:
+                return PermissionSet.objects.get(anonymous_user=True).tree()
+        except AttributeError:
+            raise ObjectDoesNotExist
 
     def has_perm(self, user, perm, obj=None, *args, **kwargs):
         """Test user permissions for a single action and object.

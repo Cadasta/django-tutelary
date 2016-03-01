@@ -1,4 +1,23 @@
-from tutelary.engine import Action, Object
+import pytest
+
+from tutelary.engine import Action, Object, SimpleSeparated
+
+
+def test_sequence_creation_empty():
+    seq1 = SimpleSeparated(None)
+    assert len(seq1) == 0
+    assert seq1.components == []
+
+
+def test_sequence_creation_components():
+    seq2 = SimpleSeparated(['parcel', 'list'])
+    assert len(seq2) == 2
+    assert seq2.components == ['parcel', 'list']
+
+
+def test_sequence_creation_bad():
+    with pytest.raises(ValueError):
+        SimpleSeparated(123)
 
 
 def test_action_creation():
