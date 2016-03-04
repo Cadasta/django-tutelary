@@ -1,5 +1,6 @@
 import json
 import itertools
+import re
 from django.db import models
 from django.conf import settings
 from django.db.models.signals import pre_delete
@@ -7,6 +8,7 @@ from django.dispatch import receiver
 from django.core.exceptions import ObjectDoesNotExist
 from audit_log.models.managers import AuditLog
 import tutelary.engine as engine
+from tutelary.exceptions import RoleVariableException
 
 
 class Policy(models.Model):
@@ -25,6 +27,10 @@ class Policy(models.Model):
 
     def __str__(self):
         return self.name
+
+    def variable_names(self):
+        pat = re.compile(r'\$(?:([_a-z][_a-z0-9]*)|{([_a-z][_a-z0-9]*)})')
+        return set([m[0] for m in re.findall(pat, self.body)])
 
 
 class RolePolicyAssign(models.Model):
@@ -48,9 +54,13 @@ class RolePolicyAssign(models.Model):
 
 class RoleManager(models.Manager):
     def create(self, *args, **kwargs):
-        r = super(RoleManager, self).create(name=kwargs['name'],
-                                            variables=kwargs['variables'])
-        for p, i in zip(kwargs['policies'], itertools.count()):
+        pols = kwargs.get('policies', [])
+        vs = kwargs.get('variables', {})
+        r = super(RoleManager, self).create(name=kwargs['name'], variables=vs)
+        vns = set().union(*[p.variable_names() for p in pols])
+        if not vns.issubset(vs.keys()):
+            raise RoleVariableException("missing variable in role definition")
+        for p, i in zip(pols, itertools.count()):
             RolePolicyAssign.objects.create(role=r, policy=p, index=i)
         return r
 
@@ -77,6 +87,9 @@ class Role(models.Model):
 
     def __str__(self):
         return self.name
+
+    def variable_names(self):
+        return set().union(*[p.variable_names() for p in self.policies.all()])
 
 
 class PolicyInstance(models.Model):

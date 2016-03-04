@@ -49,6 +49,17 @@ class VariableSubstitutionException(TutelaryException):
         )
 
 
+class RoleVariableException(TutelaryException):
+    """Exception raised for missing or illegal variable substitutions for
+    permissions roles.
+
+    """
+    def __init__(self, msg):
+        super(RoleVariableException, self).__init__(
+            "illegal role variables: " + msg
+        )
+
+
 class DecoratorException(TutelaryException):
     """Exception raised if the ``permissioned_model`` decorator is used
     without the required ``TutelaryMeta`` class member being included

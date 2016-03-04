@@ -1,5 +1,6 @@
 from tutelary.models import assign_user_policies, Role
 from tutelary.engine import Object, Action
+from tutelary.exceptions import RoleVariableException
 import pytest
 from .factories import UserFactory, PolicyFactory
 from .datadir import datadir  # noqa
@@ -74,3 +75,35 @@ def test_roles_creation(datadir, setup):  # noqa
     assert not u1.has_perm('parcel.view', obj3)
     assert not u2.has_perm('parcel.view', obj3)
     assert not u3.has_perm('parcel.view', obj3)
+
+
+def test_roles_policies_variables(datadir, setup):  # noqa
+    u1, u2, u3, u4, u5, def_pol, org_pol, prj_pol, deny_pol = setup
+
+    assert def_pol.variable_names() == set()
+    assert org_pol.variable_names() == {'organisation'}
+    assert prj_pol.variable_names() == {'organisation', 'project'}
+
+    org_role = Role.objects.create(
+        name='cadasta_org', policies=[def_pol, org_pol],
+        variables={'organisation': 'Cadasta'}
+    )
+    assert org_role.variable_names() == {'organisation'}
+    testproj_proj_role = Role.objects.create(
+        name='testproj_proj', policies=[def_pol, org_pol, prj_pol],
+        variables={'organisation': 'Cadasta', 'project': 'TestProj'}
+    )
+    testproj_proj_role.save()
+    assert testproj_proj_role.variable_names() == {'organisation', 'project'}
+
+    with pytest.raises(RoleVariableException):
+        bad_role = Role.objects.create(
+            name='cadasta_org', policies=[def_pol, org_pol]
+        )
+        bad_role.save()
+
+    ok_role = Role.objects.create(
+        name='test_org', policies=[def_pol, org_pol],
+        variables={'organisation': 'TestOrg', 'project': 'NewProj'}
+    )
+    ok_role.save()
