@@ -1,0 +1,8 @@
+{
+  "version": "2015-12-10",  // Version is optional.
+  "clause": [
+    { "effect": "deny",
+      "action": ["parcel.list"],
+      "object": ["project/Cadasta/Proj2"] }
+  ]
+}

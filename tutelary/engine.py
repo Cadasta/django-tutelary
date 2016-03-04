@@ -185,6 +185,8 @@ class PolicyBody(Sequence):
         except JSONDecodeError as e:
             raise PolicyBodyException(lineno=e.lineno, colno=e.colno)
         except (KeyError, TypeError, ValueError):
+            print(json)
+            print(variables)
             raise VariableSubstitutionException()
         self.version = 'version' in d and d['version'] or '2015-12-10'
         if 'clause' not in d:

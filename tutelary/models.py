@@ -27,6 +27,58 @@ class Policy(models.Model):
         return self.name
 
 
+class RolePolicyAssign(models.Model):
+    """A role is defined by an ordered sequence of policies.
+
+    """
+
+    policy = models.ForeignKey('Policy', on_delete=models.PROTECT)
+
+    role = models.ForeignKey('Role', on_delete=models.CASCADE)
+
+    index = models.IntegerField()
+    """Integer index used to order the sequence of policies composing a
+    role.
+
+    """
+
+    class Meta:
+        ordering = ['index']
+
+
+class RoleManager(models.Manager):
+    def create(self, *args, **kwargs):
+        r = super(RoleManager, self).create(name=kwargs['name'],
+                                            variables=kwargs['variables'])
+        for p, i in zip(kwargs['policies'], itertools.count()):
+            RolePolicyAssign.objects.create(role=r, policy=p, index=i)
+        return r
+
+
+class Role(models.Model):
+    """A policy role has a name, a sequence of policies and a set of
+    variable assignments.  Changes to roles are audited.
+
+    """
+
+    name = models.CharField(max_length=200)
+    """Role name field."""
+
+    policies = models.ManyToManyField(Policy, through=RolePolicyAssign)
+
+    variables = models.TextField()
+    """JSON dump of dictionary giving variable assignments for role.
+
+    """
+
+    audit_log = AuditLog()
+
+    objects = RoleManager()
+
+    def __str__(self):
+        return self.name
+
+
 class PolicyInstance(models.Model):
     """An instance of a policy provides fixed values for any variables
     used in the policy's body.  An ordered sequence of policy
@@ -84,13 +136,22 @@ class PermissionSetManager(models.Manager):
 
     """
 
-    def by_policies(self, policies):
+    def by_policies_and_roles(self, policies_roles):
         # Canonicalise input policy list to include empty variable
         # assignments where necessary, and serialise variable
         # assignments to strings for policy instance lookup.
-        canonpols = [(p[0], json.dumps(p[1]))
-                     if isinstance(p, tuple) else (p, '{}')
-                     for p in policies]
+        canonpols = []
+        for pr in policies_roles:
+            vars = '{}'
+            if isinstance(pr, tuple):
+                vars = json.dumps(pr[1])
+                pr = pr[0]
+            if isinstance(pr, Role):
+                vars = json.dumps(pr.variables)
+                for rp in RolePolicyAssign.objects.filter(role=pr):
+                    canonpols.append((rp.policy, vars))
+            else:
+                canonpols.append((pr, vars))
 
         # Try to find an existing permission set using all the same
         # policies and variable assignments.  First step is to find a
@@ -194,14 +255,14 @@ def clear_user_policies(user):
             pset.delete()
 
 
-def assign_user_policies(user, *policies):
+def assign_user_policies(user, *policies_roles):
     """Assign a sequence of policies to a user (or the anonymous user is
     ``user`` is ``None``).  (Also installed as ``assign_policies``
     method on ``User`` model.
 
     """
     clear_user_policies(user)
-    pset = PermissionSet.objects.by_policies(policies)
+    pset = PermissionSet.objects.by_policies_and_roles(policies_roles)
     if user is None:
         pset.anonymous_user = True
     else:
