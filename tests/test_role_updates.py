@@ -1,5 +1,5 @@
 from tutelary.models import (
-    PermissionSet, Policy, Role, PolicyInstance, assign_user_policies
+    PermissionSet, Policy, Role, PolicyInstance
 )
 from tutelary.engine import Object
 from django.contrib.auth.models import User
