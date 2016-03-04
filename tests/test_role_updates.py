@@ -1,5 +1,5 @@
 from tutelary.models import (
-    PermissionSet, Policy, Role, PolicyInstance
+    PermissionSet, Policy, Role, PolicyInstance, RolePolicyAssign
 )
 from tutelary.engine import Object
 from django.contrib.auth.models import User
@@ -70,7 +70,6 @@ def test_role_policy_update(datadir, setup):  # noqa
     assert not u2.has_perm('parcel.view', obj3)
     assert not u3.has_perm('parcel.view', obj3)
 
-    assert str(org_pol) == 'org'
     org_pol.body = datadir.join('org-policy-2.json').read()
     org_pol.save()
 
@@ -83,6 +82,112 @@ def test_role_policy_update(datadir, setup):  # noqa
     assert not u1.has_perm('parcel.view', obj2)
     assert u2.has_perm('parcel.view', obj2)
     assert u3.has_perm('parcel.view', obj2)
+
+    assert not u1.has_perm('parcel.view', obj3)
+    assert not u2.has_perm('parcel.view', obj3)
+    assert not u3.has_perm('parcel.view', obj3)
+
+
+def debug(s):
+    print(s)
+    print()
+    for p in Policy.objects.all():
+        print(repr(p))
+    print()
+    for r in Role.objects.all():
+        print(repr(r))
+    print()
+    for rpa in RolePolicyAssign.objects.all():
+        print(repr(rpa))
+    print()
+    for pi in PolicyInstance.objects.all():
+        print(repr(pi))
+    print()
+    for pset in PermissionSet.objects.all():
+        print(repr(pset))
+    print()
+    for user in User.objects.all():
+        print((user, user.permissionset.first().pk))
+    print()
+
+
+def test_role_policies_update(datadir, setup):  # noqa
+    u1, u2, u3, def_pol, org_pol, prj_pol, org_role, prj_role = setup
+
+    obj1 = Object('parcel/Cadasta/TestProj/123')
+    obj2 = Object('parcel/Cadasta/Proj2/114')
+    obj3 = Object('parcel/SkunkWorks/SR-71/Area51')
+
+    check(nuser=3, npol=3, nrole=2, npolin=6, npset=3)
+
+    assert not u1.has_perm('parcel.edit', obj1)
+    assert u2.has_perm('parcel.edit', obj1)
+    assert u3.has_perm('parcel.edit', obj1)
+
+    assert not u1.has_perm('parcel.view', obj2)
+    assert u2.has_perm('parcel.view', obj2)
+    assert u3.has_perm('parcel.view', obj2)
+
+    assert not u1.has_perm('parcel.view', obj3)
+    assert not u2.has_perm('parcel.view', obj3)
+    assert not u3.has_perm('parcel.view', obj3)
+
+    debug('HERE 1')
+    replacement_role = RoleFactory.create(
+        name='testproj_proj', policies=[def_pol, org_pol],
+        variables=org_role.variables
+    )
+    u3.assign_policies(replacement_role)
+    prj_role.delete()
+    debug('HERE 2')
+
+    check(nuser=3, npol=3, nrole=2, npolin=3, npset=2)
+
+    assert not u1.has_perm('parcel.edit', obj1)
+    assert u2.has_perm('parcel.edit', obj1)
+    assert u3.has_perm('parcel.edit', obj1)
+
+    assert not u1.has_perm('parcel.view', obj2)
+    assert u2.has_perm('parcel.view', obj2)
+    assert u3.has_perm('parcel.view', obj2)
+
+    assert not u1.has_perm('parcel.view', obj3)
+    assert not u2.has_perm('parcel.view', obj3)
+    assert not u3.has_perm('parcel.view', obj3)
+
+
+def test_user_role_update(datadir, setup):  # noqa
+    u1, u2, u3, def_pol, org_pol, prj_pol, org_role, prj_role = setup
+
+    obj1 = Object('parcel/Cadasta/TestProj/123')
+    obj2 = Object('parcel/Cadasta/Proj2/114')
+    obj3 = Object('parcel/SkunkWorks/SR-71/Area51')
+
+    check(nuser=3, npol=3, nrole=2, npolin=6, npset=3)
+
+    assert not u1.has_perm('parcel.edit', obj1)
+    assert u2.has_perm('parcel.edit', obj1)
+    assert u3.has_perm('parcel.edit', obj1)
+
+    assert not u1.has_perm('parcel.view', obj2)
+    assert u2.has_perm('parcel.view', obj2)
+    assert u3.has_perm('parcel.view', obj2)
+
+    assert not u1.has_perm('parcel.view', obj3)
+    assert not u2.has_perm('parcel.view', obj3)
+    assert not u3.has_perm('parcel.view', obj3)
+
+    u3.assign_policies(def_pol)
+
+    check(nuser=3, npol=3, nrole=2, npolin=3, npset=2)
+
+    assert not u1.has_perm('parcel.edit', obj1)
+    assert u2.has_perm('parcel.edit', obj1)
+    assert not u3.has_perm('parcel.edit', obj1)
+
+    assert not u1.has_perm('parcel.view', obj2)
+    assert u2.has_perm('parcel.view', obj2)
+    assert not u3.has_perm('parcel.view', obj2)
 
     assert not u1.has_perm('parcel.view', obj3)
     assert not u2.has_perm('parcel.view', obj3)

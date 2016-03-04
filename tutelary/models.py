@@ -20,8 +20,16 @@ class Policy(models.Model):
     name = models.CharField(max_length=200)
     """Policy name field."""
 
-    body = models.TextField()
-    """Policy body, possibly including variables."""
+    _body = models.TextField()
+
+    @property
+    def body(self):
+        return self._body
+
+    @body.setter
+    def body(self, value):
+        self._body = value
+        self.refresh()
 
     audit_log = AuditLog()
 
@@ -31,6 +39,10 @@ class Policy(models.Model):
     def variable_names(self):
         pat = re.compile(r'\$(?:([_a-z][_a-z0-9]*)|{([_a-z][_a-z0-9]*)})')
         return set([m[0] for m in re.findall(pat, self.body)])
+
+    def refresh(self):
+        for psetid in _policy_psets([(self, {})]):
+            PermissionSet.objects.get(pk=psetid).refresh()
 
 
 class RolePolicyAssign(models.Model):
@@ -50,6 +62,9 @@ class RolePolicyAssign(models.Model):
 
     class Meta:
         ordering = ['index']
+
+    def __str__(self):
+        return "role={} policy={}".format(self.role.name, self.policy.name)
 
 
 class RoleManager(models.Manager):
@@ -91,6 +106,12 @@ class Role(models.Model):
     def variable_names(self):
         return set().union(*[p.variable_names() for p in self.policies.all()])
 
+    def delete(self, *args, **kwargs):
+        rpas = RolePolicyAssign.objects.filter(role=self)
+        pols = [rpa.policy for rpa in rpas]
+        rpas.delete()
+        super(Role, self).delete(*args, **kwargs)
+
 
 class PolicyInstance(models.Model):
     """An instance of a policy provides fixed values for any variables
@@ -99,7 +120,7 @@ class PolicyInstance(models.Model):
 
     """
 
-    policy = models.ForeignKey('Policy', on_delete=models.PROTECT)
+    policy = models.ForeignKey(Policy, on_delete=models.PROTECT)
 
     pset = models.ForeignKey('PermissionSet', on_delete=models.CASCADE)
 
@@ -109,6 +130,9 @@ class PolicyInstance(models.Model):
 
     """
 
+    role = models.ForeignKey(Role, null=True, on_delete=models.PROTECT)
+    """The role that this policy instance is associated with, if any."""
+
     variables = models.TextField()
     """JSON dump of dictionary giving variable assignments for policy
     instance.
@@ -117,6 +141,13 @@ class PolicyInstance(models.Model):
 
     class Meta:
         ordering = ['index']
+
+    def __str__(self):
+        return "policy={} pset={} index={} role={} variables={}".format(
+            self.policy.name, self.pset.pk, self.index,
+            self.role.name if self.role else "NULL",
+            self.variables
+        )
 
 
 def _policy_psets(policies):
@@ -143,16 +174,16 @@ def _policy_psets(policies):
 
 
 class PermissionSetManager(models.Manager):
-    """Permission sets have a custom manager that folds all instances
-    with the same set of policy instances (as determined by the hashes
-    of the policy instances) together in the database.
+    """Permission sets have a custom manager that folds all instances with
+    the same set of policy instances together in the database.
 
     """
 
     def by_policies_and_roles(self, policies_roles):
         # Canonicalise input policy list to include empty variable
-        # assignments where necessary, and serialise variable
-        # assignments to strings for policy instance lookup.
+        # assignments where necessary, serialise variable assignments
+        # to strings for policy instance lookup, and expand roles to
+        # their corresponding lists of policies.
         canonpols = []
         for pr in policies_roles:
             vars = '{}'
@@ -162,9 +193,9 @@ class PermissionSetManager(models.Manager):
             if isinstance(pr, Role):
                 vars = json.dumps(pr.variables)
                 for rp in RolePolicyAssign.objects.filter(role=pr):
-                    canonpols.append((rp.policy, vars))
+                    canonpols.append((rp.policy, vars, pr))
             else:
-                canonpols.append((pr, vars))
+                canonpols.append((pr, vars, None))
 
         # Try to find an existing permission set using all the same
         # policies and variable assignments.  First step is to find a
@@ -199,7 +230,7 @@ class PermissionSetManager(models.Manager):
 
         # Set up policy instance references.
         for p, i in zip(canonpols, itertools.count()):
-            PolicyInstance.objects.create(pset=obj, policy=p[0],
+            PolicyInstance.objects.create(pset=obj, policy=p[0], role=p[2],
                                           index=i, variables=p[1])
 
         # The construction of the permission tree for this permission
@@ -232,13 +263,24 @@ class PermissionSet(models.Model):
     objects = PermissionSetManager()
 
     def tree(self):
-        if not hasattr(self, 'ptree'):
-            self.ptree = engine.PermissionTree(
+        if not hasattr(PermissionSet, 'ptree_cache'):
+            PermissionSet.ptree_cache = {}
+        print('tree:', self.pk, self.pk in PermissionSet.ptree_cache)
+        if self.pk not in PermissionSet.ptree_cache:
+            PermissionSet.ptree_cache[self.pk] = engine.PermissionTree(
                 policies=[engine.PolicyBody(json=pi.policy.body,
                                             variables=json.loads(pi.variables))
                           for pi in PolicyInstance.objects.filter(pset=self)]
             )
-        return self.ptree
+        return PermissionSet.ptree_cache[self.pk]
+
+    def refresh(self):
+        if hasattr(PermissionSet, 'ptree_cache'):
+            if self.pk in PermissionSet.ptree_cache:
+                del PermissionSet.ptree_cache[self.pk]
+
+    def __str__(self):
+        return str(self.pk)
 
 
 @receiver(pre_delete, sender=settings.AUTH_USER_MODEL)
@@ -262,6 +304,7 @@ def clear_user_policies(user):
     else:
         pset = user.permissionset.first()
     if pset:
+        pset.refresh()
         if user is not None:
             pset.users.remove(user)
         if pset.users.count() == 0:
@@ -276,6 +319,7 @@ def assign_user_policies(user, *policies_roles):
     """
     clear_user_policies(user)
     pset = PermissionSet.objects.by_policies_and_roles(policies_roles)
+    pset.refresh()
     if user is None:
         pset.anonymous_user = True
     else:
