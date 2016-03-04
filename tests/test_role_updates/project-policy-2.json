@@ -1,0 +1,8 @@
+{
+  "version": "2015-12-10",
+  "clause": [
+    { "effect": "deny",
+      "action": ["parcel.view"],
+      "object": ["parcel/$organisation/$project/*"] }
+  ]
+}

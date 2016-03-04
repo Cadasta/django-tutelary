@@ -1,7 +1,7 @@
 import os.path
 import factory
 
-from tutelary.models import Policy
+from tutelary.models import Policy, Role
 from django.contrib.auth.models import User
 
 
@@ -23,3 +23,8 @@ class PolicyFactory(factory.django.DjangoModelFactory):
         body_file = os.path.join(cls.directory, kwargs.pop('file', None))
         kwargs['body'] = open(body_file).read()
         return kwargs
+
+
+class RoleFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Role

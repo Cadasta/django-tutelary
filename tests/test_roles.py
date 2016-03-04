@@ -1,4 +1,4 @@
-from tutelary.models import assign_user_policies, Role
+from tutelary.models import (assign_user_policies, Role)
 from tutelary.engine import Object, Action
 from tutelary.exceptions import RoleVariableException
 import pytest
