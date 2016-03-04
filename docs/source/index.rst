@@ -18,9 +18,6 @@ Amazon's `Identity and Access Management`_ (IAM) system.
       of places where there are opportunities for caching both
       database query results and permissions query results, but I've
       not yet taken advantage of them.
-    - Not enough tests!
-    - So far, it's only been tested with "normal" Django, but not with
-      DRF.  It *should* work fine, but there might be some surprises.
 
 
 Documentation

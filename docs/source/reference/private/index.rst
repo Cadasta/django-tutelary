@@ -6,10 +6,6 @@ Internal django-tutelary models
 
 .. autoclass:: tutelary.models.PolicyInstance
 
-.. autoclass:: tutelary.models.PolicyInstanceManager
-
-.. autoclass:: tutelary.models.PolicyInstanceAssign
-
 .. autoclass:: tutelary.models.PermissionSet
 
 .. autoclass:: tutelary.models.PermissionSetManager

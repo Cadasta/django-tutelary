@@ -17,10 +17,17 @@ Actions and objects
 Policies
 --------
 
-.. autoclass:: tutelary.engine.Policy
+.. autoclass:: tutelary.engine.PolicyBody
    :members:
 
 .. autoclass:: tutelary.engine.Clause
+   :members:
+
+
+Permission trees
+----------------
+
+.. autoclass:: tutelary.engine.PermissionTree
    :members:
 
 

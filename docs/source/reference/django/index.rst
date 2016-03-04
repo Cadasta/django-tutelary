@@ -8,14 +8,11 @@ Policies
 --------
 
 .. autoclass:: tutelary.models.Policy
-
-   .. py:attribute:: name
-      :annotation: = Policy name field.
-
-   .. py:attribute:: body
-      :annotation: = Policy body field (JSON).
+   :members:
 
 .. autofunction:: tutelary.models.assign_user_policies
+
+.. autofunction:: tutelary.models.clear_user_policies
 
 
 Permissioning models
@@ -51,3 +48,5 @@ Exceptions
 .. autoexception:: tutelary.exceptions.VariableSubstitutionException
 
 .. autoexception:: tutelary.exceptions.DecoratorException
+
+.. autoexception:: tutelary.exceptions.PermissionObjectException

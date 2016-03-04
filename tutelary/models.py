@@ -16,6 +16,7 @@ class Policy(models.Model):
     """
 
     name = models.CharField(max_length=200)
+    """Policy name filed."""
 
     body = models.TextField()
     """Policy body, possibly including variables."""
