@@ -107,9 +107,7 @@ class Role(models.Model):
         return set().union(*[p.variable_names() for p in self.policies.all()])
 
     def delete(self, *args, **kwargs):
-        rpas = RolePolicyAssign.objects.filter(role=self)
-        pols = [rpa.policy for rpa in rpas]
-        rpas.delete()
+        RolePolicyAssign.objects.filter(role=self).delete()
         super(Role, self).delete(*args, **kwargs)
 
 
