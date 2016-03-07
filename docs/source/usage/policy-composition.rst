@@ -146,6 +146,29 @@ django-audit-log_ package.
 
 .. _django-audit-log: https://pypi.python.org/pypi/django-audit-log/0.7.0
 
+The ``Role`` model
+------------------
+
+As well as treating policies individually, it's possible to bundle a
+sequence of policies sharing variable assigments into a *role*.  These
+are represented by instances of the Django ``Role`` model in
+``tutelary.models``.  If we have policies assigned to variables
+``default_pol``, ``org_pol`` and ``project_pol``, we can create and
+save a role like this::
+
+  project_role = Role.objects.create(
+      name='project_role',
+      policies=[default_pol, org_pol, project_pol],
+      variables={'organisation': 'Cadasta', 'project': 'TestProj'}
+  )
+
+If this role is subsequently assigned to a user, it's precisely
+equivalent to assigning the individual policies, all with the same
+variable assignments.
+
+As for policy objects, changes to ``Role`` objects are audited using
+the django-audit-log_ package.
+
 Assigning policies to users
 ---------------------------
 
@@ -168,9 +191,9 @@ of permissions to unauthenticated users (to view all public data on
 the site, for example).
 
 The sequence of policies passed to ``User.assign_policies`` (and
-``assign_user_policies``) contains either individual ``Policy``
-objects or 2-tuples of a ``Policy`` object and a dictionary of policy
-variable assignments.  A typical use looks like this::
+``assign_user_policies``) contains either individual ``Policy`` or
+``Role`` objects or 2-tuples of a ``Policy`` object and a dictionary
+of policy variable assignments.  A typical use looks like this::
 
   default_policy = Policy.objects.get(name='default')
   editor_policy = Policy.objects.get(name='editor')

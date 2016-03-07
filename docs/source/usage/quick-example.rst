@@ -66,7 +66,7 @@ Policies
 
 Policies can be read from JSON files or stored in a database.  Here's
 a simple example of reading a couple of policy documents from files,
-and assigning them to a user::
+creating a role from them and assigning the role to a user::
 
   from django.contrib.auth.models import User
   from tutelary.models import Policy
@@ -74,12 +74,16 @@ and assigning them to a user::
   default_p = Policy(name='default',
                      body=open('default-policy.json').read())
   default_p.save()
-  sysadmin_p = Policy(name='sys-admin',
+  sysadmin_p = Policy(name='sys-admin-policy',
                       body=open('sys-admin-policy.json').read())
   sysadmin_p.save()
 
+  sysadmin_role = Roles.objects.create(
+      name='sys-admin', policies=[default_p, sysadmin_p]
+  )
+
   sysadmin = User.objects.get(username='admin')
-  sysadmin.assign_policies(default_p, sysadmin_p)
+  sysadmin.assign_policies(sysadmin_role)
 
 After the call to ``User.assign_policies``, any subsequent permissions
 queries against the ``admin`` user will be answered according to the

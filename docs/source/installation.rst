@@ -13,8 +13,8 @@ Requirements
 The django-tutelary package works with the following Python and Django
 versions:
 
-- Python (3.3, 3.4, 3.5)
-- Django (1.7, 1.8, 1.9)
+- Python (3.4, 3.5)
+- Django (1.9)
 
 The latest stable version
 =========================

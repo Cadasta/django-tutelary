@@ -10,6 +10,9 @@ Policies
 .. autoclass:: tutelary.models.Policy
    :members:
 
+.. autoclass:: tutelary.models.Role
+   :members:
+
 .. autofunction:: tutelary.models.assign_user_policies
 
 .. autofunction:: tutelary.models.clear_user_policies
@@ -46,6 +49,8 @@ Exceptions
 .. autoexception:: tutelary.exceptions.PolicyBodyException
 
 .. autoexception:: tutelary.exceptions.VariableSubstitutionException
+
+.. autoexception:: tutelary.exceptions.RoleVariableException
 
 .. autoexception:: tutelary.exceptions.DecoratorException
 

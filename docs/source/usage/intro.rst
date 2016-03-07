@@ -34,24 +34,31 @@ Policies
   A *policy* is a list of clauses describing what actions may be
   performed on what objects.  A single clause in a policy may *allow*
   or *deny* a set of actions on a set of objects.  Concretely,
-  policies are stored using JSON syntax.
+  policies are stored using JSON syntax with optional variable
+  substitutions (allowing a sort of policy templating).
+
+Roles
+  A *role* is a sequence of policies and associated variable
+  assignments.  It represents a concrete instance of the sequence of
+  policies for a selected class of entities, and simplifies some of
+  the most common use cases for policy-based permissions.
 
 Permission set
   A *permission set* represents the overall effect of a policy or set
-  of policies, which results from composing the clauses of all the
-  policies in order, with later clauses overriding earlier ones.  To
-  determine whether a set of policies allows an action for an object,
-  effectively the latest clause in the sequence of policies matching
-  the action/object combination is found and says whether the action
-  is *allowed* or *denied*.  In fact, the combination of clauses is
-  represented by a distinct permission set data structure that
-  supports fast queries for action/object combinations.
+  of policies (and/or roles), which results from composing the clauses
+  of all the policies in order, with later clauses overriding earlier
+  ones.  To determine whether a set of policies allows an action for
+  an object, effectively the latest clause in the sequence of policies
+  matching the action/object combination is found and says whether the
+  action is *allowed* or *denied*.  In fact, the combination of
+  clauses is represented by a distinct permission set data structure
+  that supports fast queries for action/object combinations.
 
 The fundamental way of assigning permissions to a user in
-django-tutelary is to assign a sequence of policies to the user.  The
-clauses in these policies are combined in order to form an overall
-permission set for the user, and it is this permission set that is
-used to answer permission queries for the user.
+django-tutelary is to assign a sequence of policies and/or roles to
+the user.  The clauses in these policies/roles are combined in order
+to form an overall permission set for the user, and it is this
+permission set that is used to answer permission queries for the user.
 
 Much of the public interface to django-tutelary is concerned with
 associating django-tutelary's *actions* and *objects* with Django

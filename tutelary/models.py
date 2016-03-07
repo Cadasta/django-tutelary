@@ -68,6 +68,10 @@ class RolePolicyAssign(models.Model):
 
 
 class RoleManager(models.Manager):
+    """Custom manager for roles: ensures that role variable assignments
+    cover all the variables used in the role's policies.
+
+    """
     def create(self, *args, **kwargs):
         pols = kwargs.get('policies', [])
         vs = kwargs.get('variables', {})
