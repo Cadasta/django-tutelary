@@ -146,3 +146,12 @@ def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
     finally:
         if added:
             del cls.TutelaryMeta
+
+
+def action_error_message(actions, req_actions):
+    for req in req_actions:
+        for a in actions:
+            if isinstance(a, tuple) and a[0] == req:
+                if 'error_message' in a[1]:
+                    return a[1]['error_message']
+    return ()

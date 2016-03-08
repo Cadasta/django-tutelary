@@ -1,6 +1,7 @@
 import django.contrib.auth.mixins as base
 
 from .models import check_perms
+from .decorators import action_error_message
 
 
 class PermissionRequiredMixin(base.PermissionRequiredMixin):
@@ -24,3 +25,11 @@ class PermissionRequiredMixin(base.PermissionRequiredMixin):
         return check_perms(self.request.user,
                            self.get_permission_required(),
                            objs, get_allowed, self.request.method)
+
+    def get_permission_denied_message(self):
+        if self.permission_denied_message:
+            return self.permission_denied_message
+        if hasattr(self, 'model') and hasattr(self.model, 'TutelaryMeta'):
+            return action_error_message(self.model.TutelaryMeta.actions,
+                                        self.get_permission_required())
+        return ()

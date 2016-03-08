@@ -41,7 +41,8 @@ class CheckModel1(models.Model):
         path_fields = ('name',)
         actions = [('check.list', {'permissions_object': None}),
                    ('check.create', {'permissions_object': None}),
-                   'check.detail',
+                   ('check.detail',
+                    {'error_message': 'detail view not allowed'}),
                    ('check.delete', {'get_allowed': True})]
 
     def __str__(self):
@@ -74,6 +75,7 @@ class DummyRequest:
 
 class CheckViewBase(PermissionRequiredMixin, generic.DetailView):
     permission_required = 'check.detail'
+    raise_exception = True
 
     def __init__(self, obj, user):
         self.model = obj
@@ -117,6 +119,15 @@ def test_view_exceptions_no_policies(datadir, setup):  # noqa
     other_user = UserFactory.create(username='other')
     ok_obj = CheckModel1(name='not-secret')
     assert not CheckView1(ok_obj, other_user).has_permission()
+
+
+def test_error_messages(datadir, setup):  # noqa
+    other_user = UserFactory.create(username='other')
+    ok_obj = CheckModel1(name='not-secret')
+    view = CheckView1(ok_obj, other_user)
+    with pytest.raises(PermissionDenied) as exc_info:
+        view.dispatch(view.request)
+    assert exc_info.value.args == ('detail view not allowed',)
 
 
 class Check2ViewBase(PermissionRequiredMixin, generic.ListView):
