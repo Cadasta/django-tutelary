@@ -42,34 +42,38 @@ model classes to store model metadata, django-tutelary uses a
   ``pk`` can be used to refer to the model's primary key.)
 
 ``actions``
+
   A sequence of *action-label* or (*action-label*, *action-options*)
   pairs, where *action-label* is a string giving the name of an action
   (e.g. ``parcel.list``, ``board.solder``, ``page.create``) and
   *action-options* is a dictionary of action options.  Possible
-  options are: ``description``, ``get_allowed`` and
-  ``permissions_object``.  The ``description`` option gives a
-  human-readable free-text description of the action.  The
-  ``get_allowed`` option is a binary flag marking whether permissions
-  should not be applied for HTTP GETs -- this may be useful for cases
-  where it's desirable for unpermissioned users to be able to access
-  the forms to perform particular actions, even if the actions then
-  subsequently fail when form data is POSTed.  (For example, you might
-  want to allow any user to access the form for creation of new
-  entities, and for permissioning only to be applied at the point
-  where the user submits the form and the object is to be created.)
-  The ``permissions_object`` option is either ``None`` (indicating the
-  the action is "free-floating" and not associated with any particular
-  object) or is a string giving the name of a foreign key field in the
-  model being configured.  The result of setting the
-  ``permissions_object`` option is that permissions for the relevant
-  action are *not* checked on the object of the class the ``actions``
-  list is attached to, but to the alternative object referred to by
-  the appropriate foreign key field.  This capability is intended for
-  use with "collective" actions.  For example, if all "``board``"
-  entities belong to a "``project``" entity, a "``board.create``"
-  action should really be referred to the ``project``, not to any
-  individual board -- is the user allowed to create new boards for
-  this project?
+  options are: ``description``, ``get_allowed``,
+  ``permissions_object`` and ``error_message``.  The ``description``
+  option gives a human-readable free-text description of the action.
+  The ``get_allowed`` option is a binary flag marking whether
+  permissions should not be applied for HTTP GETs -- this may be
+  useful for cases where it's desirable for unpermissioned users to be
+  able to access the forms to perform particular actions, even if the
+  actions then subsequently fail when form data is POSTed.  (For
+  example, you might want to allow any user to access the form for
+  creation of new entities, and for permissioning only to be applied
+  at the point where the user submits the form and the object is to be
+  created.)  The ``permissions_object`` option is either ``None``
+  (indicating the the action is "free-floating" and not associated
+  with any particular object) or is a string giving the name of a
+  foreign key field in the model being configured.  The result of
+  setting the ``permissions_object`` option is that permissions for
+  the relevant action are *not* checked on the object of the class the
+  ``actions`` list is attached to, but to the alternative object
+  referred to by the appropriate foreign key field.  This capability
+  is intended for use with "collective" actions.  For example, if all
+  "``board``" entities belong to a "``project``" entity, a
+  "``board.create``" action should really be referred to the
+  ``project``, not to any individual board -- is the user allowed to
+  create new boards for this project?  The ``error_message`` option
+  can be used to provide a custom error message to be passed in a
+  ``PermissionDenied`` exception if access to a view fails because of
+  permissioning on an action.
 
 Here's an example of a model definition set up for use with
 django-tutelary::
@@ -91,7 +95,8 @@ django-tutelary::
               ('party.create', {'description': "Create parties",
                                 'permissions_object': 'project',
                                 'get_allowed': True}),
-              ('party.detail', {'description': "View details of a party"}),
+              ('party.detail', {'description': "View details of a party",
+                                'error_message': "Detail view is not allowed"}),
               ('party.edit',   {'description': "Update existing parties",
                                 'get_allowed': True}),
               ('party.delete', {'description': "Delete parties",
