@@ -267,7 +267,6 @@ class PermissionSet(models.Model):
     def tree(self):
         if not hasattr(PermissionSet, 'ptree_cache'):
             PermissionSet.ptree_cache = {}
-        print('tree:', self.pk, self.pk in PermissionSet.ptree_cache)
         if self.pk not in PermissionSet.ptree_cache:
             PermissionSet.ptree_cache[self.pk] = engine.PermissionTree(
                 policies=[engine.PolicyBody(json=pi.policy.body,
