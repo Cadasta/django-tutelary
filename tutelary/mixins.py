@@ -15,9 +15,14 @@ class PermissionRequiredMixin(base.PermissionRequiredMixin):
         objs = [None]
         if hasattr(self, 'get_object'):
             try:
+                # SingleObjectMixin with an existing object.
                 objs = [self.get_object()]
             except:
-                pass
+                try:
+                    # FormMixin for a new object.
+                    objs = [self.get_form().save(commit=False)]
+                except:
+                    pass
         if objs == [None] and hasattr(self, 'get_queryset'):
             objs = self.get_queryset()
         return check_perms(self.request.user,

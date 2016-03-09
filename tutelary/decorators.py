@@ -140,9 +140,10 @@ def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
         else:
             cls.get_permissions_object = make_get_perms_object(perms_objs)
         return cls
-    finally:
+    except:
         if added:
             del cls.TutelaryMeta
+        raise
 
 
 def action_error_message(actions, req_actions):

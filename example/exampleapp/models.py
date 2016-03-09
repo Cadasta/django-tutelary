@@ -62,13 +62,10 @@ class Party(models.Model):
             ('party.list',   {'description': "List existing parties",
                               'permissions_object': 'project'}),
             ('party.create', {'description': "Create parties",
-                              'permissions_object': 'project',
-                              'get_allowed': True}),
+                              'permissions_object': 'project'}),
             ('party.detail', {'description': "View details of a party"}),
-            ('party.edit',   {'description': "Update existing parties",
-                              'get_allowed': True}),
-            ('party.delete', {'description': "Delete parties",
-                              'get_allowed': True})
+            ('party.edit',   {'description': "Update existing parties"}),
+            ('party.delete', {'description': "Delete parties"})
         ]
 
     def get_absolute_url(self):
@@ -90,13 +87,10 @@ class Parcel(models.Model):
             ('parcel.list',   {'description': "List existing parcels",
                                'permissions_object': 'project'}),
             ('parcel.create', {'description': "Create parcels",
-                               'permissions_object': 'project',
-                               'get_allowed': True}),
+                               'permissions_object': 'project'}),
             ('parcel.detail', {'description': "View details of a parcel"}),
-            ('parcel.edit',   {'description': "Update existing parcels",
-                               'get_allowed': True}),
-            ('parcel.delete', {'description': "Delete parcels",
-                               'get_allowed': True})
+            ('parcel.edit',   {'description': "Update existing parcels"}),
+            ('parcel.delete', {'description': "Delete parcels"})
         ]
 
     def get_absolute_url(self):

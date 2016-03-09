@@ -330,7 +330,7 @@ class OrganisationCreate(CreateView):
     model = Organisation
     fields = ['name']
     success_url = reverse_lazy('organisation-list')
-    permission_required = 'organisation.create'
+    permission_required = {'GET': None, 'POST': 'organisation.create'}
 
 
 class OrganisationDelete(DeleteView):
@@ -365,7 +365,7 @@ class ProjectCreate(CreateView):
     model = Project
     form_class = ProjectForm
     success_url = reverse_lazy('project-list')
-    permission_required = 'project.create'
+    permission_required = {'GET': None, 'POST': 'project.create'}
 
 
 class ProjectDelete(DeleteView):
@@ -404,20 +404,20 @@ class PartyForm(ModelForm):
 class PartyCreate(CreateView):
     model = Party
     form_class = PartyForm
-    permission_required = 'party.create'
+    permission_required = {'GET': None, 'POST': 'party.create'}
 
 
 class PartyUpdate(UpdateView):
     model = Party
     form_class = PartyForm
     template_name_suffix = '_update_form'
-    permission_required = 'party.edit'
+    permission_required = {'GET': None, 'POST': 'party.edit'}
 
 
 class PartyDelete(DeleteView):
     model = Party
     success_url = reverse_lazy('party-list')
-    permission_required = 'party.delete'
+    permission_required = {'GET': None, 'POST': 'party.delete'}
 
 
 # ----------------------------------------------------------------------
@@ -450,20 +450,20 @@ class ParcelForm(ModelForm):
 class ParcelCreate(CreateView):
     model = Parcel
     form_class = ParcelForm
-    permission_required = 'parcel.create'
+    permission_required = {'GET': None, 'POST': 'parcel.create'}
 
 
 class ParcelUpdate(UpdateView):
     model = Parcel
     form_class = ParcelForm
     template_name_suffix = '_update_form'
-    permission_required = 'parcel.edit'
+    permission_required = {'GET': None, 'POST': 'parcel.edit'}
 
 
 class ParcelDelete(DeleteView):
     model = Parcel
     success_url = reverse_lazy('parcel-list')
-    permission_required = 'parcel.delete'
+    permission_required = {'GET': None, 'POST': 'parcel.delete'}
 
 
 # ----------------------------------------------------------------------

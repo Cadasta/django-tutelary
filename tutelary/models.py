@@ -329,11 +329,12 @@ def assign_user_policies(user, *policies_roles):
 
 
 def check_perms(user, actions, objs, method=None):
-    for a in actions:
-        for o in objs:
-            test_obj = None
-            if o is not None:
-                test_obj = o.get_permissions_object(a)
-            if not user.has_perm(a, test_obj):
-                return False
+    if actions is not None:
+        for a in actions:
+            for o in objs:
+                test_obj = None
+                if o is not None:
+                    test_obj = o.get_permissions_object(a)
+                if not user.has_perm(a, test_obj):
+                    return False
     return True
