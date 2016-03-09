@@ -47,33 +47,25 @@ model classes to store model metadata, django-tutelary uses a
   pairs, where *action-label* is a string giving the name of an action
   (e.g. ``parcel.list``, ``board.solder``, ``page.create``) and
   *action-options* is a dictionary of action options.  Possible
-  options are: ``description``, ``get_allowed``,
-  ``permissions_object`` and ``error_message``.  The ``description``
-  option gives a human-readable free-text description of the action.
-  The ``get_allowed`` option is a binary flag marking whether
-  permissions should not be applied for HTTP GETs -- this may be
-  useful for cases where it's desirable for unpermissioned users to be
-  able to access the forms to perform particular actions, even if the
-  actions then subsequently fail when form data is POSTed.  (For
-  example, you might want to allow any user to access the form for
-  creation of new entities, and for permissioning only to be applied
-  at the point where the user submits the form and the object is to be
-  created.)  The ``permissions_object`` option is either ``None``
-  (indicating the the action is "free-floating" and not associated
-  with any particular object) or is a string giving the name of a
-  foreign key field in the model being configured.  The result of
-  setting the ``permissions_object`` option is that permissions for
-  the relevant action are *not* checked on the object of the class the
-  ``actions`` list is attached to, but to the alternative object
-  referred to by the appropriate foreign key field.  This capability
-  is intended for use with "collective" actions.  For example, if all
-  "``board``" entities belong to a "``project``" entity, a
-  "``board.create``" action should really be referred to the
-  ``project``, not to any individual board -- is the user allowed to
-  create new boards for this project?  The ``error_message`` option
-  can be used to provide a custom error message to be passed in a
-  ``PermissionDenied`` exception if access to a view fails because of
-  permissioning on an action.
+  options are: ``description``, ``permissions_object`` and
+  ``error_message``.  The ``description`` option gives a
+  human-readable free-text description of the action.  The
+  ``permissions_object`` option is either ``None`` (indicating the the
+  action is "free-floating" and not associated with any particular
+  object) or is a string giving the name of a foreign key field in the
+  model being configured.  The result of setting the
+  ``permissions_object`` option is that permissions for the relevant
+  action are *not* checked on the object of the class the ``actions``
+  list is attached to, but to the alternative object referred to by
+  the appropriate foreign key field.  This capability is intended for
+  use with "collective" actions.  For example, if all "``board``"
+  entities belong to a "``project``" entity, a "``board.create``"
+  action should really be referred to the ``project``, not to any
+  individual board -- is the user allowed to create new boards for
+  this project?  The ``error_message`` option can be used to provide a
+  custom error message to be passed in a ``PermissionDenied``
+  exception if access to a view fails because of permissioning on an
+  action.
 
 Here's an example of a model definition set up for use with
 django-tutelary::
@@ -93,14 +85,11 @@ django-tutelary::
               ('party.list',   {'description': "List existing parties",
                                 'permissions_object': 'project'}),
               ('party.create', {'description': "Create parties",
-                                'permissions_object': 'project',
-                                'get_allowed': True}),
+                                'permissions_object': 'project'),
               ('party.detail', {'description': "View details of a party",
                                 'error_message': "Detail view is not allowed"}),
-              ('party.edit',   {'description': "Update existing parties",
-                                'get_allowed': True}),
-              ('party.delete', {'description': "Delete parties",
-                                'get_allowed': True})
+              ('party.edit',   {'description': "Update existing parties"}),
+              ('party.delete', {'description': "Delete parties"})
           ]
 
 In this case, as well as the normal Django ``Meta`` class member, we
@@ -111,21 +100,10 @@ will refer to objects of class ``Party`` as ``party/.../<name>``,
 where the ``...`` will be filled based on the ``path_fields`` of class
 ``Project`` (since ``project`` is a foreign key field here).
 
-The ``actions`` list here defines five actions, three of which
-(``party.create``, ``party.edit`` and ``party.delete``) have
-``get_allowed`` true, saying that a HTTP GET on any of the views
-permissioned using these actions should succeed.  The result of this
-is that users can access the *forms* for creating, editing and
-deleting parties, but POSTing those forms will not be allowed.  (This
-*is* a little confusing, but it's intended to provide the greatest
-possible fiexibility for users of django-tutelary: if you want to have
-a combined model list and create view, it makes sense for users to be
-able to GET the view, but for only permissioned users to be able to
-POST.)
-
-Two of the actions defined here (``party.list`` and ``party.create``)
-are "collective" actions, meaning that they are permissioned on the
-``project`` field of the ``Party`` model.
+The ``actions`` list here defines five actions, two of which
+(``party.list`` and ``party.create``) are "collective" actions,
+meaning that they are permissioned on the ``project`` field of the
+``Party`` model.
 
 The ``permissioned_model`` function
 -----------------------------------

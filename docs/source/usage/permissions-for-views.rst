@@ -82,7 +82,14 @@ Method dictionary
   dictionary whose keys are HTTP method names (GET, POST, PUT, etc.).
   The values in the dictionary can be any of the preceding three
   ``permission_required`` options, or ``None``, which indicates that
-  requests for the given HTTP method are always permitted.
+  requests for the given HTTP method are always permitted.  This
+  facility be useful for cases where it's desirable for unpermissioned
+  users to be able to access the forms to perform particular actions,
+  even if the actions then subsequently fail when form data is POSTed.
+  For example, you might want to allow any user to access the form for
+  creation of new entities, and for permissioning only to be applied
+  at the point where the user submits the form and the object is to be
+  created.  An example is presented below.
 
 Some examples should make this clearer.  Suppose that we have a
 ``ListCreateView`` which provides list of ``Board`` entities via GET
