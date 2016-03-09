@@ -1,10 +1,8 @@
 from tutelary.engine import Action
 from tutelary.decorators import permissioned_model
 from tutelary.mixins import PermissionRequiredMixin
-from django.core.exceptions import PermissionDenied
 from django.db import models
 import django.views.generic as generic
-import django.views.generic.edit as edit
 import pytest
 from .factories import UserFactory, PolicyFactory
 from .datadir import datadir  # noqa
