@@ -108,7 +108,7 @@ def test_permission_required_sequence(datadir, setup):  # noqa
 
 def test_permission_required_callable(datadir, setup):  # noqa
     class CheckViewBase(PermissionRequiredMixin, generic.DetailView):
-        def check_actions(self, request):
+        def check_actions(self, view, request):
             if request.method == 'GET':
                 return ('check.list', 'check.detail')
             elif request.method == 'POST':

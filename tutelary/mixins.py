@@ -1,4 +1,5 @@
 import django.contrib.auth.mixins as base
+from django.core.exceptions import ImproperlyConfigured
 
 from .models import check_perms
 from .decorators import action_error_message
@@ -25,6 +26,28 @@ class PermissionRequiredMixin(base.PermissionRequiredMixin):
         return check_perms(self.request.user,
                            self.get_permission_required(),
                            objs, get_allowed, self.request.method)
+
+    def get_permission_required(self):
+        if self.permission_required is None:
+            raise ImproperlyConfigured(
+                '{0} is missing the permission_required attribute. Define '
+                '{0}.permission_required, or override '
+                '{0}.get_permission_required().'.format(
+                    self.__class__.__name__)
+            )
+
+        if isinstance(self.permission_required, dict):
+            perms = self.permission_required[self.request.method]
+        else:
+            perms = self.permission_required
+
+        if callable(perms):
+            perms = perms(self, self.request)
+
+        if isinstance(perms, str):
+            perms = (perms, )
+
+        return perms
 
     def get_permission_denied_message(self):
         if self.permission_denied_message:

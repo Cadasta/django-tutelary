@@ -72,7 +72,10 @@ Callable
   the callable returns a single string or sequence of strings, these
   are interpreted as action names, and the permissions for the view
   are checked as if these action names had been provided directly as
-  the value of ``permission_required``.
+  the value of ``permission_required``.  Note that if the callable is
+  defined as a method, its signature should be ``method_name(self,
+  view, request)``, even if it's already defined as a member of a view
+  class.
 
 Method dictionary
   The final option for ``permission_required`` is to provide a
