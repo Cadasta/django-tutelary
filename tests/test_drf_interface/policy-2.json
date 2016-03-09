@@ -1,0 +1,9 @@
+{
+  "version": "2015-12-10",
+  "clause": [
+    { "effect": "deny", "action": ["check.detail"], "object": ["check/secret"] },
+    { "effect": "deny", "action": ["check2.list"], "object": ["check/secret"] },
+    { "effect": "deny", "action": ["check2.detail"], "object": ["check2/secret"] },
+    { "effect": "deny", "action": ["check5.detail"], "object": ["check5/*"] }
+  ]
+}

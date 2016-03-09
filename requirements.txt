@@ -18,3 +18,6 @@ wheel==0.26.0
 
 # Sphinx for documentation builds
 Sphinx==1.3.3
+
+# Only used for testing.
+djangorestframework==3.3.2

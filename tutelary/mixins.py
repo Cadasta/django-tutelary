@@ -1,36 +1,59 @@
-import django.contrib.auth.mixins as base
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
+from collections.abc import Sequence
 
 from .models import check_perms
 from .decorators import action_error_message
 
 
-class PermissionRequiredMixin(base.PermissionRequiredMixin):
+class PermissionRequiredMixin:
     """Permission checking mixin -- works just like the
     ``PermissionRequiredMixin`` in the default Django authentication
     system.
 
     """
     def has_permission(self):
+        """Permission checking for "normal" Django."""
         objs = [None]
         if hasattr(self, 'get_object'):
             try:
-                # SingleObjectMixin with an existing object.
                 objs = [self.get_object()]
             except:
                 try:
-                    # FormMixin for a new object.
                     objs = [self.get_form().save(commit=False)]
                 except:
                     pass
-        if objs == [None] and hasattr(self, 'get_queryset'):
+        if objs == [None]:
             objs = self.get_queryset()
         return check_perms(self.request.user,
                            self.get_permission_required(),
                            objs, self.request.method)
 
+    def check_permissions(self, request):
+        """Permission checking for DRF."""
+        objs = [None]
+        if hasattr(self, 'get_object'):
+            try:
+                objs = [self.get_object()]
+            except:
+                pass
+        if objs == [None]:
+            objs = self.get_queryset()
+
+        has_perm = check_perms(self.request.user,
+                               self.get_permission_required(),
+                               objs, self.request.method)
+
+        if not has_perm:
+            msg = self.get_permission_denied_message(
+                default="Permission denied."
+            )
+            if isinstance(msg, Sequence):
+                msg = msg[0]
+            self.permission_denied(request, message=msg)
+
     def get_permission_required(self):
-        if self.permission_required is None:
+        if (not hasattr(self, 'permission_required') or
+           self.permission_required is None):
             raise ImproperlyConfigured(
                 '{0} is missing the permission_required attribute. Define '
                 '{0}.permission_required, or override '
@@ -51,14 +74,30 @@ class PermissionRequiredMixin(base.PermissionRequiredMixin):
 
         return perms
 
-    def get_permission_denied_message(self):
-        if self.permission_denied_message:
+    def get_permission_denied_message(self, default=None):
+        if hasattr(self, 'permission_denied_message'):
             return (self.permission_denied_message,)
         if hasattr(self, 'model') and hasattr(self.model, 'TutelaryMeta'):
             return action_error_message(self.model.TutelaryMeta.actions,
-                                        self.get_permission_required())
+                                        self.get_permission_required(),
+                                        default)
+
+    def check_drf(self):
+        if not hasattr(self, 'drf'):
+            self.drf = ([c.__name__ for c in self.__class__.__mro__][-3:] ==
+                        ['APIView', 'View', 'object'])
+        return self.drf
 
     def handle_no_permission(self):
         if self.raise_exception:
             raise PermissionDenied(*self.get_permission_denied_message())
         super().handle_no_permission()
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.check_drf():
+            self.check_permissions(request)
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            if not self.has_permission():
+                return self.handle_no_permission()
+            return super().dispatch(request, *args, **kwargs)

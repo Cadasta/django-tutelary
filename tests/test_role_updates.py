@@ -88,27 +88,31 @@ def test_role_policy_update(datadir, setup):  # noqa
     assert not u3.has_perm('parcel.view', obj3)
 
 
+DEBUG = False
+
+
 def debug(s):
-    print(s)
-    print()
-    for p in Policy.objects.all():
-        print(repr(p))
-    print()
-    for r in Role.objects.all():
-        print(repr(r))
-    print()
-    for rpa in RolePolicyAssign.objects.all():
-        print(repr(rpa))
-    print()
-    for pi in PolicyInstance.objects.all():
-        print(repr(pi))
-    print()
-    for pset in PermissionSet.objects.all():
-        print(repr(pset))
-    print()
-    for user in User.objects.all():
-        print((user, user.permissionset.first().pk))
-    print()
+    if DEBUG:
+        print(s)
+        print()
+        for p in Policy.objects.all():
+            print(repr(p))
+        print()
+        for r in Role.objects.all():
+            print(repr(r))
+        print()
+        for rpa in RolePolicyAssign.objects.all():
+            print(repr(rpa))
+        print()
+        for pi in PolicyInstance.objects.all():
+            print(repr(pi))
+        print()
+        for pset in PermissionSet.objects.all():
+            print(repr(pset))
+        print()
+        for user in User.objects.all():
+            print((user, user.permissionset.first().pk))
+        print()
 
 
 def test_role_policies_update(datadir, setup):  # noqa

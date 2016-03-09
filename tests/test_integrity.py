@@ -29,6 +29,9 @@ def setup(datadir, db):
     return (user1, user2, user3, def_pol, org_pol, prj_pol)
 
 
+DEBUG = False
+
+
 @pytest.fixture(scope="function")  # noqa
 def debug(db):
     def fn(s):
@@ -43,7 +46,14 @@ def debug(db):
                                     str(pi.pk) + ': ' + str(pi.pset.id) + ' ' +
                                     pi.policy.name + ' ' +
                                     str(pi.variables), pis)))
-    return fn
+
+    def nofn(s):
+        pass
+
+    if DEBUG:
+        return fn
+    else:
+        return nofn
 
 
 def check(nuser=None, npol=None, npolin=None, npset=None):

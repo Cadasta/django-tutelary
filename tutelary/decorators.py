@@ -146,10 +146,13 @@ def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
         raise
 
 
-def action_error_message(actions, req_actions):
+def action_error_message(actions, req_actions, default=None):
     for req in req_actions:
         for a in actions:
             if isinstance(a, tuple) and a[0] == req:
                 if 'error_message' in a[1]:
                     return (a[1]['error_message'],)
-    return ()
+    if default is not None:
+        return (default,)
+    else:
+        return ()

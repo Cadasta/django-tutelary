@@ -1,17 +1,22 @@
+from django.core.exceptions import PermissionDenied, ImproperlyConfigured
+from django.db import models
+from django.http import HttpResponse
+import django.views.generic as generic
+import django.views.generic.edit as edit
+
+import pytest
+from django.test import RequestFactory
+
 from tutelary.engine import Action
 from tutelary.decorators import permissioned_model, permission_required
 from tutelary.mixins import PermissionRequiredMixin
 from tutelary.exceptions import PermissionObjectException, DecoratorException
-from django.core.exceptions import PermissionDenied, ImproperlyConfigured
-from django.db import models
-from django.http import HttpResponse
-from django.test import RequestFactory
-import django.contrib.auth.mixins as base_mixins
-import django.views.generic as generic
-import django.views.generic.edit as edit
-import pytest
+
 from .factories import UserFactory, PolicyFactory
 from .datadir import datadir  # noqa
+from .check_models import (
+    CheckModel1, CheckModel2, CheckModel3, CheckModel4, CheckModel5
+)
 
 
 @pytest.fixture(scope="function")  # noqa
@@ -33,63 +38,26 @@ def setup(datadir, db):
     return (user1, user2)
 
 
-@permissioned_model
-class CheckModel1(models.Model):
-    name = models.CharField(max_length=100)
-
-    class TutelaryMeta:
-        perm_type = 'check'
-        path_fields = ('name',)
-        actions = [('check.list', {'permissions_object': None}),
-                   ('check.create', {'permissions_object': None}),
-                   ('check.detail',
-                    {'error_message': 'detail view not allowed'}),
-                   'check.delete']
-
-    def __str__(self):
-        return self.name
-
-
-class CheckModel2(models.Model):
-    name = models.CharField(max_length=100)
-    container = models.ForeignKey(CheckModel1)
-
-    def __str__(self):
-        return self.name
-
-
-permissioned_model(
-    CheckModel2, perm_type='check2',
-    path_fields=('container', 'pk'),
-    actions=[('check2.list', {'permissions_object': 'container'}),
-             ('check2.create', {'permissions_object': 'container'}),
-             'check2.detail',
-             'check2.delete']
-)
-
-
-class DummyRequest:
-    def __init__(self, user, method='GET'):
-        self.user = user
-        self.method = method
-
-
-class CheckViewBase(PermissionRequiredMixin, generic.DetailView):
-    permission_required = 'check.detail'
-    raise_exception = True
-
+class CheckViewBase:
     def __init__(self, obj, user):
         self.model = obj
         self.obj = obj
-        self.request = DummyRequest(user)
+        self.request = RequestFactory().get('/check')
+        self.request.user = user
 
 
-class CheckView1(CheckViewBase):
+class CheckView1Base(PermissionRequiredMixin, CheckViewBase,
+                     generic.DetailView):
+    permission_required = 'check.detail'
+    raise_exception = True
+
+
+class CheckView1(CheckView1Base):
     def get_object(self):
         return self.obj
 
 
-class CheckView2(CheckViewBase):
+class CheckView2(CheckView1Base):
     def get_queryset(self):
         return [self.obj]
 
@@ -123,13 +91,9 @@ def test_view_exceptions_no_policies(datadir, setup):  # noqa
 
 
 def test_view_exceptions_no_permission_required(datadir, setup):  # noqa
-    class CheckViewBad(PermissionRequiredMixin, generic.DetailView):
+    class CheckViewBad(PermissionRequiredMixin, CheckViewBase,
+                       generic.DetailView):
         raise_exception = True
-
-        def __init__(self, obj, user):
-            self.model = obj
-            self.obj = obj
-            self.request = DummyRequest(user)
 
         def get_object(self):
             return self.obj
@@ -141,14 +105,16 @@ def test_view_exceptions_no_permission_required(datadir, setup):  # noqa
 
 
 def test_error_messages(datadir, setup):  # noqa
-    class CheckCreateView(PermissionRequiredMixin, edit.CreateView):
+    class CheckCreateView(PermissionRequiredMixin, CheckViewBase,
+                          edit.CreateView):
         permission_required = 'check.create'
         raise_exception = True
 
         def __init__(self, obj, user):
             self.model = obj
             self.obj = obj
-            self.request = DummyRequest(user)
+            self.request = RequestFactory().post('/check')
+            self.request.user = user
 
         def get_object(self):
             return self.obj
@@ -161,19 +127,21 @@ def test_error_messages(datadir, setup):  # noqa
         def __init__(self, obj, user):
             self.model = obj
             self.obj = obj
-            self.request = DummyRequest(user)
+            self.request = RequestFactory().post('/check')
+            self.request.user = user
 
         def get_object(self):
             return self.obj
 
-    class CheckCreateView4(PermissionRequiredMixin, edit.CreateView):
+    class CheckCreateView3(PermissionRequiredMixin, edit.CreateView):
         raise_exception = False
         permission_required = 'check.create'
 
         def __init__(self, obj, user):
             self.model = obj
             self.obj = obj
-            self.request = DummyRequest(user)
+            self.request = RequestFactory().post('/check')
+            self.request.user = user
 
         def get_object(self):
             return self.obj
@@ -199,24 +167,18 @@ def test_error_messages(datadir, setup):  # noqa
     with pytest.raises(PermissionDenied) as exc_info3:
         view3.dispatch(view3.request)
     assert exc_info3.value.args == ('special message',)
-    view4 = CheckCreateView4(obj, user1)
-    safe = base_mixins.PermissionRequiredMixin.handle_no_permission
+    view4 = CheckCreateView3(obj, user1)
     try:
-        base_mixins.PermissionRequiredMixin.handle_no_permission = tmp
+        edit.CreateView.handle_no_permission = tmp
         with pytest.raises(PermissionDenied) as exc_info4:
             view4.dispatch(view4.request)
     finally:
-        base_mixins.PermissionRequiredMixin.handle_no_permission = safe
+        del edit.CreateView.handle_no_permission
     assert exc_info4.value.args == ('test fixup message',)
 
 
-class Check2ViewBase(PermissionRequiredMixin, generic.ListView):
+class Check2ViewBase(PermissionRequiredMixin, CheckViewBase, generic.ListView):
     permission_required = 'check2.list'
-
-    def __init__(self, obj, user):
-        self.model = obj
-        self.obj = obj
-        self.request = DummyRequest(user)
 
 
 def test_mixin_fk_obj_path(datadir, setup):  # noqa
@@ -254,13 +216,6 @@ def test_mixin_fk_queryset_path(datadir, setup):  # noqa
 
 
 def test_permission_object_exceptions(datadir, setup):  # noqa
-    class CheckModel3(models.Model):
-        name = models.CharField(max_length=100)
-        container = models.ForeignKey(CheckModel1)
-
-        def __str__(self):
-            return self.name
-
     with pytest.raises(PermissionObjectException):
         permissioned_model(
             CheckModel3, perm_type='check3',
@@ -299,30 +254,10 @@ def test_permission_object_exceptions(datadir, setup):  # noqa
         )
 
 
-@permissioned_model
-class CheckModel4(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
-
-    class TutelaryMeta:
-        perm_type = 'check4'
-        path_fields = ('name',)
-        actions = [('check4.list', {'permissions_object': None}),
-                   ('check4.create', {'permissions_object': None}),
-                   'check4.detail',
-                   'check4.delete']
-
-
 def test_mixin_null_perms_obj(datadir, setup):  # noqa
-    class Check4ListView(PermissionRequiredMixin, generic.ListView):
+    class Check4ListView(PermissionRequiredMixin, CheckViewBase,
+                         generic.ListView):
         permission_required = 'check4.list'
-
-        def __init__(self, obj, user):
-            self.model = obj
-            self.obj = obj
-            self.request = DummyRequest(user)
 
         def get_object(self):
             return self.obj
@@ -333,7 +268,8 @@ def test_mixin_null_perms_obj(datadir, setup):  # noqa
         def __init__(self, obj, user):
             self.model = obj
             self.obj = obj
-            self.request = DummyRequest(user)
+            self.request = RequestFactory().post('/check')
+            self.request.user = user
 
         def get_object(self):
             return self.obj
@@ -343,32 +279,15 @@ def test_mixin_null_perms_obj(datadir, setup):  # noqa
     new_obj = CheckModel4(name='new-one')
 
     assert Check4ListView(obj, user1).has_permission()
-    assert not Check4CreateView(obj, user1).has_permission()
+    assert not Check4CreateView(new_obj, user1).has_permission()
     assert Check4ListView(obj, user2).has_permission()
     assert Check4CreateView(new_obj, user2).has_permission()
 
 
-@permissioned_model
-class CheckModel5(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
-
-    class TutelaryMeta:
-        perm_type = 'check5'
-        path_fields = ('name',)
-        actions = ['check4.detail', 'check4.delete']
-
-
 def test_mixin_no_permissions_object(datadir, setup):  # noqa
-    class Check5DetailView(PermissionRequiredMixin, generic.DetailView):
+    class Check5DetailView(PermissionRequiredMixin, CheckViewBase,
+                           generic.DetailView):
         permission_required = 'check5.detail'
-
-        def __init__(self, obj, user):
-            self.model = obj
-            self.obj = obj
-            self.request = DummyRequest(user)
 
         def get_object(self):
             return self.obj
