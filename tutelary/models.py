@@ -328,14 +328,12 @@ def assign_user_policies(user, *policies_roles):
     pset.save()
 
 
-def check_perms(user, actions, objs, get_allowed=None, method=None):
+def check_perms(user, actions, objs, method=None):
     for a in actions:
         for o in objs:
             test_obj = None
             if o is not None:
                 test_obj = o.get_permissions_object(a)
             if not user.has_perm(a, test_obj):
-                if (get_allowed is None or
-                   not (a in get_allowed and method == 'GET')):
-                    return False
+                return False
     return True

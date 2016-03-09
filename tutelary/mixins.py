@@ -13,9 +13,6 @@ class PermissionRequiredMixin(base.PermissionRequiredMixin):
     """
     def has_permission(self):
         objs = [None]
-        get_allowed = {}
-        if hasattr(self, 'model') and hasattr(self.model, 'TutelaryMeta'):
-            get_allowed = self.model.TutelaryMeta.get_allowed
         if hasattr(self, 'get_object'):
             try:
                 objs = [self.get_object()]
@@ -25,7 +22,7 @@ class PermissionRequiredMixin(base.PermissionRequiredMixin):
             objs = self.get_queryset()
         return check_perms(self.request.user,
                            self.get_permission_required(),
-                           objs, get_allowed, self.request.method)
+                           objs, self.request.method)
 
     def get_permission_required(self):
         if self.permission_required is None:

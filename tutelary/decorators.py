@@ -116,7 +116,6 @@ def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
                                          actions=actions))
         cls.TutelaryMeta.pfs = ([cls.TutelaryMeta.perm_type] +
                                 get_path_fields(cls))
-        cls.TutelaryMeta.get_allowed = {}
         perms_objs = {}
         for a in cls.TutelaryMeta.actions:
             an = a
@@ -125,8 +124,6 @@ def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
                 an = a[0]
                 ap = a[1]
             Action.register(an)
-            if 'get_allowed' in ap:
-                cls.TutelaryMeta.get_allowed[an] = ap['get_allowed']
             if 'permissions_object' in ap:
                 po = ap['permissions_object']
                 if po is not None:
