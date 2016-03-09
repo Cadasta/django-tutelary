@@ -1,5 +1,5 @@
 import django.contrib.auth.mixins as base
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 
 from .models import check_perms
 from .decorators import action_error_message
@@ -51,8 +51,12 @@ class PermissionRequiredMixin(base.PermissionRequiredMixin):
 
     def get_permission_denied_message(self):
         if self.permission_denied_message:
-            return self.permission_denied_message
+            return (self.permission_denied_message,)
         if hasattr(self, 'model') and hasattr(self.model, 'TutelaryMeta'):
             return action_error_message(self.model.TutelaryMeta.actions,
                                         self.get_permission_required())
-        return ()
+
+    def handle_no_permission(self):
+        if self.raise_exception:
+            raise PermissionDenied(*self.get_permission_denied_message())
+        super().handle_no_permission()

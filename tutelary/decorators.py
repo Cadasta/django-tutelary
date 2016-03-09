@@ -153,5 +153,5 @@ def action_error_message(actions, req_actions):
         for a in actions:
             if isinstance(a, tuple) and a[0] == req:
                 if 'error_message' in a[1]:
-                    return a[1]['error_message']
+                    return (a[1]['error_message'],)
     return ()

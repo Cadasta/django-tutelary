@@ -75,7 +75,7 @@ class RoleManager(models.Manager):
     def create(self, *args, **kwargs):
         pols = kwargs.get('policies', [])
         vs = kwargs.get('variables', {})
-        r = super(RoleManager, self).create(name=kwargs['name'], variables=vs)
+        r = super().create(name=kwargs['name'], variables=vs)
         vns = set().union(*[p.variable_names() for p in pols])
         if not vns.issubset(vs.keys()):
             raise RoleVariableException("missing variable in role definition")
@@ -112,7 +112,7 @@ class Role(models.Model):
 
     def delete(self, *args, **kwargs):
         RolePolicyAssign.objects.filter(role=self).delete()
-        super(Role, self).delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
 
 
 class PolicyInstance(models.Model):
