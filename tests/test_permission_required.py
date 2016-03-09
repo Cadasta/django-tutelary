@@ -38,7 +38,7 @@ class CheckModel(models.Model):
                    ('check.create', {'permissions_object': None}),
                    ('check.detail',
                     {'error_message': 'detail view not allowed'}),
-                   ('check.delete', {'get_allowed': True})]
+                   'check.delete']
 
     def __str__(self):
         return self.name

@@ -44,7 +44,7 @@ class CheckModel1(models.Model):
                    ('check.create', {'permissions_object': None}),
                    ('check.detail',
                     {'error_message': 'detail view not allowed'}),
-                   ('check.delete', {'get_allowed': True})]
+                   'check.delete']
 
     def __str__(self):
         return self.name
@@ -297,27 +297,6 @@ def test_permission_object_exceptions(datadir, setup):  # noqa
             path_fields=('name',),
             actions=['dummy.list']
         )
-
-
-def test_get_allowed(datadir, setup):  # noqa
-    class CheckGetAllowedView(PermissionRequiredMixin, edit.DeleteView):
-        permission_required = 'check.delete'
-
-        def __init__(self, obj, user, method):
-            self.model = obj
-            self.obj = obj
-            self.request = DummyRequest(user, method)
-
-        def get_object(self):
-            return self.obj
-
-    user1, user2 = setup
-    obj = CheckModel1(name='not-secret')
-
-    assert CheckGetAllowedView(obj, user1, 'GET').has_permission()
-    assert CheckGetAllowedView(obj, user2, 'GET').has_permission()
-    assert not CheckGetAllowedView(obj, user1, 'POST').has_permission()
-    assert CheckGetAllowedView(obj, user2, 'POST').has_permission()
 
 
 @permissioned_model
