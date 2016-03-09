@@ -71,6 +71,8 @@ def test_mixin_basic_obj_path(datadir, setup):  # noqa
     assert not CheckView1(secret_obj, user1).has_permission()
     assert CheckView1(ok_obj, user2).has_permission()
     assert CheckView1(secret_obj, user2).has_permission()
+    view1 = CheckView1(ok_obj, user1)
+    view1.dispatch(view1.request)
 
 
 def test_mixin_basic_queryset_path(datadir, setup):  # noqa

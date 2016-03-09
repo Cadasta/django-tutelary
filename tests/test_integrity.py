@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 import pytest
 from .factories import UserFactory, PolicyFactory
 from .datadir import datadir  # noqa
+from .settings import DEBUG
 
 
 @pytest.fixture(scope="function")  # noqa
@@ -27,9 +28,6 @@ def setup(datadir, db):
                                      'project': 'TestProj'}))
 
     return (user1, user2, user3, def_pol, org_pol, prj_pol)
-
-
-DEBUG = False
 
 
 @pytest.fixture(scope="function")  # noqa

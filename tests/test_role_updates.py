@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 import pytest
 from .factories import UserFactory, PolicyFactory, RoleFactory
 from .datadir import datadir  # noqa
+from .settings import DEBUG
 
 
 @pytest.fixture(scope="function")  # noqa
@@ -86,9 +87,6 @@ def test_role_policy_update(datadir, setup):  # noqa
     assert not u1.has_perm('parcel.view', obj3)
     assert not u2.has_perm('parcel.view', obj3)
     assert not u3.has_perm('parcel.view', obj3)
-
-
-DEBUG = False
 
 
 def debug(s):
