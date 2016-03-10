@@ -43,6 +43,12 @@ class PermissionRequiredMixin:
                                self.get_permission_required(),
                                objs, self.request.method)
 
+#        print('objs:', objs)
+#        print('acts:', self.get_permission_required())
+#        print('user:', self.request.user)
+#        print('method:', self.request.method)
+#        print('has_perm:', has_perm)
+
         if not has_perm:
             msg = self.get_permission_denied_message(
                 default="Permission denied."

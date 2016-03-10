@@ -1,3 +1,4 @@
+import simplejson as json
 from tutelary.engine import PermissionTree, PolicyBody, Action, Object
 from .datadir import datadir  # noqa
 
@@ -97,3 +98,26 @@ def test_permission_set_policies_3(datadir):  # noqa
     assert not dcpset.allow(admin_invite, useriross)
     assert not dcpset.allow(admin_invite, org)
     assert dcpset.allow(statistics)
+
+
+def test_permission_set_policies_4():
+    clause = {
+        "clause": [
+            {
+                "effect": "allow",
+                "object": ["organization/*"],
+                "action": ["organization.*"]
+            },
+            {
+                "effect": "allow",
+                "object": ["project/*/*"],
+                "action": ["project.*.*"]
+            }
+        ]
+    }
+    pol = PolicyBody(json=json.dumps(clause))
+    pset = PermissionTree(policies=[pol])
+
+    user_list = Action('project.users.list')
+    proj = Object('project/Cadasta/TestProj')
+    assert pset.allow(user_list, proj)
