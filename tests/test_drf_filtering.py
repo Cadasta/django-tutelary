@@ -1,4 +1,3 @@
-from rest_framework.exceptions import PermissionDenied
 from rest_framework import serializers
 import rest_framework.generics as generics
 
