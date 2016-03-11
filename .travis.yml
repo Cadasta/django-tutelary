@@ -3,9 +3,9 @@ language: python
 sudo: false
 
 env:
-    - TOX_ENV=py34-flake8
-    - TOX_ENV=py34-docs
-    - TOX_ENV=py34-django1.9
+    - TOX_ENV=py35-flake8
+    - TOX_ENV=py35-docs
+    - TOX_ENV=py35-django1.9
 
 matrix:
   fast_finish: true
