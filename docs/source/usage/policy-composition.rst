@@ -230,3 +230,11 @@ This assumes that the JSON body of the ``Policy`` object named
 variables used within the body of a policy must be provided at the
 point of use of the policy -- here, "point of use" means when the
 policy is assigned to a user using ``User.assign_policies``.
+
+The list of policies and/or roles assigned to a user can be retrieved
+using the ``user_assigned_policies`` function and the
+``User.assigned_policies`` method -- passing ``None`` to the former
+retrieves the policies assigned to the anonymous user.  The return
+value of both of these is a sequence in the same format as the
+arguments passed to ``User.assign_policies``, i.e. a sequence of
+policy or role values or ``(policy/role, variables)`` pairs.
