@@ -53,6 +53,9 @@ class CheckView1Base(PermissionRequiredMixin, CheckViewBase,
 
 
 class CheckView1(CheckView1Base):
+    def get_perms_objects(self):
+        return [self.obj]
+
     def get_object(self):
         return self.obj
 

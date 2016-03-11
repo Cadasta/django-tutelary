@@ -42,7 +42,6 @@ model classes to store model metadata, django-tutelary uses a
   ``pk`` can be used to refer to the model's primary key.)
 
 ``actions``
-
   A sequence of *action-label* or (*action-label*, *action-options*)
   pairs, where *action-label* is a string giving the name of an action
   (e.g. ``parcel.list``, ``board.solder``, ``page.create``) and

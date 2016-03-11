@@ -257,6 +257,57 @@ the ``project.list`` permission for the associated organisation, and
 for which the user has the ``project.delete`` permission on the
 project itself.
 
+The ``get_perms_objects`` method
+--------------------------------
+
+Most of the time, django-tutelary can work out which objects are
+associated with a view itself -- for single-object views, it calls
+``get_object``, for multi-object views it calls ``get_queryset``, and
+it also does something reasonable for object creation forms, which are
+something of a special case.
+
+However, there are some cases where it's not possible to work out
+which object or objects permissions should be tested on just from the
+form of the view.  One example where this is likely to be the case is
+if you have a many-to-many relation from a base object class to a
+subsidiary class, and you want to control addition and removal of the
+subsidiary objects based on the base object.  The views in this case
+will be views of the subsidiary objects, so some mechanism is needed
+to allow django-tutelary to identify the base object on which
+permissions should be test.  For this purpose, django-tutelary checks
+to see whether a view has a method called ``get_perms_objects``, and
+if it does, it uses this method to find the set of objects on which to
+test permissions.
+
+To see how this works, suppose we have a model representing
+organisations, and that organisations can have users as members, with
+this membership being represented by a many-to-many field between the
+organisation model and the user model.  Adding or removing users to an
+organisation is an operation on the *organisation*, not on the user
+list, but the user list is what the views will be managing.  To deal
+with this, we write code like this::
+
+  class OrganizationUsersDelete(PermissionRequiredMixin,
+                                OrganizationUsersQuerySet,
+                                generics.DestroyAPIView):
+      permission_required = 'org.users.remove'
+
+      def get_perms_objects(self):
+          return [self.get_organization(self.kwargs['slug'])]
+
+      def destroy(self, request, *args, **kwargs):
+          user = self.get_object()
+          self.org.users.remove(user)
+
+          return Response(status=status.HTTP_204_NO_CONTENT)
+
+Here, the ``get_perms_objects`` method returns a reference to the
+organisation on which permissions should be tested.
+
+Use of the ``get_perms_objects`` method shortcuts all the other
+mechanisms that django-tutelary uses to determine permissions objects,
+so can easily be used to deal with any special cases of this kind.
+
 Function views
 --------------
 

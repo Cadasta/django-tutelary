@@ -52,7 +52,6 @@ def setup(datadir, db):
     users[8].assign_policies((org_admin_p, {'org': 'Org3'}))
     users[9].assign_policies((org_admin_p, {'org': 'Org3'}),
                              (proj_mgr_p, {'org': 'Org3', 'proj': 'Proj3'}))
-    assign_user_policies(None, (org_admin_p, {'org': 'Sandbox'}))
 
     return (users, pols, roles)
 
@@ -96,6 +95,8 @@ def test_lookup_user_policies_and_roles(datadir, setup):  # noqa
     (sys_admin_r,
      org_admin_1_r, org_admin_2_r,
      proj_mgr_1_r, proj_mgr_2_r) = roles
+    assert user_assigned_policies(None) == []
+    assign_user_policies(None, (org_admin_p, {'org': 'Sandbox'}))
     assert user_assigned_policies(None) == [(org_admin_p, {'org': 'Sandbox'})]
     assert users[0].assigned_policies() == []
     assert users[1].assigned_policies() == [sys_admin_p]

@@ -87,6 +87,9 @@ class CheckView1(PermissionRequiredMixin, generic.RetrieveAPIView):
             self.model = kwargs['object']
             self.object = kwargs['object']
 
+    def get_perms_objects(self):
+        return [self.object]
+
     def get_object(self):
         return self.object
 

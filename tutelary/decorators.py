@@ -124,7 +124,7 @@ def permissioned_model(cls, perm_type=None, path_fields=None, actions=None):
                 an = a[0]
                 ap = a[1]
             Action.register(an)
-            if 'permissions_object' in ap:
+            if isinstance(ap, dict) and 'permissions_object' in ap:
                 po = ap['permissions_object']
                 if po is not None:
                     try:
