@@ -1,29 +1,33 @@
-import os.path
-
-from django.core.exceptions import PermissionDenied
-import django.template.loader
-import django.views.generic as generic
+from rest_framework.exceptions import PermissionDenied
+from rest_framework import serializers
+import rest_framework.generics as generics
 
 from tutelary.mixins import PermissionRequiredMixin
 
 import pytest
-from django.test import RequestFactory
+from rest_framework.test import APIRequestFactory
 
 from .factories import UserFactory, PolicyFactory
 from .datadir import datadir  # noqa
 from .filter_models import Org, Proj
 
 
-django.template.loader._engine_list(None)[0].engine.dirs = [
-    os.path.join(os.path.dirname(__file__), "templates")
-]
+class OrgSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Org
+        fields = ('name',)
 
 
-class BaseProjList(generic.ListView):
-    model = Proj
+class ProjSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Proj
+        fields = ('name', 'org')
+        depth = 1
+
+
+class BaseProjList(generics.ListAPIView):
     objects = None
-    template_name = "filtering_proj_list.html"
-    raise_exception = True
+    serializer_class = ProjSerializer
 
     def __init__(self, *args, **kwargs):
         if 'objects' in kwargs:
@@ -58,8 +62,9 @@ class DetailDeleteProjList(PermissionRequiredMixin, BaseProjList):
 
 
 def api_get(url, user):
-    req = RequestFactory().get(url)
+    req = APIRequestFactory().get(url)
     req.user = user
+    req.successful_authenticator = True
     return req
 
 
@@ -122,14 +127,14 @@ def setup(datadir, db):
 
 
 def project_count(rsp):
-    return rsp.content.count(b'PROJECT')
+    return len(rsp.data)
 
 
 def test_normal_listing(datadir, setup):  # noqa
     users, pols, orgs, projs = setup
     r1, r2, r3, r4, r5 = map(lambda u: api_get('/projs', u), users)
 
-    view = NormalProjList.as_view(objects=projs)
+    view = NormalProjList().as_view(objects=projs)
     assert project_count(view(r1).render()) == 10
     with pytest.raises(PermissionDenied):
         rsp2 = view(r2).render()  # noqa
@@ -144,7 +149,7 @@ def test_basic_filter_listing(datadir, setup):  # noqa
     users, pols, orgs, projs = setup
     r1, r2, r3, r4, r5 = map(lambda u: api_get('/projs', u), users)
 
-    view = FilterProjList.as_view(objects=projs)
+    view = FilterProjList().as_view(objects=projs)
     assert project_count(view(r1).render()) == 10
     assert project_count(view(r2).render()) == 7
     assert project_count(view(r3).render()) == 3
@@ -156,7 +161,7 @@ def test_detail_filter_listing(datadir, setup):  # noqa
     users, pols, orgs, projs = setup
     r1, r2, r3, r4, r5 = map(lambda u: api_get('/projs', u), users)
 
-    view = DetailProjList.as_view(objects=projs)
+    view = DetailProjList().as_view(objects=projs)
     assert project_count(view(r1).render()) == 10
     assert project_count(view(r2).render()) == 3
     assert project_count(view(r3).render()) == 3
@@ -168,7 +173,7 @@ def test_delete_filter_listing(datadir, setup):  # noqa
     users, pols, orgs, projs = setup
     r1, r2, r3, r4, r5 = map(lambda u: api_get('/projs', u), users)
 
-    view = DeleteProjList.as_view(objects=projs)
+    view = DeleteProjList().as_view(objects=projs)
     assert project_count(view(r1).render()) == 10
     assert project_count(view(r2).render()) == 1
     assert project_count(view(r3).render()) == 2
@@ -180,7 +185,7 @@ def test_detail_delete_filter_listing(datadir, setup):  # noqa
     users, pols, orgs, projs = setup
     r1, r2, r3, r4, r5 = map(lambda u: api_get('/projs', u), users)
 
-    view = DetailDeleteProjList.as_view(objects=projs)
+    view = DetailDeleteProjList().as_view(objects=projs)
     assert project_count(view(r1).render()) == 10
     assert project_count(view(r2).render()) == 1
     assert project_count(view(r3).render()) == 2
