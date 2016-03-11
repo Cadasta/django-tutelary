@@ -18,8 +18,6 @@ simply by mixed into your view classes without any drama.  The
 "normal" Django and with `DRF
 <http://www.django-rest-framework.org/>`_.
 
-.. warning:: MAKE THIS TRUE!
-
 For example, suppose that you've defined a ``user.detail`` action for
 the ``User`` model (using the ``permissioned_model`` function).  You
 can then control access to a detail view for the ``User`` model using
@@ -41,7 +39,8 @@ added to the view.  There are a number of possibilities for setting
 this attribute, but the simplest option is either a single action name
 or a sequence of action names.  All of the actions listed in
 ``permission_required`` must be *allowed* for the user on the model
-object for the view to succeed.
+object for the view to succeed.  (There are some exceptions to this
+statement, related to "collective actions" -- see below.)
 
 The ``permission_required`` attribute
 -------------------------------------
@@ -139,6 +138,124 @@ the entity?)::
           'GET': 'org.view',
           'PATCH': patch_actions
       }
+
+Special treatment of collective actions
+---------------------------------------
+
+There are a couple of extra features for annotating views that are
+intended to make some common use cases with "collective actions" work
+more smoothly.  In this context, "collective actions" means actions
+that refer to more than one object at a time.  In normal Django
+generic views, any views that use the ``SingleObjectMixin`` class
+don't refer to collective actions, while those that use the
+``MultipleObjectMixin`` class do.  Similary, when using the Django
+REST Framework, generic views that use the ``ListModelMixin`` class
+are collective actions and most others are not.
+
+The essential issue with collective actions is that a user may have
+permission to perform a particular action on only a subset of the
+queryset of a view.  Normally, django-tutelary checks that the
+requested actions are permitted on *all* the objects in the queryset.
+If any of these permission checks fail, then the entire attempt to
+render the view will fail and a ``PermissionDenied`` exception will be
+raised.  This behaviour is reasonable, but there is an alternative and
+equally reasonable option, which is to filter the view's queryset so
+that only objects for which the action is permitted remain.
+
+As a concrete example, suppose that we have models representing
+organisations and projects in our application.  Each project belongs
+to a single organisation.  Our models look like this (all the code
+examples shown in this section are just sketches -- you'd obviously
+need to add some things to fully functional working models and views,
+but we'll show enough to illustrate the permissioning issues)::
+
+  @permissioned_model
+  class Organization(models.Model):
+      name = models.CharField(max_length=100)
+
+      class TutelaryMeta:
+          perm_type = 'org'
+          path_fields = ('pk',)
+          actions = [('org.list',   {'permissions_object': None}),
+                     ('org.create', {'permissions_object': None}),
+                     'org.detail',
+                     'org.delete']
+
+  @permissioned_model
+  class Project(models.Model):
+      name = models.CharField(max_length=100)
+      organization = models.ForeignKey(Organization)
+
+      class TutelaryMeta:
+          perm_type = 'project'
+          path_fields = ('organization', 'pk')
+          actions = [('project.list',
+                      {'permissions_object': 'organization'}),
+                     ('project.create',
+                      {'permissions_object': 'organization'}),
+                     'project.detail',
+                     'project.delete']
+
+Suppose that we wish to provide a view to list all projects in the
+database.  Using a DRF ``ListAPIView``, our view might look something
+like this::
+
+  class ProjectListView(PermissionRequiredMixin, ListAPIView):
+      queryset = Project.objects.all()
+      serializer_class = ProjectSerializer
+      permission_required = 'project.list'
+
+Now, suppose that we process a request to render this view for a user
+who has ``project.list`` permissions for the ``Organization`` with
+name ``org1``, but not for ``org2``.  As it stands, assuming that
+projects exist in both of these organizations, this user's request
+will fail with a ``PermissionDenied`` exception, because the
+``project.list`` action has to be allowed for all of the objects in
+the view's queryset, which includes both projects in ``org1`` (that
+the user can list) and projects in ``org2`` (that the user is not
+permitted to list).
+
+This is obviously inconvenient.  To make this work, we would have to
+override the ``get_queryset`` method on our view and manually filter
+out the objects for which the request is not permitted.  Instead of
+doing this, django-tutelary allows us to specify that we want the
+view's queryset to be filtered.  We do this by adding a
+``permission_filter_queryset`` attribute to the view class::
+
+  class ProjectListView(PermissionRequiredMixin, ListAPIView):
+      queryset = Project.objects.all()
+      serializer_class = ProjectSerializer
+      permission_required = 'project.list'
+      permission_filter_queryset = True
+
+The ``permission_filter_queryset`` attribute can be set to:
+
+ - ``False``: gives the default ("all fail if one fails") behaviour;
+ - ``True``: causes querysets for all collective actions to be
+   filtered -- in this case, a ``PermissionDenied`` exception is never
+   raised: if the action is denied for *all* objects in the queryset,
+   then an empty queryset is used for the view;
+ - a sequence of "associated" action names or a dictionary mapping
+   from action names to sequences of "associated" action names: in
+   this case, the queryset is filtered both on the "main" action and
+   the "associated" action -- this capability is intended primarily
+   for list views, where it may be desirable to restrict the entities
+   rendered to a subset where certain other actions can be performed.
+
+As an example of the last, more complex case, suppose that we want to
+display a list of all the projects that a user is allowed to delete.
+We can do this with a view like this::
+
+  class ProjectDeleteListView(PermissionRequiredMixin, ListAPIView):
+      queryset = Project.objects.all()
+      serializer_class = ProjectSerializer
+      permission_required = 'project.list'
+      permission_filter_queryset = ['project.delete']
+
+This view will return all projects for which the requesting user has
+the ``project.list`` permission for the associated organisation, and
+for which the user has the ``project.delete`` permission on the
+project itself.
 
 Function views
 --------------

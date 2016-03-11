@@ -1,0 +1,21 @@
+{
+  "version": "2015-12-10",
+  "clause": [
+    { "effect": "allow",
+      "action": ["org.list"] },
+
+    { "effect": "allow",
+      "action": ["proj.list"],
+      "object": ["org/org1"] },
+
+    { "effect": "allow",
+      "action": ["proj.detail"],
+      "object": ["proj/org1/proj1",
+                 "proj/org1/proj2",
+                 "proj/org1/proj3"] },
+
+    { "effect": "allow",
+      "action": ["proj.delete"],
+      "object": ["proj/org1/proj1"] }
+  ]
+}
