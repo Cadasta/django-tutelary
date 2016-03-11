@@ -118,30 +118,18 @@ class PermissionRequiredMixin:
             return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        print('get_queryset:')
-        print('  self:', self)
         if hasattr(self, 'filtered_queryset'):
-            print('  len(self.filtered_queryset):',
-                  len(self.filtered_queryset))
             return self.filtered_queryset
         else:
             return super().get_queryset()
 
     def perms_filter_queryset(self, objs):
-        print('perms_filter_queryset:')
-        user = self.request.user
         actions = self.get_permission_required()
-        method = self.request.method
-        filt = self.permission_filter_queryset
-        print('  self:', self)
-        print('  filt:', filt)
-        print('  self.queryset:', self.queryset)
-        if filt is True:
-            def check_one(obj):
-                return check_perms(user, actions, [obj], method)
-            new_objs = list(filter(check_one, objs))
-            self.filtered_queryset = new_objs
-            print('  len(self.filtered_queryset):',
-                  len(self.filtered_queryset))
-        else:
-            pass
+        if isinstance(self.permission_filter_queryset, Sequence):
+            actions += tuple(self.permission_filter_queryset)
+
+        def check_one(obj):
+            return check_perms(self.request.user, actions,
+                               [obj], self.request.method)
+
+        self.filtered_queryset = list(filter(check_one, objs))

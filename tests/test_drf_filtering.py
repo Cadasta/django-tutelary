@@ -48,17 +48,17 @@ class FilterProjList(PermissionRequiredMixin, BaseProjList):
 
 class DetailProjList(PermissionRequiredMixin, BaseProjList):
     permission_required = 'proj.list'
-    permission_filter_queryset = ['project.detail']
+    permission_filter_queryset = ['proj.detail']
 
 
 class DeleteProjList(PermissionRequiredMixin, BaseProjList):
     permission_required = 'proj.list'
-    permission_filter_queryset = ['project.delete']
+    permission_filter_queryset = ['proj.delete']
 
 
 class DetailDeleteProjList(PermissionRequiredMixin, BaseProjList):
     permission_required = 'proj.list'
-    permission_filter_queryset = ['project.detail', 'project.delete']
+    permission_filter_queryset = ['proj.detail', 'proj.delete']
 
 
 def api_get(url, user):
