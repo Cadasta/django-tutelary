@@ -24,9 +24,14 @@ class PermissionRequiredMixin:
                     pass
         if objs == [None]:
             objs = self.get_queryset()
-        return check_perms(self.request.user,
-                           self.get_permission_required(),
-                           objs, self.request.method)
+        if (hasattr(self, 'permission_filter_queryset') and
+           self.permission_filter_queryset is not False):
+            self.perms_filter_queryset(objs)
+            return True
+        else:
+            return check_perms(self.request.user,
+                               self.get_permission_required(),
+                               objs, self.request.method)
 
     def check_permissions(self, request):
         """Permission checking for DRF."""
@@ -39,23 +44,27 @@ class PermissionRequiredMixin:
         if objs == [None]:
             objs = self.get_queryset()
 
-        has_perm = check_perms(self.request.user,
-                               self.get_permission_required(),
-                               objs, self.request.method)
+        if (hasattr(self, 'permission_filter_queryset') and
+           self.permission_filter_queryset is not False):
+            self.perms_filter_queryset(objs)
+        else:
+            has_perm = check_perms(self.request.user,
+                                   self.get_permission_required(),
+                                   objs, self.request.method)
 
-#        print('objs:', objs)
-#        print('acts:', self.get_permission_required())
-#        print('user:', self.request.user)
-#        print('method:', self.request.method)
-#        print('has_perm:', has_perm)
+#            print('objs:', objs)
+#            print('acts:', self.get_permission_required())
+#            print('user:', self.request.user)
+#            print('method:', self.request.method)
+#            print('has_perm:', has_perm)
 
-        if not has_perm:
-            msg = self.get_permission_denied_message(
-                default="Permission denied."
-            )
-            if isinstance(msg, Sequence):
-                msg = msg[0]
-            self.permission_denied(request, message=msg)
+            if not has_perm:
+                msg = self.get_permission_denied_message(
+                    default="Permission denied."
+                )
+                if isinstance(msg, Sequence):
+                    msg = msg[0]
+                self.permission_denied(request, message=msg)
 
     def get_permission_required(self):
         if (not hasattr(self, 'permission_required') or
@@ -107,3 +116,32 @@ class PermissionRequiredMixin:
             if not self.has_permission():
                 return self.handle_no_permission()
             return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        print('get_queryset:')
+        print('  self:', self)
+        if hasattr(self, 'filtered_queryset'):
+            print('  len(self.filtered_queryset):',
+                  len(self.filtered_queryset))
+            return self.filtered_queryset
+        else:
+            return super().get_queryset()
+
+    def perms_filter_queryset(self, objs):
+        print('perms_filter_queryset:')
+        user = self.request.user
+        actions = self.get_permission_required()
+        method = self.request.method
+        filt = self.permission_filter_queryset
+        print('  self:', self)
+        print('  filt:', filt)
+        print('  self.queryset:', self.queryset)
+        if filt is True:
+            def check_one(obj):
+                return check_perms(user, actions, [obj], method)
+            new_objs = list(filter(check_one, objs))
+            self.filtered_queryset = new_objs
+            print('  len(self.filtered_queryset):',
+                  len(self.filtered_queryset))
+        else:
+            pass
