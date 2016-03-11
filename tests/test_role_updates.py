@@ -136,14 +136,14 @@ def test_role_policies_update(datadir, setup):  # noqa
 
     debug('HERE 1')
     replacement_role = RoleFactory.create(
-        name='testproj_proj', policies=[def_pol, org_pol],
+        name='replacement_role', policies=[def_pol, org_pol],
         variables=org_role.variables
     )
     u3.assign_policies(replacement_role)
     prj_role.delete()
     debug('HERE 2')
 
-    check(nuser=3, npol=3, nrole=2, npolin=3, npset=2)
+    check(nuser=3, npol=3, nrole=2, npolin=5, npset=3)
 
     assert not u1.has_perm('parcel.edit', obj1)
     assert u2.has_perm('parcel.edit', obj1)
