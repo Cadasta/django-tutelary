@@ -3,7 +3,7 @@ from rest_framework.exceptions import PermissionDenied
 import rest_framework.generics as generic
 
 import pytest
-from rest_framework.test import APIRequestFactory
+from rest_framework.test import APIRequestFactory, force_authenticate
 
 from tutelary.engine import Action
 from tutelary.mixins import PermissionRequiredMixin
@@ -34,8 +34,7 @@ def setup(datadir, db):
 
 def api_get(url, user):
     req = APIRequestFactory().get(url)
-    req.user = user
-    req.successful_authenticator = True
+    force_authenticate(req, user)
     return req
 
 
@@ -115,8 +114,8 @@ def test_mixin_basic_obj_path(datadir, setup):  # noqa
     req1 = api_get('/check', user1)
     rsp1 = CheckView1().as_view(object=ok)(req1).render()
     assert rsp1.status_code == 200
-    with pytest.raises(PermissionDenied):
-        rsp2 = CheckView1().as_view(object=secret)(req1).render()  # noqa
+    rsp2 = CheckView1().as_view(object=secret)(req1).render()
+    assert rsp2.status_code == 403
 
     req2 = api_get('/check', user2)
     rsp3 = CheckView1().as_view(object=ok)(req2).render()
@@ -133,8 +132,8 @@ def test_mixin_basic_queryset_path(datadir, setup):  # noqa
     req1 = api_get('/check', user1)
     rsp1 = CheckView2().as_view(object=ok)(req1).render()
     assert rsp1.status_code == 200
-    with pytest.raises(PermissionDenied):
-        rsp2 = CheckView2().as_view(object=secret)(req1).render()  # noqa
+    rsp2 = CheckView2().as_view(object=secret)(req1).render()
+    assert rsp2.status_code == 403
 
     req2 = api_get('/check', user2)
     rsp3 = CheckView2().as_view(object=ok)(req2).render()
@@ -147,8 +146,8 @@ def test_view_exceptions_no_policies(datadir, setup):  # noqa
     other_user = UserFactory.create(username='other')
     ok = CheckModel1(name='not-secret')
     req = api_get('/check', other_user)
-    with pytest.raises(PermissionDenied):
-        rsp = CheckView1().as_view(object=ok)(req).render()  # noqa
+    rsp = CheckView1().as_view(object=ok)(req).render()
+    assert rsp.status_code == 403
 
 
 def test_view_exceptions_no_permission_required(datadir, setup):  # noqa
@@ -227,27 +226,27 @@ def test_error_messages(datadir, setup):  # noqa
     obj = CheckModel1(name='secret')
 
     req1 = api_get('/check', other_user)
-    with pytest.raises(PermissionDenied) as exc_info1:
-        rsp1 = CheckView1().as_view(object=obj)(req1).render()  # noqa
-    assert exc_info1.value.detail == 'detail view not allowed'
+    rsp1 = CheckView1().as_view(object=obj)(req1).render()
+    assert rsp1.status_code == 403
+    assert rsp1.data['detail'] == 'detail view not allowed'
 
     req2 = api_post('/check', user1)
-    with pytest.raises(PermissionDenied) as exc_info2:
-        rsp2 = CheckCreateView().as_view(object=obj)(req2).render()  # noqa
-    assert exc_info2.value.detail == 'Permission denied.'
+    rsp2 = CheckCreateView().as_view(object=obj)(req2).render()
+    assert rsp2.status_code == 403
+    assert rsp2.data['detail'] == 'Permission denied.'
 
-    with pytest.raises(PermissionDenied) as exc_info3:
-        rsp2a = CheckCreateView2().as_view(object=obj)(req2).render()  # noqa
-    assert exc_info3.value.detail == 'special message'
+    rsp2a = CheckCreateView2().as_view(object=obj)(req2).render()
+    assert rsp2a.status_code == 403
+    assert rsp2a.data['detail'] == 'special message'
 
     safe = generic.CreateAPIView.permission_denied
     try:
         generic.CreateAPIView.permission_denied = tmp
-        with pytest.raises(PermissionDenied) as exc_info4:
-            rsp3 = CheckCreateView3().as_view(object=obj)(req2).render()  # noqa
+        rsp3 = CheckCreateView3().as_view(object=obj)(req2).render()
     finally:
         generic.CreateAPIView.permission_denied = safe
-    assert exc_info4.value.detail == 'test fixup message'
+    assert rsp3.status_code == 403
+    assert rsp3.data['detail'] == 'test fixup message'
 
 
 def test_mixin_fk_obj_path(datadir, setup):  # noqa
@@ -272,10 +271,10 @@ def test_mixin_fk_obj_path(datadir, setup):  # noqa
     secret = CheckModel2(name='not-visible', container=secret_container)
 
     req1 = api_post('/check', user1)
-    with pytest.raises(PermissionDenied):
-        rsp1 = Check2View1().as_view(object=ok)(req1).render()  # noqa
-    with pytest.raises(PermissionDenied):
-        rsp2 = Check2View1().as_view(object=secret)(req1).render()  # noqa
+    rsp1 = Check2View1().as_view(object=ok)(req1).render()
+    assert rsp1.status_code == 403
+    rsp2 = Check2View1().as_view(object=secret)(req1).render()
+    assert rsp2.status_code == 403
     req2 = api_post('/check', user2)
     rsp3 = Check2View1().as_view(object=ok)(req2).render()
     assert rsp3.status_code == 201
@@ -305,10 +304,10 @@ def test_mixin_fk_queryset_path(datadir, setup):  # noqa
     secret = CheckModel2(name='not-visible', container=secret_container)
 
     req1 = api_get('/check', user1)
-    rsp1 = Check2View2().as_view(object=ok)(req1).render()  # noqa
+    rsp1 = Check2View2().as_view(object=ok)(req1).render()
     assert rsp1.status_code == 200
-    with pytest.raises(PermissionDenied):
-        rsp2 = Check2View2().as_view(object=secret)(req1).render()  # noqa
+    rsp2 = Check2View2().as_view(object=secret)(req1).render()
+    assert rsp2.status_code == 403
     req2 = api_get('/check', user2)
     rsp3 = Check2View2().as_view(object=ok)(req2).render()
     assert rsp3.status_code == 200
@@ -341,14 +340,14 @@ def test_mixin_null_perms_obj(datadir, setup):  # noqa
     rsp1 = Check4ListView().as_view(object=obj)(req1).render()
     assert rsp1.status_code == 200
     req2 = api_post('/check', user1)
-    with pytest.raises(PermissionDenied):
-        rsp2 = Check4CreateView().as_view(object=new_obj)(req2).render()  # noqa
+    rsp2 = Check4CreateView().as_view(object=new_obj)(req2).render()
+    assert rsp2.status_code == 403
 
     req3 = api_get('/check', user2)
     rsp3 = Check4ListView().as_view(object=obj)(req3).render()
     assert rsp3.status_code == 200
     req4 = api_post('/check', user2)
-    rsp4 = Check4CreateView().as_view(object=new_obj)(req4).render()  # noqa
+    rsp4 = Check4CreateView().as_view(object=new_obj)(req4).render()
     assert rsp4.status_code == 201
 
 
@@ -370,8 +369,8 @@ def test_mixin_no_permissions_object(datadir, setup):  # noqa
     obj = CheckModel5(name='check')
 
     req1 = api_get('/check', user1)
-    with pytest.raises(PermissionDenied):
-        rsp1 = Check5DetailView().as_view(object=obj)(req1).render()  # noqa
+    rsp1 = Check5DetailView().as_view(object=obj)(req1).render()
+    assert rsp1.status_code == 403
     req2 = api_get('/check', user2)
     rsp2 = Check5DetailView().as_view(object=obj)(req2).render()
     assert rsp2.status_code == 200

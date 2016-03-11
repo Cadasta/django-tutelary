@@ -52,11 +52,11 @@ class PermissionRequiredMixin:
                                    self.get_permission_required(),
                                    objs, self.request.method)
 
-#            print('objs:', objs)
-#            print('acts:', self.get_permission_required())
-#            print('user:', self.request.user)
-#            print('method:', self.request.method)
-#            print('has_perm:', has_perm)
+            # print('objs:', objs)
+            # print('acts:', self.get_permission_required())
+            # print('user:', self.request.user)
+            # print('method:', self.request.method)
+            # print('has_perm:', has_perm)
 
             if not has_perm:
                 msg = self.get_permission_denied_message(
@@ -110,7 +110,6 @@ class PermissionRequiredMixin:
 
     def dispatch(self, request, *args, **kwargs):
         if self.check_drf():
-            self.check_permissions(request)
             return super().dispatch(request, *args, **kwargs)
         else:
             if not self.has_permission():
@@ -133,3 +132,7 @@ class PermissionRequiredMixin:
                                [obj], self.request.method)
 
         self.filtered_queryset = list(filter(check_one, objs))
+
+    def initial(self, request, *args, **kwargs):
+        self.check_permissions(request)
+        return super().initial(request, *args, **kwargs)

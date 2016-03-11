@@ -5,7 +5,7 @@ import rest_framework.generics as generics
 from tutelary.mixins import PermissionRequiredMixin
 
 import pytest
-from rest_framework.test import APIRequestFactory
+from rest_framework.test import APIRequestFactory, force_authenticate
 
 from .factories import UserFactory, PolicyFactory
 from .datadir import datadir  # noqa
@@ -63,8 +63,7 @@ class DetailDeleteProjList(PermissionRequiredMixin, BaseProjList):
 
 def api_get(url, user):
     req = APIRequestFactory().get(url)
-    req.user = user
-    req.successful_authenticator = True
+    force_authenticate(req, user)
     return req
 
 
@@ -136,12 +135,12 @@ def test_normal_listing(datadir, setup):  # noqa
 
     view = NormalProjList().as_view(objects=projs)
     assert project_count(view(r1).render()) == 10
-    with pytest.raises(PermissionDenied):
-        rsp2 = view(r2).render()  # noqa
-    with pytest.raises(PermissionDenied):
-        rsp3 = view(r3).render()  # noqa
-    with pytest.raises(PermissionDenied):
-        rsp4 = view(r4).render()  # noqa
+    rsp2 = view(r2).render()
+    assert rsp2.status_code == 403
+    rsp3 = view(r3).render()
+    assert rsp3.status_code == 403
+    rsp4 = view(r4).render()  # noqa
+    assert rsp4.status_code == 403
     assert project_count(view(r5).render()) == 10
 
 
