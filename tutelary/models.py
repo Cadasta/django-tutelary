@@ -212,7 +212,9 @@ class PermissionSetManager(models.Manager):
             if len(pis) == len(canonpols):
                 same = True
                 for pi, canonpol in zip(pis, canonpols):
-                    if pi.policy != canonpol[0] or pi.variables != canonpol[1]:
+                    if (pi.variables != canonpol[1] or
+                       (canonpol[2] is not None and pi.role != canonpol[0]) or
+                       (canonpol[2] is None and pi.policy != canonpol[0])):
                         same = False
                         break
                 if same:
@@ -329,7 +331,32 @@ def assign_user_policies(user, *policies_roles):
 
 
 def user_assigned_policies(user):
-    pass
+    """Return sequence of policies assigned to a user (or the anonymous
+    user is ``user`` is ``None``).  (Also installed as
+    ``assigned_policies`` method on ``User`` model.
+
+    """
+    if user is None:
+        try:
+            pset = PermissionSet.objects.get(anonymous_user=True)
+            pset.anonymous_user = False
+            pset.save()
+        except ObjectDoesNotExist:
+            return []
+    else:
+        pset = user.permissionset.first()
+    res = []
+    print('user_assigned_policies:', user)
+    for pi in PolicyInstance.objects.filter(pset=pset):
+        print(' ', pi)
+        if pi.role:
+            res.append(pi.role)
+        else:
+            if pi.variables != '{}':
+                res.append((pi.policy, json.loads(pi.variables)))
+            else:
+                res.append(pi.policy)
+    return res
 
 
 def check_perms(user, actions, objs, method=None):

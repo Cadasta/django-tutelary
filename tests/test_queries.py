@@ -6,12 +6,6 @@ from .factories import UserFactory, PolicyFactory, RoleFactory
 import pytest
 
 
-#  - Create 3 policies, 1 without variables, 2 with
-#  - Create roles:
-#      * 2 from no-var policy
-#      * 2 from one var policy
-#      * 2 from combinations of policies
-
 @pytest.fixture(scope="function")  # noqa
 def setup(datadir, db):
     users = []
@@ -24,7 +18,6 @@ def setup(datadir, db):
     proj_mgr_p = PolicyFactory.create(name='proj-mgr', file='proj-mgr.json')
     pols = [sys_admin_p, org_admin_p, proj_mgr_p]
 
-    roles = []
     sys_admin_r = RoleFactory.create(
         name='sys-admin', policies=[pols[0]],
         variables={}
@@ -99,6 +92,20 @@ def test_role_lookup(datadir, setup):  # noqa
 
 def test_lookup_user_policies_and_roles(datadir, setup):  # noqa
     users, pols, roles = setup
-    assert user_assigned_policies(None) == []
+    sys_admin_p, org_admin_p, proj_mgr_p = pols
+    (sys_admin_r,
+     org_admin_1_r, org_admin_2_r,
+     proj_mgr_1_r, proj_mgr_2_r) = roles
+    assert user_assigned_policies(None) == [(org_admin_p, {'org': 'Sandbox'})]
     assert users[0].assigned_policies() == []
-    assert users[1].assigned_policies() == []
+    assert users[1].assigned_policies() == [sys_admin_p]
+    assert users[2].assigned_policies() == [sys_admin_r]
+    assert users[3].assigned_policies() == [org_admin_1_r]
+    assert users[4].assigned_policies() == [org_admin_2_r]
+    assert users[5].assigned_policies() == [org_admin_1_r, org_admin_2_r]
+    assert users[6].assigned_policies() == [org_admin_1_r, proj_mgr_2_r]
+    assert users[7].assigned_policies() == [proj_mgr_1_r]
+    assert users[8].assigned_policies() == [(org_admin_p, {'org': 'Org3'})]
+    assert users[9].assigned_policies() == [(org_admin_p, {'org': 'Org3'}),
+                                            (proj_mgr_p, {'org': 'Org3',
+                                                          'proj': 'Proj3'})]
