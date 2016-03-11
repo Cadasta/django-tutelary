@@ -1,5 +1,5 @@
 import rest_framework.generics as generic
-import simplejson as json
+import json
 
 from rest_framework.test import APIRequestFactory
 

@@ -9,10 +9,14 @@ from setuptools import setup
 name = 'django-tutelary'
 package = 'tutelary'
 description = 'Policy-based permissions for Django.'
-url = 'https://github.com/ian-ross/django-tutelary'
+url = 'https://github.com/Cadasta/django-tutelary'
 author = 'Ian Ross'
 author_email = 'iross@cadasta.org'
 license = 'BSD'
+
+readme_file = os.path.join(os.path.dirname(__file__), 'README.rst')
+with open(readme_file, 'r') as f:
+    long_description = f.readline().strip()
 
 
 def get_version(package):
@@ -70,27 +74,25 @@ setup(
     url=url,
     license=license,
     description=description,
+    long_description=long_description,
     author=author,
     author_email=author_email,
     packages=get_packages(package),
     package_data=get_package_data(package),
     install_requires=[
+        'Django==1.9',
         'django-audit-log==0.7.0',
         'simplejson==3.8.1'
     ],
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
-        'Framework :: Django',
+        'Framework :: Django :: 1.9',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Natural Language :: English',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Topic :: Internet :: WWW/HTTP',
     ]
 )

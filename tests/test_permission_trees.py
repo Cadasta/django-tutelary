@@ -1,4 +1,4 @@
-import simplejson as json
+import json
 from tutelary.engine import PermissionTree, PolicyBody, Action, Object
 from .datadir import datadir  # noqa
 

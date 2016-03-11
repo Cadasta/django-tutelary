@@ -11,8 +11,8 @@ Policy-based permissions for Django.
 Requirements
 ------------
 
--  Python (3.3, 3.4, 3.5)
--  Django (1.6, 1.7, 1.8)
+-  Python (3.5)
+-  Django (1.9)
 
 Installation
 ------------
