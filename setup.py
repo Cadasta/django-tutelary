@@ -81,8 +81,7 @@ setup(
     package_data=get_package_data(package),
     install_requires=[
         'Django==1.9',
-        'django-audit-log==0.7.0',
-        'simplejson==3.8.1'
+        'django-audit-log==0.7.0'
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
