@@ -1,0 +1,13 @@
+// Project manager policy
+{
+  "version": "2015-12-10",
+  "clause": [
+    { "effect": "allow",
+      "action": ["page.create"],
+      "object": ["proj/$org/$proj"] },
+
+    { "effect": "allow",
+      "action": ["page.delete"],
+      "object": ["page/$org/$proj/*"] }
+  ]
+}

@@ -1,0 +1,21 @@
+// Organisation admin policy
+{
+  "version": "2015-12-10",
+  "clause": [
+    { "effect": "allow",
+      "action": ["proj.create"],
+      "object": ["org/$org"] },
+
+    { "effect": "allow",
+      "action": ["proj.delete"],
+      "object": ["proj/$org/*"] },
+
+    { "effect": "allow",
+      "action": ["page.create"],
+      "object": ["proj/$org/*"] },
+
+    { "effect": "allow",
+      "action": ["page.delete"],
+      "object": ["page/$org/*/*"] }
+  ]
+}

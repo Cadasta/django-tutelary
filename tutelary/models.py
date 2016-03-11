@@ -328,6 +328,10 @@ def assign_user_policies(user, *policies_roles):
     pset.save()
 
 
+def user_assigned_policies(user):
+    pass
+
+
 def check_perms(user, actions, objs, method=None):
     if actions is not None:
         for a in actions:

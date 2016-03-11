@@ -177,14 +177,14 @@ policies with variables that are filled in for particular assignments
 to users.  (For instance, the policies for a ``project-manager`` roles
 will probably have a ``$project`` variable that needs to be filled in
 to instantiate the role for a particular project -- i.e. to make a
-user a project manager for that particular project).  To make dealing
-with this a little easier, a custom query is provided to find ``Role``
-objects by name and variable assignment.  Since role names are not
-constrained to be unique, you can give all the role instances you
-assign to project managers the same name and can do this to find the
-project manager roles for a particular project::
+user a project manager for that particular project).  This case is
+easy to deal with using the standard ``filter`` query method to find
+``Role`` objects by name and variable assignment.  Since role names
+are not constrained to be unique, you can give all the role instances
+you assign to project managers the same name and can do this to find
+the project manager roles for a particular project::
 
-  project_manager_roles = Role.objects.by_name_and_variables(
+  project_manager_roles = Role.filter(
     name='project-manager',
     variables={'project': 'ExcitingNewProject'}
   )
