@@ -20,16 +20,13 @@ class Policy(models.Model):
     name = models.CharField(max_length=200)
     """Policy name field."""
 
-    _body = models.TextField()
+    body = models.TextField()
+    """Policy JSON body."""
 
-    @property
-    def body(self):
-        return self._body
-
-    @body.setter
-    def body(self, value):
-        self._body = value
-        self.refresh()
+    def __setattr__(self, attrname, val):
+        super().__setattr__(attrname, val)
+        if attrname == 'body':
+            self.refresh()
 
     audit_log = AuditLog()
 

@@ -1,5 +1,6 @@
 import json
 import itertools
+import re
 import django.views.generic as generic
 import django.views.generic.edit as edit
 from django.db import transaction
@@ -286,14 +287,32 @@ class PolicyDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(PolicyDetail, self).get_context_data(**kwargs)
-        context['pretty_body'] = json.dumps(json.loads(context['object'].body),
-                                            indent=2)
+        outlines = []
+        in_array = False
+        accum_line = None
+        for line in json.dumps(json.loads(context['object'].body),
+                               indent=2, sort_keys=True).splitlines():
+            if not in_array:
+                if (re.match(r'\s+"action": \[', line) or
+                   re.match(r'\s+"object": \[', line)):
+                    accum_line = line
+                    in_array = True
+                else:
+                    outlines.append(line)
+            else:
+                accum_line += ' ' + line.replace(' ', '')
+                if re.match(r'\s+],?', line):
+                    outlines.append(accum_line)
+                    in_array = False
+                    accum_line = None
+        body = '\n'.join(outlines)
+        context['pretty_body'] = body
         return context
 
 
 class PolicyCreate(CreateView):
     model = Policy
-    fields = ['name', 'body']
+    fields = ('name', 'body')
     permission_required = 'policy.create'
 
     def get_success_url(self):
@@ -302,7 +321,7 @@ class PolicyCreate(CreateView):
 
 class PolicyUpdate(UpdateView):
     model = Policy
-    fields = ['name', 'body']
+    fields = ('name', 'body')
     template_name_suffix = '_update_form'
     permission_required = 'policy.edit'
 
@@ -328,7 +347,7 @@ class OrganisationList(ListView):
 
 class OrganisationCreate(CreateView):
     model = Organisation
-    fields = ['name']
+    fields = ('name',)
     success_url = reverse_lazy('organisation-list')
     permission_required = {'GET': None, 'POST': 'organisation.create'}
 

@@ -10,9 +10,9 @@ The django-tutelary package is a policy-based permission plugin for
 Django, loosely inspired by the way that permissions policies work in
 Amazon's `Identity and Access Management`_ (IAM) system.
 
-.. warning:: This is a work in progress.  Use at your own risk.  In
+.. note:: This is a work in progress.  Use at your own risk.  In
    particular, django-tutelary currently has no caching, so
-   performance won't be stellar.  There are places where there are
+   performance might not be stellar.  There are places where there are
    opportunities for caching both database query results and
    permissions query results, but I've yet to take advantage of them.
 

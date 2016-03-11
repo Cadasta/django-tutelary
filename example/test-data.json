@@ -12,7 +12,7 @@
     "email": "",
     "is_staff": false,
     "is_active": true,
-    "date_joined": "2016-02-19T13:57:01.449",
+    "date_joined": "2016-03-11T09:59:19.247",
     "groups": [],
     "user_permissions": []
   }
@@ -30,7 +30,7 @@
     "email": "",
     "is_staff": false,
     "is_active": true,
-    "date_joined": "2016-02-19T13:57:01.666",
+    "date_joined": "2016-03-11T09:59:19.469",
     "groups": [],
     "user_permissions": []
   }
@@ -48,7 +48,7 @@
     "email": "",
     "is_staff": false,
     "is_active": true,
-    "date_joined": "2016-02-19T13:57:01.823",
+    "date_joined": "2016-03-11T09:59:19.874",
     "groups": [],
     "user_permissions": []
   }
@@ -66,7 +66,7 @@
     "email": "",
     "is_staff": false,
     "is_active": true,
-    "date_joined": "2016-02-19T13:57:02.059",
+    "date_joined": "2016-03-11T09:59:20.148",
     "groups": [],
     "user_permissions": []
   }
@@ -77,9 +77,9 @@
   "fields": {
     "id": 1,
     "name": "default",
-    "body": "{\"clause\": [{\"action\": [\"party.list\"], \"object\": [\"project/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"party.detail\"], \"object\": [\"party/*/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"parcel.list\"], \"object\": [\"project/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"parcel.detail\"], \"object\": [\"parcel/*/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"organisation.list\"], \"effect\": \"allow\"}, {\"action\": [\"organisation.detail\"], \"object\": [\"organisation/*\"], \"effect\": \"allow\"}, {\"action\": [\"project.list\"], \"object\": [\"organisation/*\"], \"effect\": \"allow\"}, {\"action\": [\"project.detail\"], \"object\": [\"project/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"user.list\"], \"effect\": \"allow\"}, {\"action\": [\"user.detail\"], \"object\": [\"user/*\"], \"effect\": \"allow\"}, {\"action\": [\"policy.list\"], \"effect\": \"allow\"}, {\"action\": [\"policy.detail\"], \"object\": [\"policy/*\"], \"effect\": \"allow\"}, {\"action\": \"statistics\", \"effect\": \"deny\"}]}",
+    "body": "{\"clause\": [{\"object\": [\"project/*/*\"], \"action\": [\"party.list\"], \"effect\": \"allow\"}, {\"object\": [\"party/*/*/*\"], \"action\": [\"party.detail\"], \"effect\": \"allow\"}, {\"object\": [\"project/*/*\"], \"action\": [\"parcel.list\"], \"effect\": \"allow\"}, {\"object\": [\"parcel/*/*/*\"], \"action\": [\"parcel.detail\"], \"effect\": \"allow\"}, {\"action\": [\"organisation.list\"], \"effect\": \"allow\"}, {\"object\": [\"organisation/*\"], \"action\": [\"organisation.detail\"], \"effect\": \"allow\"}, {\"object\": [\"organisation/*\"], \"action\": [\"project.list\"], \"effect\": \"allow\"}, {\"object\": [\"project/*/*\"], \"action\": [\"project.detail\"], \"effect\": \"allow\"}, {\"action\": [\"user.list\"], \"effect\": \"allow\"}, {\"object\": [\"user/*\"], \"action\": [\"user.detail\"], \"effect\": \"allow\"}, {\"action\": [\"policy.list\"], \"effect\": \"allow\"}, {\"object\": [\"policy/*\"], \"action\": [\"policy.detail\"], \"effect\": \"allow\"}, {\"action\": \"statistics\", \"effect\": \"deny\"}]}",
     "action_user": null,
-    "action_date": "2016-02-19T13:57:01.262",
+    "action_date": "2016-03-11T09:59:19.013",
     "action_type": "I"
   }
 },
@@ -89,9 +89,9 @@
   "fields": {
     "id": 2,
     "name": "sys-admin",
-    "body": "{\"clause\": [{\"action\": [\"party.detail\", \"party.edit\", \"party.delete\"], \"object\": [\"party/*/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"party.list\", \"party.create\"], \"object\": [\"project/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"parcel.detail\", \"parcel.edit\", \"parcel.delete\"], \"object\": [\"parcel/*/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"parcel.list\", \"parcel.create\"], \"object\": [\"project/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"organisation.delete\"], \"object\": [\"organisation/*\"], \"effect\": \"allow\"}, {\"action\": [\"organisation.list\", \"organisation.create\"], \"effect\": \"allow\"}, {\"action\": [\"project.delete\"], \"object\": [\"project/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"project.list\", \"project.create\"], \"object\": [\"organisation/*\"], \"effect\": \"allow\"}, {\"action\": [\"user.detail\", \"user.edit\", \"user.delete\"], \"object\": [\"user/*\"], \"effect\": \"allow\"}, {\"action\": [\"user.list\", \"user.create\"], \"effect\": \"allow\"}, {\"action\": [\"policy.detail\", \"policy.edit\", \"policy.delete\"], \"object\": [\"policy/*\"], \"effect\": \"allow\"}, {\"action\": [\"policy.list\", \"policy.create\"], \"effect\": \"allow\"}, {\"action\": \"statistics\", \"effect\": \"allow\"}]}",
+    "body": "{\"clause\": [{\"object\": [\"party/*/*/*\"], \"action\": [\"party.detail\", \"party.edit\", \"party.delete\"], \"effect\": \"allow\"}, {\"object\": [\"project/*/*\"], \"action\": [\"party.list\", \"party.create\"], \"effect\": \"allow\"}, {\"object\": [\"parcel/*/*/*\"], \"action\": [\"parcel.detail\", \"parcel.edit\", \"parcel.delete\"], \"effect\": \"allow\"}, {\"object\": [\"project/*/*\"], \"action\": [\"parcel.list\", \"parcel.create\"], \"effect\": \"allow\"}, {\"object\": [\"organisation/*\"], \"action\": [\"organisation.delete\"], \"effect\": \"allow\"}, {\"action\": [\"organisation.list\", \"organisation.create\"], \"effect\": \"allow\"}, {\"object\": [\"project/*/*\"], \"action\": [\"project.delete\"], \"effect\": \"allow\"}, {\"object\": [\"organisation/*\"], \"action\": [\"project.list\", \"project.create\"], \"effect\": \"allow\"}, {\"object\": [\"user/*\"], \"action\": [\"user.detail\", \"user.edit\", \"user.delete\"], \"effect\": \"allow\"}, {\"action\": [\"user.list\", \"user.create\"], \"effect\": \"allow\"}, {\"object\": [\"policy/*\"], \"action\": [\"policy.detail\", \"policy.edit\", \"policy.delete\"], \"effect\": \"allow\"}, {\"action\": [\"policy.list\", \"policy.create\"], \"effect\": \"allow\"}, {\"action\": \"statistics\", \"effect\": \"allow\"}]}",
     "action_user": null,
-    "action_date": "2016-02-19T13:57:01.273",
+    "action_date": "2016-03-11T09:59:19.060",
     "action_type": "I"
   }
 },
@@ -101,9 +101,9 @@
   "fields": {
     "id": 3,
     "name": "org-default",
-    "body": "{\"clause\": [{\"action\": [\"party.detail\", \"party.edit\", \"party.delete\"], \"object\": [\"party/$organisation/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"party.list\", \"party.create\"], \"object\": [\"project/$organisation/*\"], \"effect\": \"allow\"}, {\"action\": [\"parcel.detail\", \"parcel.edit\", \"parcel.delete\"], \"object\": [\"parcel/$organisation/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"parcel.list\", \"parcel.create\"], \"object\": [\"project/$organisation/*\"], \"effect\": \"allow\"}, {\"action\": [\"project.delete\"], \"object\": [\"project/$organisation/*\"], \"effect\": \"allow\"}, {\"action\": [\"project.list\", \"project.create\"], \"object\": [\"organisation/$organisation\"], \"effect\": \"allow\"}]}",
+    "body": "{\"clause\": [{\"object\": [\"party/$organisation/*/*\"], \"action\": [\"party.detail\", \"party.edit\", \"party.delete\"], \"effect\": \"allow\"}, {\"object\": [\"project/$organisation/*\"], \"action\": [\"party.list\", \"party.create\"], \"effect\": \"allow\"}, {\"object\": [\"parcel/$organisation/*/*\"], \"action\": [\"parcel.detail\", \"parcel.edit\", \"parcel.delete\"], \"effect\": \"allow\"}, {\"object\": [\"project/$organisation/*\"], \"action\": [\"parcel.list\", \"parcel.create\"], \"effect\": \"allow\"}, {\"object\": [\"project/$organisation/*\"], \"action\": [\"project.delete\"], \"effect\": \"allow\"}, {\"object\": [\"organisation/$organisation\"], \"action\": [\"project.list\", \"project.create\"], \"effect\": \"allow\"}]}",
     "action_user": null,
-    "action_date": "2016-02-19T13:57:01.300",
+    "action_date": "2016-03-11T09:59:19.104",
     "action_type": "I"
   }
 },
@@ -113,9 +113,9 @@
   "fields": {
     "id": 4,
     "name": "project-default",
-    "body": "{\"clause\": [{\"action\": [\"party.edit\"], \"object\": [\"party/$organisation/$project/*\"], \"effect\": \"deny\"}, {\"action\": [\"parcel.edit\"], \"object\": [\"parcel/$organisation/$project/*\"], \"effect\": \"deny\"}, {\"action\": [\"project.edit\", \"project.delete\"], \"object\": [\"project/$organisation/*\"], \"effect\": \"deny\"}, {\"action\": [\"project.create\"], \"object\": [\"organisation/$organisation\"], \"effect\": \"deny\"}]}",
+    "body": "{\"clause\": [{\"object\": [\"party/$organisation/$project/*\"], \"action\": [\"party.edit\"], \"effect\": \"deny\"}, {\"object\": [\"parcel/$organisation/$project/*\"], \"action\": [\"parcel.edit\"], \"effect\": \"deny\"}, {\"object\": [\"project/$organisation/*\"], \"action\": [\"project.edit\", \"project.delete\"], \"effect\": \"deny\"}, {\"object\": [\"organisation/$organisation\"], \"action\": [\"project.create\"], \"effect\": \"deny\"}]}",
     "action_user": null,
-    "action_date": "2016-02-19T13:57:01.327",
+    "action_date": "2016-03-11T09:59:19.145",
     "action_type": "I"
   }
 },
@@ -124,7 +124,7 @@
   "pk": 1,
   "fields": {
     "name": "default",
-    "body": "{\"clause\": [{\"action\": [\"party.list\"], \"object\": [\"project/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"party.detail\"], \"object\": [\"party/*/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"parcel.list\"], \"object\": [\"project/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"parcel.detail\"], \"object\": [\"parcel/*/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"organisation.list\"], \"effect\": \"allow\"}, {\"action\": [\"organisation.detail\"], \"object\": [\"organisation/*\"], \"effect\": \"allow\"}, {\"action\": [\"project.list\"], \"object\": [\"organisation/*\"], \"effect\": \"allow\"}, {\"action\": [\"project.detail\"], \"object\": [\"project/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"user.list\"], \"effect\": \"allow\"}, {\"action\": [\"user.detail\"], \"object\": [\"user/*\"], \"effect\": \"allow\"}, {\"action\": [\"policy.list\"], \"effect\": \"allow\"}, {\"action\": [\"policy.detail\"], \"object\": [\"policy/*\"], \"effect\": \"allow\"}, {\"action\": \"statistics\", \"effect\": \"deny\"}]}"
+    "body": "{\"clause\": [{\"object\": [\"project/*/*\"], \"action\": [\"party.list\"], \"effect\": \"allow\"}, {\"object\": [\"party/*/*/*\"], \"action\": [\"party.detail\"], \"effect\": \"allow\"}, {\"object\": [\"project/*/*\"], \"action\": [\"parcel.list\"], \"effect\": \"allow\"}, {\"object\": [\"parcel/*/*/*\"], \"action\": [\"parcel.detail\"], \"effect\": \"allow\"}, {\"action\": [\"organisation.list\"], \"effect\": \"allow\"}, {\"object\": [\"organisation/*\"], \"action\": [\"organisation.detail\"], \"effect\": \"allow\"}, {\"object\": [\"organisation/*\"], \"action\": [\"project.list\"], \"effect\": \"allow\"}, {\"object\": [\"project/*/*\"], \"action\": [\"project.detail\"], \"effect\": \"allow\"}, {\"action\": [\"user.list\"], \"effect\": \"allow\"}, {\"object\": [\"user/*\"], \"action\": [\"user.detail\"], \"effect\": \"allow\"}, {\"action\": [\"policy.list\"], \"effect\": \"allow\"}, {\"object\": [\"policy/*\"], \"action\": [\"policy.detail\"], \"effect\": \"allow\"}, {\"action\": \"statistics\", \"effect\": \"deny\"}]}"
   }
 },
 {
@@ -132,7 +132,7 @@
   "pk": 2,
   "fields": {
     "name": "sys-admin",
-    "body": "{\"clause\": [{\"action\": [\"party.detail\", \"party.edit\", \"party.delete\"], \"object\": [\"party/*/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"party.list\", \"party.create\"], \"object\": [\"project/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"parcel.detail\", \"parcel.edit\", \"parcel.delete\"], \"object\": [\"parcel/*/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"parcel.list\", \"parcel.create\"], \"object\": [\"project/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"organisation.delete\"], \"object\": [\"organisation/*\"], \"effect\": \"allow\"}, {\"action\": [\"organisation.list\", \"organisation.create\"], \"effect\": \"allow\"}, {\"action\": [\"project.delete\"], \"object\": [\"project/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"project.list\", \"project.create\"], \"object\": [\"organisation/*\"], \"effect\": \"allow\"}, {\"action\": [\"user.detail\", \"user.edit\", \"user.delete\"], \"object\": [\"user/*\"], \"effect\": \"allow\"}, {\"action\": [\"user.list\", \"user.create\"], \"effect\": \"allow\"}, {\"action\": [\"policy.detail\", \"policy.edit\", \"policy.delete\"], \"object\": [\"policy/*\"], \"effect\": \"allow\"}, {\"action\": [\"policy.list\", \"policy.create\"], \"effect\": \"allow\"}, {\"action\": \"statistics\", \"effect\": \"allow\"}]}"
+    "body": "{\"clause\": [{\"object\": [\"party/*/*/*\"], \"action\": [\"party.detail\", \"party.edit\", \"party.delete\"], \"effect\": \"allow\"}, {\"object\": [\"project/*/*\"], \"action\": [\"party.list\", \"party.create\"], \"effect\": \"allow\"}, {\"object\": [\"parcel/*/*/*\"], \"action\": [\"parcel.detail\", \"parcel.edit\", \"parcel.delete\"], \"effect\": \"allow\"}, {\"object\": [\"project/*/*\"], \"action\": [\"parcel.list\", \"parcel.create\"], \"effect\": \"allow\"}, {\"object\": [\"organisation/*\"], \"action\": [\"organisation.delete\"], \"effect\": \"allow\"}, {\"action\": [\"organisation.list\", \"organisation.create\"], \"effect\": \"allow\"}, {\"object\": [\"project/*/*\"], \"action\": [\"project.delete\"], \"effect\": \"allow\"}, {\"object\": [\"organisation/*\"], \"action\": [\"project.list\", \"project.create\"], \"effect\": \"allow\"}, {\"object\": [\"user/*\"], \"action\": [\"user.detail\", \"user.edit\", \"user.delete\"], \"effect\": \"allow\"}, {\"action\": [\"user.list\", \"user.create\"], \"effect\": \"allow\"}, {\"object\": [\"policy/*\"], \"action\": [\"policy.detail\", \"policy.edit\", \"policy.delete\"], \"effect\": \"allow\"}, {\"action\": [\"policy.list\", \"policy.create\"], \"effect\": \"allow\"}, {\"action\": \"statistics\", \"effect\": \"allow\"}]}"
   }
 },
 {
@@ -140,7 +140,7 @@
   "pk": 3,
   "fields": {
     "name": "org-default",
-    "body": "{\"clause\": [{\"action\": [\"party.detail\", \"party.edit\", \"party.delete\"], \"object\": [\"party/$organisation/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"party.list\", \"party.create\"], \"object\": [\"project/$organisation/*\"], \"effect\": \"allow\"}, {\"action\": [\"parcel.detail\", \"parcel.edit\", \"parcel.delete\"], \"object\": [\"parcel/$organisation/*/*\"], \"effect\": \"allow\"}, {\"action\": [\"parcel.list\", \"parcel.create\"], \"object\": [\"project/$organisation/*\"], \"effect\": \"allow\"}, {\"action\": [\"project.delete\"], \"object\": [\"project/$organisation/*\"], \"effect\": \"allow\"}, {\"action\": [\"project.list\", \"project.create\"], \"object\": [\"organisation/$organisation\"], \"effect\": \"allow\"}]}"
+    "body": "{\"clause\": [{\"object\": [\"party/$organisation/*/*\"], \"action\": [\"party.detail\", \"party.edit\", \"party.delete\"], \"effect\": \"allow\"}, {\"object\": [\"project/$organisation/*\"], \"action\": [\"party.list\", \"party.create\"], \"effect\": \"allow\"}, {\"object\": [\"parcel/$organisation/*/*\"], \"action\": [\"parcel.detail\", \"parcel.edit\", \"parcel.delete\"], \"effect\": \"allow\"}, {\"object\": [\"project/$organisation/*\"], \"action\": [\"parcel.list\", \"parcel.create\"], \"effect\": \"allow\"}, {\"object\": [\"project/$organisation/*\"], \"action\": [\"project.delete\"], \"effect\": \"allow\"}, {\"object\": [\"organisation/$organisation\"], \"action\": [\"project.list\", \"project.create\"], \"effect\": \"allow\"}]}"
   }
 },
 {
@@ -148,7 +148,7 @@
   "pk": 4,
   "fields": {
     "name": "project-default",
-    "body": "{\"clause\": [{\"action\": [\"party.edit\"], \"object\": [\"party/$organisation/$project/*\"], \"effect\": \"deny\"}, {\"action\": [\"parcel.edit\"], \"object\": [\"parcel/$organisation/$project/*\"], \"effect\": \"deny\"}, {\"action\": [\"project.edit\", \"project.delete\"], \"object\": [\"project/$organisation/*\"], \"effect\": \"deny\"}, {\"action\": [\"project.create\"], \"object\": [\"organisation/$organisation\"], \"effect\": \"deny\"}]}"
+    "body": "{\"clause\": [{\"object\": [\"party/$organisation/$project/*\"], \"action\": [\"party.edit\"], \"effect\": \"deny\"}, {\"object\": [\"parcel/$organisation/$project/*\"], \"action\": [\"parcel.edit\"], \"effect\": \"deny\"}, {\"object\": [\"project/$organisation/*\"], \"action\": [\"project.edit\", \"project.delete\"], \"effect\": \"deny\"}, {\"object\": [\"organisation/$organisation\"], \"action\": [\"project.create\"], \"effect\": \"deny\"}]}"
   }
 },
 {
@@ -158,6 +158,7 @@
     "policy": 1,
     "pset": 1,
     "index": 0,
+    "role": null,
     "variables": "{}"
   }
 },
@@ -168,6 +169,7 @@
     "policy": 2,
     "pset": 1,
     "index": 1,
+    "role": null,
     "variables": "{}"
   }
 },
@@ -178,6 +180,7 @@
     "policy": 1,
     "pset": 2,
     "index": 0,
+    "role": null,
     "variables": "{}"
   }
 },
@@ -188,6 +191,7 @@
     "policy": 1,
     "pset": 3,
     "index": 0,
+    "role": null,
     "variables": "{}"
   }
 },
@@ -198,6 +202,7 @@
     "policy": 3,
     "pset": 3,
     "index": 1,
+    "role": null,
     "variables": "{\"organisation\": \"Cadasta\"}"
   }
 },
@@ -208,6 +213,7 @@
     "policy": 1,
     "pset": 4,
     "index": 0,
+    "role": null,
     "variables": "{}"
   }
 },
@@ -218,6 +224,7 @@
     "policy": 3,
     "pset": 4,
     "index": 1,
+    "role": null,
     "variables": "{\"organisation\": \"Cadasta\"}"
   }
 },
@@ -228,7 +235,8 @@
     "policy": 4,
     "pset": 4,
     "index": 2,
-    "variables": "{\"organisation\": \"Cadasta\", \"project\": \"CadastaProj1\"}"
+    "role": null,
+    "variables": "{\"project\": \"CadastaProj1\", \"organisation\": \"Cadasta\"}"
   }
 },
 {
