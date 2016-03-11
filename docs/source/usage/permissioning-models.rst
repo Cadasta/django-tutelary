@@ -82,14 +82,19 @@ django-tutelary::
           perm_type = 'party'
           path_fields = ('project', 'pk')
           actions = [
-              ('party.list',   {'description': "List existing parties",
-                                'permissions_object': 'project'}),
-              ('party.create', {'description': "Create parties",
-                                'permissions_object': 'project'),
-              ('party.detail', {'description': "View details of a party",
-                                'error_message': "Detail view is not allowed"}),
-              ('party.edit',   {'description': "Update existing parties"}),
-              ('party.delete', {'description': "Delete parties"})
+              ('party.list',
+               {'description': "List existing parties",
+                'permissions_object': 'project'}),
+              ('party.create',
+               {'description': "Create parties",
+                'permissions_object': 'project'),
+              ('party.detail',
+               {'description': "View details of a party",
+                'error_message': "Detail view is not allowed"}),
+              ('party.edit',
+               {'description': "Update existing parties"}),
+              ('party.delete',
+               {'description': "Delete parties"})
           ]
 
 In this case, as well as the normal Django ``Meta`` class member, we
@@ -196,8 +201,10 @@ permissions as follows::
           perm_type = 'project'
           path_fields = ('organisation', 'name')
           actions = [
-              ('project.list',   {'permissions_object': 'organisation'}),
-              ('project.create', {'permissions_object': 'organisation'}),
+              ('project.list',
+               {'permissions_object': 'organisation'}),
+              ('project.create',
+               {'permissions_object': 'organisation'}),
               'project.delete'
           ]
 

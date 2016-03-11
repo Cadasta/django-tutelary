@@ -1,7 +1,7 @@
 .. _guide_policy_composition:
 
-Policy composition
-==================
+Policy composition and assignment
+=================================
 
 As described in the previous section, policies are effectively
 interpreted clause-by-clause, with later clauses overriding earlier
@@ -11,9 +11,11 @@ you associate a sequence of policies with each user, with the sequence
 usually going from less specific to more specific.
 
 In this section, we'll work through an example, then talk about the
-``Policy`` class and ``User.assign_policies`` and
+``Policy`` and ``Role`` classes and ``User.assign_policies`` and
 ``assign_user_policies`` methods defined by django-tutelary to connect
-users to the policies that control their permissions.
+users to the policies that control their permissions.  We'll also look
+at some custom query methods for finding roles and retrieving the list
+of roles and policies assigned to a user.
 
 A worked example
 ----------------
@@ -168,6 +170,24 @@ variable assignments.
 
 As for policy objects, changes to ``Role`` objects are audited using
 the django-audit-log_ package.
+
+A common use case for roles is to have a named role
+(e.g. ``system-admin``, ``project-manager``, ``process-qa``) using
+policies with variables that are filled in for particular assignments
+to users.  (For instance, the policies for a ``project-manager`` roles
+will probably have a ``$project`` variable that needs to be filled in
+to instantiate the role for a particular project -- i.e. to make a
+user a project manager for that particular project).  To make dealing
+with this a little easier, a custom query is provided to find ``Role``
+objects by name and variable assignment.  Since role names are not
+constrained to be unique, you can give all the role instances you
+assign to project managers the same name and can do this to find the
+project manager roles for a particular project::
+
+  project_manager_roles = Role.objects.by_name_and_variables(
+    name='project-manager',
+    variables={'project': 'ExcitingNewProject'}
+  )
 
 Assigning policies to users
 ---------------------------
