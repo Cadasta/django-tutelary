@@ -14,16 +14,19 @@ class PermissionRequiredMixin:
     def has_permission(self):
         """Permission checking for "normal" Django."""
         objs = [None]
-        if hasattr(self, 'get_object'):
-            try:
-                objs = [self.get_object()]
-            except:
+        if hasattr(self, 'get_perms_objects'):
+            objs = self.get_perms_objects()
+        else:
+            if hasattr(self, 'get_object'):
                 try:
-                    objs = [self.get_form().save(commit=False)]
+                    objs = [self.get_object()]
                 except:
-                    pass
-        if objs == [None]:
-            objs = self.get_queryset()
+                    try:
+                        objs = [self.get_form().save(commit=False)]
+                    except:
+                        pass
+            if objs == [None]:
+                objs = self.get_queryset()
         if (hasattr(self, 'permission_filter_queryset') and
            self.permission_filter_queryset is not False):
             self.perms_filter_queryset(objs)
@@ -36,13 +39,18 @@ class PermissionRequiredMixin:
     def check_permissions(self, request):
         """Permission checking for DRF."""
         objs = [None]
-        if hasattr(self, 'get_object'):
-            try:
-                objs = [self.get_object()]
-            except:
-                pass
-        if objs == [None]:
-            objs = self.get_queryset()
+        if hasattr(self, 'get_perms_objects'):
+            objs = self.get_perms_objects()
+        else:
+            if hasattr(self, 'get_object'):
+                try:
+                    objs = [self.get_object()]
+                except:
+                    pass
+                if objs == [None]:
+                    objs = self.get_queryset()
+                if len(objs) == 0:
+                    objs = [None]
 
         if (hasattr(self, 'permission_filter_queryset') and
            self.permission_filter_queryset is not False):
