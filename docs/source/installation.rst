@@ -13,13 +13,11 @@ Requirements
 The django-tutelary package works with the following Python and Django
 versions:
 
-- Python (3.4, 3.5)
+- Python (3.5)
 - Django (1.9)
 
 The latest stable version
 =========================
-
-.. warning:: The package isn't actually released to PyPI yet!
 
 The latest, stable version is always available via the `Python package
 index_` (PyPI).  You can download the latest version on `the site`_
@@ -47,9 +45,6 @@ Then install it manually::
 
     cd django-tutelary
     python setup.py install
-
-.. warning:: The development version may contain bugs, so use with
-   care!
 
 .. _Github account: https://github.com/Cadasta/django-tutelary/
 
