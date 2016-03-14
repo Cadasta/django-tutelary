@@ -17,9 +17,6 @@ Requirements
 Installation
 ------------
 
-.. note:: django-tutelary is not yet released to PyPI.  Please install
-          directly from GitHub for now.
-
 Install using ``pip``:
 
 .. code:: bash
@@ -29,7 +26,7 @@ Install using ``pip``:
 Usage
 -----
 
-Refer to the `documentation <http://django-tutelary.readthedocs.org/>`_
+Refer to the `documentation <http://www.skybluetrades.net/django-tutelary/>`_
 for further details!
 
 .. |build-status-image| image:: https://secure.travis-ci.org/Cadasta/django-tutelary.svg?branch=master
