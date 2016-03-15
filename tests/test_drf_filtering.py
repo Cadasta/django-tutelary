@@ -24,13 +24,27 @@ class ProjSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+class FakeQueryset:
+    def __init__(self, objs):
+        self.objects = objs
+
+    def __len__(self):
+        return len(self.objects)
+
+    def __iter__(self):
+        return self.objects.__iter__()
+
+    def filter(self, pk__in):
+        return FakeQueryset([o for o in self.objects if o.pk in pk__in])
+
+
 class BaseProjList(generics.ListAPIView):
     objects = None
     serializer_class = ProjSerializer
 
     def __init__(self, *args, **kwargs):
         if 'objects' in kwargs:
-            self.objects = kwargs['objects']
+            self.objects = FakeQueryset(kwargs['objects'])
 
     def get_queryset(self):
         return self.objects
@@ -114,11 +128,11 @@ def setup(datadir, db):
 
     orgs = []
     for i in range(1, 3):
-        orgs.append(Org(name='org{}'.format(i)))
+        orgs.append(Org(pk=i, name='org{}'.format(i)))
 
     projs = []
     for i in range(1, 11):
-        projs.append(Proj(name='proj{}'.format(i),
+        projs.append(Proj(pk=i, name='proj{}'.format(i),
                           org=orgs[0] if i < 8 else orgs[1]))
 
     return (users, pols, orgs, projs)

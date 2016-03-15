@@ -28,8 +28,10 @@ class PermissionRequiredMixin:
             if objs == [None]:
                 objs = self.get_queryset()
         if (hasattr(self, 'permission_filter_queryset') and
-           self.permission_filter_queryset is not False):
-            self.perms_filter_queryset(objs)
+           self.permission_filter_queryset is not False and
+           self.request.method == 'GET'):
+            if objs != [None]:
+                self.perms_filter_queryset(objs)
             return True
         else:
             return check_perms(self.request.user,
@@ -53,8 +55,10 @@ class PermissionRequiredMixin:
                     objs = [None]
 
         if (hasattr(self, 'permission_filter_queryset') and
-           self.permission_filter_queryset is not False):
-            self.perms_filter_queryset(objs)
+           self.permission_filter_queryset is not False and
+           self.request.method == 'GET'):
+            if objs != [None]:
+                self.perms_filter_queryset(objs)
         else:
             has_perm = check_perms(self.request.user,
                                    self.get_permission_required(),
@@ -139,7 +143,8 @@ class PermissionRequiredMixin:
             return check_perms(self.request.user, actions,
                                [obj], self.request.method)
 
-        self.filtered_queryset = list(filter(check_one, objs))
+        filtered_pks = [o.pk for o in filter(check_one, objs)]
+        self.filtered_queryset = self.get_queryset().filter(pk__in=filtered_pks)
 
     def initial(self, request, *args, **kwargs):
         self.check_permissions(request)
