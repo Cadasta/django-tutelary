@@ -184,7 +184,7 @@ are not constrained to be unique, you can give all the role instances
 you assign to project managers the same name and can do this to find
 the project manager roles for a particular project::
 
-  project_manager_roles = Role.filter(
+  project_manager_roles = Role.objects.filter(
     name='project-manager',
     variables={'project': 'ExcitingNewProject'}
   )
