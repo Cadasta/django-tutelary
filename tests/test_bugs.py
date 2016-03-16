@@ -3,7 +3,6 @@ import json
 
 from rest_framework.test import APIRequestFactory
 
-from tutelary.engine import Object
 from tutelary.models import Policy
 from tutelary.mixins import PermissionRequiredMixin
 from tutelary.decorators import permissioned_model
