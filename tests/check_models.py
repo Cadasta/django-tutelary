@@ -72,3 +72,19 @@ class CheckModel5(models.Model):
         perm_type = 'check5'
         path_fields = ('name',)
         actions = ['check5.detail', 'check5.delete']
+
+
+class CheckModel1Broken(models.Model):
+    name = models.CharField(max_length=100)
+
+    class TutelaryMeta:
+        perm_type = 'check'
+        path_fields = ('name',)
+        actions = [('check.list', {'permissions_object': None}),
+                   ('check.create', {'permissions_object': None}),
+                   ('check.detail',
+                    {'error_message': 'detail view not allowed'}),
+                   'check.delete']
+
+    def __str__(self):
+        return self.name

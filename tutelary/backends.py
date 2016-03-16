@@ -1,6 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
+from .exceptions import InvalidPermissionObjectException
 from .models import PermissionSet
-from .engine import Action
+from .engine import Action, Object
 
 
 class Backend:
@@ -17,6 +18,10 @@ class Backend:
         except AttributeError:
             raise ObjectDoesNotExist
 
+    @staticmethod
+    def _obj_ok(obj):
+        return obj is None or callable(obj) or isinstance(obj, Object)
+
     def has_perm(self, user, perm, obj=None, *args, **kwargs):
         """Test user permissions for a single action and object.
 
@@ -29,6 +34,11 @@ class Backend:
         :returns: ``bool`` -- is the action permitted?
         """
         try:
+            if not self._obj_ok(obj):
+                if hasattr(obj, 'get_permissions_object'):
+                    obj = obj.get_permissions_object(perm)
+                else:
+                    raise InvalidPermissionObjectException
             return self._get_pset(user).allow(Action(perm), obj)
         except ObjectDoesNotExist:
             return False
@@ -46,6 +56,8 @@ class Backend:
 
         """
         try:
+            if not self._obj_ok(obj):
+                raise InvalidPermissionObjectException
             return self._get_pset(user).permitted_actions(obj)
         except ObjectDoesNotExist:
             return []

@@ -76,3 +76,14 @@ class PermissionObjectException(TutelaryException):
             "invalid permissions_object property '" + prop +
             "' in permissioned_model"
         )
+
+
+class InvalidPermissionObjectException(TutelaryException):
+    """Exception raised by authentication backend if the object passed to
+    backend methods is not either a ``tutelary.engine.Object`` or a
+    Django model instance with a ``get_permissions_object`` method.
+
+    """
+    def __init__(self):
+        super().__init__("invalid object passed to django-tutelary " +
+                         "backend method")

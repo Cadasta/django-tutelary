@@ -3,12 +3,14 @@ import json
 
 from rest_framework.test import APIRequestFactory
 
+from tutelary.engine import Object
 from tutelary.models import Policy
 from tutelary.mixins import PermissionRequiredMixin
 from tutelary.decorators import permissioned_model
 from django.db import models
 
-from .factories import UserFactory
+from .datadir import datadir  # noqa
+from .factories import UserFactory, PolicyFactory
 
 
 # Include a dummy Organization model to be able to make Project
@@ -116,8 +118,8 @@ def test_oliver_bug(db):
     req2.user = user
     req2.successful_authenticator = True
 
-    org = Organization(name='TestOrg')
-    proj = Project(organization=org)
+    org = Organization(pk='TestOrg')
+    proj = Project(pk='TestProj', organization=org)
 
     # This works!
     rsp1 = ProjectUsers().as_view(object=proj)(req1).render()
@@ -126,3 +128,15 @@ def test_oliver_bug(db):
     # This works too!
     rsp2 = ProjectUsers().as_view(object=proj)(req2).render()
     assert rsp2.status_code == 201
+
+
+def test_oliver_bug_2(datadir, db):  # noqa
+    PolicyFactory.set_directory(str(datadir))
+    PolicyFactory.create(name='org-admin', file='org-admin.json')
+
+    policy = Policy.objects.get(name='org-admin')
+    user = UserFactory.create(username='testuser')
+    user.assign_policies((policy, {'organization': 'TestOrg'}))
+
+    org1 = Organization(pk='TestOrg')
+    assert user.has_perm('org.delete', org1)

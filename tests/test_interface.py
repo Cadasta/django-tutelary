@@ -1,4 +1,5 @@
 from django.core.exceptions import PermissionDenied, ImproperlyConfigured
+from django.contrib.auth import get_backends
 from django.db import models
 from django.http import HttpResponse
 import django.views.generic as generic
@@ -10,12 +11,16 @@ from django.test import RequestFactory
 from tutelary.engine import Action
 from tutelary.decorators import permissioned_model, permission_required
 from tutelary.mixins import PermissionRequiredMixin
-from tutelary.exceptions import PermissionObjectException, DecoratorException
+from tutelary.exceptions import (
+    PermissionObjectException, DecoratorException,
+    InvalidPermissionObjectException
+)
 
 from .factories import UserFactory, PolicyFactory
 from .datadir import datadir  # noqa
 from .check_models import (
-    CheckModel1, CheckModel2, CheckModel3, CheckModel4, CheckModel5
+    CheckModel1, CheckModel2, CheckModel3, CheckModel4, CheckModel5,
+    CheckModel1Broken
 )
 
 
@@ -324,3 +329,19 @@ def test_function_view(datadir, setup):  # noqa
     with pytest.raises(PermissionDenied):
         assert (func_view_bad(request).content ==
                 b'<html><body>Dummy response.</body></html>')
+
+
+def test_backend_exceptions(datadir, setup):  # noqa
+    user1, user2 = setup
+    ok_obj = CheckModel1(name='secret')
+    broken_obj = CheckModel1Broken(name='broken')
+
+    assert not user1.has_perm('check.detail', ok_obj)
+    assert user2.has_perm('check.detail', ok_obj)
+    with pytest.raises(InvalidPermissionObjectException):
+        assert not user1.has_perm('check.detail', broken_obj)
+    with pytest.raises(InvalidPermissionObjectException):
+        assert user2.has_perm('check.detail', broken_obj)
+
+    with pytest.raises(InvalidPermissionObjectException):
+        assert get_backends()[0].permitted_actions(user1, ok_obj) != []
