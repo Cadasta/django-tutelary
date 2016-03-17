@@ -86,7 +86,7 @@ django-tutelary::
                 'permissions_object': 'project'}),
               ('party.create',
                {'description': "Create parties",
-                'permissions_object': 'project'),
+                'permissions_object': 'project'}),
               ('party.detail',
                {'description': "View details of a party",
                 'error_message': "Detail view is not allowed"}),
@@ -100,8 +100,8 @@ In this case, as well as the normal Django ``Meta`` class member, we
 also set up a ``TutelaryMeta`` class member.  This gives the
 permission type of the model as ``party`` and the ``path_fields`` as
 ``project`` and ``name`` -- together these mean that django-tutelary
-will refer to objects of class ``Party`` as ``party/.../<name>``,
-where the ``...`` will be filled based on the ``path_fields`` of class
+will refer to objects of class ``Party`` as ``party/.../<pk>``, where
+the ``...`` will be filled based on the ``path_fields`` of class
 ``Project`` (since ``project`` is a foreign key field here).
 
 The ``actions`` list here defines five actions, two of which
@@ -127,7 +127,8 @@ As a class decorator, ``permissioned_model`` is used as follows::
 
   @permissioned_model
   class AModel(models.Model):
-    field definitions...
+    # Field definitions
+    ...
 
     class TutelaryMeta:
       perm_type = ...
@@ -165,21 +166,21 @@ permissions queries and in the ``permission_required`` attribute for
 Examples
 --------
 
-Suppose that we have a pair of related models, ``Organisation`` and
+Suppose that we have a pair of related models, ``Organization`` and
 ``Project``, with ``Project`` instances belonging to an
-``Organisation`` so that ``Project`` has a foreign key to
-``Organisation``.  We can set up these models with django-tutelary
+``Organization`` so that ``Project`` has a foreign key to
+``Organization``.  We can set up these models with django-tutelary
 permissions as follows::
 
   @permissioned_model
-  class Organisation(models.Model):
+  class Organization(models.Model):
       name = models.CharField(max_length=100)
 
       class Meta:
           ordering = ('name',)
 
       class TutelaryMeta:
-          perm_type = 'organisation'
+          perm_type = 'organization'
           path_fields = ('name',)
           actions = [
               ('org.list',   {'permissions_object': None}),
@@ -191,27 +192,27 @@ permissions as follows::
   @permissioned_model
   class Project(models.Model):
       name = models.CharField(max_length=100)
-      organisation = models.ForeignKey(Organisation)
+      organization = models.ForeignKey(Organization)
 
       class Meta:
-          ordering = ('organisation', 'name')
+          ordering = ('organization', 'name')
 
       class TutelaryMeta:
           perm_type = 'project'
-          path_fields = ('organisation', 'name')
+          path_fields = ('organization', 'name')
           actions = [
               ('project.list',
-               {'permissions_object': 'organisation'}),
+               {'permissions_object': 'organization'}),
               ('project.create',
-               {'permissions_object': 'organisation'}),
+               {'permissions_object': 'organization'}),
               'project.delete'
           ]
 
-In policies, ``Organisation`` objects are then represented as
-``organisation/<org-name>`` and projects as
-``project/<org-name>/<project-name>``.  Using the ``organisation``
+In policies, ``Organization`` objects are then represented as
+``organization/<org-name>`` and projects as
+``project/<org-name>/<project-name>``.  Using the ``organization``
 foreign key field in the ``path_fields`` metadata attribute of the
-``Project`` model causes the ``path_fields`` from the ``Organisation``
+``Project`` model causes the ``path_fields`` from the ``Organization``
 model to be spliced into the object names used for ``Project``
 instances.
 

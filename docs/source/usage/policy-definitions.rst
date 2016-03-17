@@ -31,7 +31,13 @@ Each individual *clause* is a JSON object with three fields:
   actions to which the clause applies.  For example, ``["*.edit",
   "*.delete"]`` refers to all edit and delete actions for any object
   types, and ``["parcel.create", "parcel.delete"]`` refers to the
-  create and delete actions for ``parcel`` objects.
+  create and delete actions for ``parcel`` objects.  Note that these
+  action labels are entirely arbitrary: django-tutelary does no
+  interpretation of the labels at all -- if you have permissions for
+  editing pages, you can call them ``page.create``, ``page.edit``,
+  etc. or you can all them ``monkey.create``, ``monkey.edit``, etc.
+  As long as the action labels used in model definitions, policy
+  documents and views all match up, django-tutelary doesn't care.
 
 ``object``
   An optional JSON array of object patterns (as strings) representing
@@ -39,7 +45,7 @@ Each individual *clause* is a JSON object with three fields:
   ``parcel`` objects are labelled as
   ``parcel/<org-name>/<project-name>/<id>``, then
   ``["parcel/Cadasta/*/*"]`` refers to all the ``parcel`` objects in
-  all projects belonging to the ``Cadasta`` organisation.  The object
+  all projects belonging to the ``Cadasta`` organization.  The object
   patterns in a clause may contain variables, indicated by a leading
   ``$`` character -- these may be substituted at the point where the
   policy is used, allowing for a limited form of policy templating.
@@ -96,20 +102,20 @@ Examples
 --------
 
 Here's a policy definition using a template variable for the
-``organisation`` field in some object patterns.  This variable will be
+``organization`` field in some object patterns.  This variable will be
 instantiated when the policy is assigned to a user.  The policy also
 contains a clause allowing the "free-floating" ``statistics`` action::
 
   {
     "version": "2015-12-10",
     "clause": [
-      // Allow all editing actions for a single organisation.
+      # Allow all editing actions for a single organization.
       { "effect": "allow", "action": ["*.edit"],
-        "object": ["*/$organisation/*/*/*"] },
-      // But deny all create actions.
+        "object": ["*/$organization/*/*/*"] },
+      # But deny all create actions.
       { "effect": "deny", "action": ["*.create"],
-        "object": ["*/$organisation/*"] },
-      // Allow the "free-standing" statistics action.
+        "object": ["*/$organization/*"] },
+      # Allow the "free-standing" statistics action.
       { "effect": "allow", "action": ["statistics"] }
     ]
   }
@@ -129,10 +135,10 @@ for all object types, but nothing else::
        "object": ["parcel/*/*"]},
       {"effect": "allow", "action": ["parcel.detail"],
        "object": ["parcel/*/*/*"]},
-      {"effect": "allow", "action": ["organisation.list"],
-       "object": ["organisation"]},
-      {"effect": "allow", "action": ["organisation.detail"],
-       "object": ["organisation/*"]},
+      {"effect": "allow", "action": ["organization.list"],
+       "object": ["organization"]},
+      {"effect": "allow", "action": ["organization.detail"],
+       "object": ["organization/*"]},
       {"effect": "allow", "action": ["project.list"],
        "object": ["project/*"]},
       {"effect": "allow", "action": ["project.detail"],

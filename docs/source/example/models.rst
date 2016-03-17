@@ -16,7 +16,7 @@ The example application is a simple CRUD application managing objects
 of two types: "parties" and "parcels" (the names are taken from the
 land tenure application we're using django-tutelary for).  Parties and
 parcels both belong to "projects" and projects belong to
-"organisations".  The application also manages user accounts (which
+"organizations".  The application also manages user accounts (which
 are just ``User`` objects from ``django.contrib.auth.models``) and
 django-tutelary policies.  This is simple enough, but has enough
 complexity to illustrate how to use django-tutelary.  (The application
@@ -28,35 +28,35 @@ example to use it on!)
 Registering actions
 -------------------
 
-Each of the ``Organisation`` and ``Project`` models register
+Each of the ``Organization`` and ``Project`` models register
 django-tutelary actions for listing entities and creating and deleting
-entities.  Organisations are identified as ``organisation/<org-name>``
-and projects (which belong to organisations) are identified as
+entities.  Organizations are identified as ``organization/<org-name>``
+and projects (which belong to organizations) are identified as
 ``project/<org-name>/<proj-name>``.  This demonstrates a useful
 feature of the ``path_fields`` member of the ``TutelaryMeta`` class:
 if the model field referred to by an entry in ``path_fields`` is a
 foreign key, then the path fields of the model referred to by the
 foreign key are inserted into the object components (i.e. the owning
-organisation's name appears in the object identifier for projects).
+organization's name appears in the object identifier for projects).
 The code to do this looks like this (for the ``Project`` model)::
 
   @permissioned_model
   class Project(models.Model):
       name = models.CharField(max_length=100)
-      organisation = models.ForeignKey(Organisation)
+      organization = models.ForeignKey(Organization)
 
       class Meta:
-          ordering = ('organisation', 'name')
+          ordering = ('organization', 'name')
 
       class TutelaryMeta:
           perm_type = 'project'
-          path_fields = ('organisation', 'name')
+          path_fields = ('organization', 'name')
           actions = [('project.list',
                       {'description': "Can list existing projects",
-                       'permissions_object': 'organisation'}),
+                       'permissions_object': 'organization'}),
                      ('project.create',
                       {'description': "Can create projects",
-                       'permissions_object': 'organisation'}),
+                       'permissions_object': 'organization'}),
                      ('project.delete',
                       {'description': "Can delete projects"})]
 
@@ -85,7 +85,7 @@ Here's the definition of the ``Parcel`` model::
                        'allow_get': True,
                        'permissions_object': 'project'}),
                      ('parcel.detail',
-                      {'description': "Can view details of a parcel"}),
+                      {'description': "Can view parcel details"}),
                      ('parcel.edit',
                       {'description': "Can update existing parcels",
                        'allow_get': True}),

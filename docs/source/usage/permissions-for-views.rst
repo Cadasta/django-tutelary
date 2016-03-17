@@ -13,7 +13,7 @@ Class-based views
 Using django-tutelary for controlling access to Django views is
 straightforward.  There is a single ``PermissionRequiredMixin`` mixin
 class defined in ``tutelary.mixins``, and in most cases this can
-simply by mixed into your view classes without any drama.  The
+simply be mixed into your view classes without any drama.  The
 ``PermissionRequiredMixin`` mixin is written to work both with
 "normal" Django and with `DRF
 <http://www.django-rest-framework.org/>`_.
@@ -124,7 +124,7 @@ the entity?)::
 
   class OrganizationDetail(PermissionRequiredMixin,
                            generics.RetrieveUpdateAPIView):
-      def patch_actions(self, request):
+      def patch_actions(self, view, request):
           is_archived = self.get_object().archived
           new_archived = request.data.get('archived', is_archived)
           if not is_archived and (is_archived != new_archived):
@@ -163,8 +163,8 @@ equally reasonable option, which is to filter the view's queryset so
 that only objects for which the action is permitted remain.
 
 As a concrete example, suppose that we have models representing
-organisations and projects in our application.  Each project belongs
-to a single organisation.  Our models look like this (all the code
+organizations and projects in our application.  Each project belongs
+to a single organization.  Our models look like this (all the code
 examples shown in this section are just sketches -- you'd obviously
 need to add some things to fully functional working models and views,
 but we'll show enough to illustrate the permissioning issues)::
@@ -253,7 +253,7 @@ We can do this with a view like this::
       permission_filter_queryset = ['project.delete']
 
 This view will return all projects for which the requesting user has
-the ``project.list`` permission for the associated organisation, and
+the ``project.list`` permission for the associated organization, and
 for which the user has the ``project.delete`` permission on the
 project itself.
 
@@ -280,10 +280,10 @@ if it does, it uses this method to find the set of objects on which to
 test permissions.
 
 To see how this works, suppose we have a model representing
-organisations, and that organisations can have users as members, with
+organizations, and that organizations can have users as members, with
 this membership being represented by a many-to-many field between the
-organisation model and the user model.  Adding or removing users to an
-organisation is an operation on the *organisation*, not on the user
+organization model and the user model.  Adding or removing users to an
+organization is an operation on the *organization*, not on the user
 list, but the user list is what the views will be managing.  To deal
 with this, we write code like this::
 
@@ -302,7 +302,7 @@ with this, we write code like this::
           return Response(status=status.HTTP_204_NO_CONTENT)
 
 Here, the ``get_perms_objects`` method returns a reference to the
-organisation on which permissions should be tested.
+organization on which permissions should be tested.
 
 Use of the ``get_perms_objects`` method shortcuts all the other
 mechanisms that django-tutelary uses to determine permissions objects,

@@ -6,7 +6,7 @@ A quick example
 Models
 ------
 
-Suppose that we have a Django model called ``Organisation`` we want to
+Suppose that we have a Django model called ``Organization`` we want to
 manage with django-tutelary.  We mark up the basic model definition
 using a decorator (``permissioned_model``) and a metadata class
 (``TutelaryMeta``)::
@@ -15,21 +15,21 @@ using a decorator (``permissioned_model``) and a metadata class
   from tutelary.decorators import permissioned_model
 
   @permissioned_model
-  class Organisation(models.Model):
+  class Organization(models.Model):
       name = models.CharField(max_length=100)
 
       class TutelaryMeta:
-          perm_type = 'organisation'
+          perm_type = 'organization'
           path_fields = ('name',)
           actions = [('org.list',   {'permissions_object': None}),
                      ('org.create', {'permissions_object': None}),
                      'org.delete']
 
 Here, the ``TutelaryMeta`` class carries metadata describing the
-actions that can be performed on an ``Organisation`` object, and how
-to represent instances of ``Organisation`` as django-tutelary objects.
-Here, an ``Organisation`` with ``name = "Cadasta"`` would be
-represented by the django-tutelary object ``organisation/Cadasta``,
+actions that can be performed on an ``Organization`` object, and how
+to represent instances of ``Organization`` as django-tutelary objects.
+Here, an ``Organization`` with ``name = "Cadasta"`` would be
+represented by the django-tutelary object ``organization/Cadasta``,
 based on the ``perm_type`` and ``path_fields`` values.
 
 Views
@@ -42,22 +42,22 @@ those operations is made in the following way::
   from django.core.urlresolvers import reverse_lazy
   import django.views.generic.edit as edit
   from tutelary.mixins import PermissionRequiredMixin
-  from .models import Organisation
+  from .models import Organization
 
-  class OrganisationDelete(PermissionRequiredMixin,
+  class OrganizationDelete(PermissionRequiredMixin,
                            edit.DeleteView):
-      model = Organisation
-      success_url = reverse_lazy('organisation-list')
+      model = Organization
+      success_url = reverse_lazy('organization-list')
       permission_required = 'org.delete'
 
 Here, we use a normal Django class-based view and mix in
 django-tutelary's ``PermissionRequiredMixin``.  This mixin uses the
-``permission_required`` attribute on the ``OrganisationDelete`` view
+``permission_required`` attribute on the ``OrganizationDelete`` view
 to determine which django-tutelary action this view corresponds to.
-If a user attempts to delete an organisation, the user's associated
+If a user attempts to delete an organization, the user's associated
 permission set (generated from the policies assigned to the user) is
 used to determine whether the ``org.delete`` action is allowed on the
-organisation in question.  If the action is *allowed*, view processing
+organization in question.  If the action is *allowed*, view processing
 proceeds as normal.  If the action is *denied*, a ``PermissionDenied``
 exception is raised.
 

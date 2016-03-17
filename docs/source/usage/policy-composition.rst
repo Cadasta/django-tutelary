@@ -20,7 +20,7 @@ of roles and policies assigned to a user.
 A worked example
 ----------------
 
-Suppose that we have an organisation with "departments", and each
+Suppose that we have an organization with "departments", and each
 department has "sections".  Departments are labelled as
 ``dept/<dept-name>`` and sections as ``sect/<dept-name>/<sect-name>``.
 The possible actions we'll consider are ``dept.view``,
@@ -39,7 +39,7 @@ in ``default-policy.json`` with then be something like::
     "object": ["sect/*/*"]}]
 
 Now consider what additional permissions we might want to allow for
-overall administrators of the organisation.  Such users need to be
+overall administrators of the organization.  Such users need to be
 able to create and delete departments and create and delete sections
 within any department, so the policy clauses in
 ``org-admin-policy.json`` would be::
@@ -161,12 +161,16 @@ save a role like this::
   project_role = Role.objects.create(
       name='project_role',
       policies=[default_pol, org_pol, project_pol],
-      variables={'organisation': 'Cadasta', 'project': 'TestProj'}
+      variables={'organization': 'Cadasta', 'project': 'TestProj'}
   )
 
 If this role is subsequently assigned to a user, it's precisely
 equivalent to assigning the individual policies, all with the same
-variable assignments.
+variable assignments.  (The rules governing the template variable
+assignments in role definitions are the same as for assigning policies
+to users: briefly, all variables used in the body of the policy
+definitions must be given values, and any superfluous variable
+assignments are ignored.)
 
 As for policy objects, changes to ``Role`` objects are audited using
 the django-audit-log_ package.
@@ -220,16 +224,18 @@ of policy variable assignments.  A typical use looks like this::
   user = User.objects.get(username='iross')
   user.assign_policies(
     default_policy,
-    (editor_policy, {'organisation': 'Cadasta',
+    (editor_policy, {'organization': 'Cadasta',
                      'project': 'Kibera'})
   )
 
 This assumes that the JSON body of the ``Policy`` object named
-"``editor``" uses the policy variables ``$organisation`` and
+"``editor``" uses the policy variables ``$organization`` and
 ``$project``.  It's important to note that values for *all* policy
 variables used within the body of a policy must be provided at the
 point of use of the policy -- here, "point of use" means when the
 policy is assigned to a user using ``User.assign_policies``.
+Superfluous variables are ignored, but any used within the policy body
+*must* be given values.
 
 The list of policies and/or roles assigned to a user can be retrieved
 using the ``user_assigned_policies`` function and the
