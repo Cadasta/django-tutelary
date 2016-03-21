@@ -88,10 +88,10 @@ class PermissionRequiredMixin:
                     self.__class__.__name__)
             )
 
+        perms = self.permission_required
         if isinstance(self.permission_required, dict):
-            perms = self.permission_required[self.request.method]
-        else:
-            perms = self.permission_required
+            if self.request.method in self.permission_required:
+                perms = self.permission_required[self.request.method]
 
         if callable(perms):
             perms = perms(self, self.request)
@@ -131,8 +131,10 @@ class PermissionRequiredMixin:
     def get_queryset(self):
         if hasattr(self, 'filtered_queryset'):
             return self.filtered_queryset
-        else:
+        elif hasattr(super(), 'get_queryset'):
             return super().get_queryset()
+        else:
+            return [None]
 
     def perms_filter_queryset(self, objs):
         actions = self.get_permission_required()
@@ -144,7 +146,9 @@ class PermissionRequiredMixin:
                                [obj], self.request.method)
 
         filtered_pks = [o.pk for o in filter(check_one, objs)]
-        self.filtered_queryset = self.get_queryset().filter(pk__in=filtered_pks)
+        self.filtered_queryset = self.get_queryset().filter(
+            pk__in=filtered_pks
+        )
 
     def initial(self, request, *args, **kwargs):
         self.check_permissions(request)
