@@ -116,9 +116,10 @@ class PermissionRequiredMixin:
         return self.drf
 
     def handle_no_permission(self):
-        if self.raise_exception:
-            raise PermissionDenied(*self.get_permission_denied_message())
-        super().handle_no_permission()
+        msg = self.get_permission_denied_message()
+        if hasattr(self, 'raise_exception') and self.raise_exception:
+            raise PermissionDenied(*msg)
+        return msg
 
     def dispatch(self, request, *args, **kwargs):
         if self.check_drf():

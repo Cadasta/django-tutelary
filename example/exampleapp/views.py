@@ -86,9 +86,11 @@ class PermissionInfoMixin:
 class PermissionRequiredMixin(tutelary.mixins.PermissionRequiredMixin):
     def handle_no_permission(self):
         # Stop a redirect loop here.
+        msg = super().handle_no_permission()
         if len(messages.get_messages(self.request)) > 0:
             return redirect('/')
-        messages.add_message(self.request, messages.ERROR, "PERMISSION DENIED")
+        messages.add_message(self.request, messages.ERROR,
+                             msg[0] if len(msg) > 0 else "PERMISSION DEFINED")
         return redirect(self.request.META.get('HTTP_REFERER', '/'))
 
 

@@ -156,11 +156,8 @@ def test_error_messages(datadir, setup):  # noqa
         def get_object(self):
             return self.obj
 
-    # We use this to temporarily monkeypatch the handle_no_permission
-    # method in the base PermissionRequiredMixin class to check that
-    # we get routed there correctly if raise_exception isn't set.
-    def tmp(mixin):
-        raise PermissionDenied('test fixup message')
+        def handle_no_permission(self):
+            raise PermissionDenied('test fixup message')
 
     user1, user2 = setup
     other_user = UserFactory.create(username='other')
@@ -178,12 +175,8 @@ def test_error_messages(datadir, setup):  # noqa
         view3.dispatch(view3.request)
     assert exc_info3.value.args == ('special message',)
     view4 = CheckCreateView3(obj, user1)
-    try:
-        edit.CreateView.handle_no_permission = tmp
-        with pytest.raises(PermissionDenied) as exc_info4:
-            view4.dispatch(view4.request)
-    finally:
-        del edit.CreateView.handle_no_permission
+    with pytest.raises(PermissionDenied) as exc_info4:
+        view4.dispatch(view4.request)
     assert exc_info4.value.args == ('test fixup message',)
 
 
