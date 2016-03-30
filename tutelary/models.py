@@ -343,9 +343,7 @@ def user_assigned_policies(user):
     else:
         pset = user.permissionset.first()
     res = []
-    print('user_assigned_policies:', user)
     for pi in PolicyInstance.objects.filter(pset=pset):
-        print(' ', pi)
         if pi.role:
             res.append(pi.role)
         else:
