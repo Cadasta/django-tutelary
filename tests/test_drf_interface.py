@@ -6,7 +6,7 @@ import pytest
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from tutelary.engine import Action
-from tutelary.mixins import PermissionRequiredMixin
+from tutelary.mixins import APIPermissionRequiredMixin
 
 from .factories import UserFactory, PolicyFactory
 from .datadir import datadir  # noqa
@@ -68,7 +68,7 @@ class CheckViewBase(generic.RetrieveAPIView):
             self.object = kwargs['object']
 
 
-class CheckView1Base(PermissionRequiredMixin, CheckViewBase):
+class CheckView1Base(APIPermissionRequiredMixin, CheckViewBase):
     permission_required = 'check.detail'
     raise_exception = True
 
@@ -76,7 +76,7 @@ class CheckView1Base(PermissionRequiredMixin, CheckViewBase):
         super().__init__(*args, **kwargs)
 
 
-class CheckView1(PermissionRequiredMixin, generic.RetrieveAPIView):
+class CheckView1(APIPermissionRequiredMixin, generic.RetrieveAPIView):
     object = None
     serializer_class = DummySerializer
     permission_required = 'check.detail'
@@ -94,7 +94,7 @@ class CheckView1(PermissionRequiredMixin, generic.RetrieveAPIView):
         return self.object
 
 
-class CheckView2(PermissionRequiredMixin, generic.ListAPIView):
+class CheckView2(APIPermissionRequiredMixin, generic.ListAPIView):
     object = None
     serializer_class = DummySerializer
     permission_required = 'check.detail'
@@ -154,7 +154,7 @@ def test_view_exceptions_no_policies(datadir, setup):  # noqa
 
 
 def test_view_exceptions_no_permission_required(datadir, setup):  # noqa
-    class CheckViewBad(PermissionRequiredMixin, generic.RetrieveAPIView):
+    class CheckViewBad(APIPermissionRequiredMixin, generic.RetrieveAPIView):
         object = None
         serializer_class = DummySerializer
         raise_exception = True
@@ -175,7 +175,7 @@ def test_view_exceptions_no_permission_required(datadir, setup):  # noqa
 
 
 def test_error_messages(datadir, setup):  # noqa
-    class CheckCreateView(PermissionRequiredMixin, generic.CreateAPIView):
+    class CheckCreateView(APIPermissionRequiredMixin, generic.CreateAPIView):
         object = None
         serializer_class = DummySerializer
         permission_required = 'check.create'
@@ -189,7 +189,7 @@ def test_error_messages(datadir, setup):  # noqa
         def get_object(self):
             return self.object
 
-    class CheckCreateView2(PermissionRequiredMixin, generic.CreateAPIView):
+    class CheckCreateView2(APIPermissionRequiredMixin, generic.CreateAPIView):
         object = None
         serializer_class = DummySerializer
         permission_required = 'check.create'
@@ -204,7 +204,7 @@ def test_error_messages(datadir, setup):  # noqa
         def get_object(self):
             return self.object
 
-    class CheckCreateView3(PermissionRequiredMixin, generic.CreateAPIView):
+    class CheckCreateView3(APIPermissionRequiredMixin, generic.CreateAPIView):
         object = None
         serializer_class = DummySerializer
         permission_required = 'check.create'
@@ -219,8 +219,8 @@ def test_error_messages(datadir, setup):  # noqa
             return self.object
 
     # We use this to temporarily monkeypatch the handle_no_permission
-    # method in the base PermissionRequiredMixin class to check that
-    # we get routed there correctly if raise_exception isn't set.
+    # method in the APIPermissionRequiredMixin class to check that we
+    # get routed there correctly if raise_exception isn't set.
     def tmp(mixin, request, message):
         raise PermissionDenied('test fixup message')
 
@@ -253,7 +253,7 @@ def test_error_messages(datadir, setup):  # noqa
 
 
 def test_mixin_fk_obj_path(datadir, setup):  # noqa
-    class Check2View1(PermissionRequiredMixin, generic.CreateAPIView):
+    class Check2View1(APIPermissionRequiredMixin, generic.CreateAPIView):
         object = None
         serializer_class = DummySerializer
         permission_required = 'check2.create'
@@ -286,7 +286,7 @@ def test_mixin_fk_obj_path(datadir, setup):  # noqa
 
 
 def test_mixin_fk_queryset_path(datadir, setup):  # noqa
-    class Check2View2(PermissionRequiredMixin, generic.ListAPIView):
+    class Check2View2(APIPermissionRequiredMixin, generic.ListAPIView):
         object = None
         serializer_class = DummySerializer
         permission_required = 'check2.list'
@@ -319,7 +319,7 @@ def test_mixin_fk_queryset_path(datadir, setup):  # noqa
 
 
 def test_mixin_null_perms_obj(datadir, setup):  # noqa
-    class Check4ListView(PermissionRequiredMixin, generic.ListAPIView):
+    class Check4ListView(APIPermissionRequiredMixin, generic.ListAPIView):
         object = None
         serializer_class = DummySerializer
         permission_required = 'check4.list'
@@ -327,7 +327,7 @@ def test_mixin_null_perms_obj(datadir, setup):  # noqa
         def get_queryset(self):
             return [self.object]
 
-    class Check4CreateView(PermissionRequiredMixin, generic.CreateAPIView):
+    class Check4CreateView(APIPermissionRequiredMixin, generic.CreateAPIView):
         object = None
         serializer_class = DummySerializer
         permission_required = 'check4.create'
@@ -355,7 +355,8 @@ def test_mixin_null_perms_obj(datadir, setup):  # noqa
 
 
 def test_mixin_no_permissions_object(datadir, setup):  # noqa
-    class Check5DetailView(PermissionRequiredMixin, generic.RetrieveAPIView):
+    class Check5DetailView(APIPermissionRequiredMixin,
+                           generic.RetrieveAPIView):
         object = None
         serializer_class = DummySerializer
         permission_required = 'check5.detail'

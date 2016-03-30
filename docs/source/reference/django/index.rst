@@ -29,6 +29,8 @@ Permissions for views
 
 .. autoclass:: tutelary.mixins.PermissionRequiredMixin
 
+.. autoclass:: tutelary.mixins.APIPermissionRequiredMixin
+
 .. autofunction:: tutelary.decorators.permission_required
 
 

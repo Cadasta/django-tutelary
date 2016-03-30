@@ -5,10 +5,11 @@ Permissions queries
 
 Most of the time, queries to django-tutelary to find out whether
 actions are permitted will happen automatically through the
-``PermissionRequiredMixin`` and django-tutelary's custom
-authentication backend.  However, there are cases where it can be
-useful to make these queries explicitly, and django-tutelary supports
-a couple of other query types that are documented here.
+``PermissionRequiredMixin`` or ``APIPermissionRequiredMixin`` classes
+and django-tutelary's custom authentication backend.  However, there
+are cases where it can be useful to make these queries explicitly, and
+django-tutelary supports a couple of other query types that are
+documented here.
 
 Simple permissions queries
 --------------------------

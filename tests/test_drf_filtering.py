@@ -1,7 +1,7 @@
 from rest_framework import serializers
 import rest_framework.generics as generics
 
-from tutelary.mixins import PermissionRequiredMixin
+from tutelary.mixins import APIPermissionRequiredMixin
 
 import pytest
 from rest_framework.test import APIRequestFactory, force_authenticate
@@ -50,26 +50,26 @@ class BaseProjList(generics.ListAPIView):
         return self.objects
 
 
-class NormalProjList(PermissionRequiredMixin, BaseProjList):
+class NormalProjList(APIPermissionRequiredMixin, BaseProjList):
     permission_required = 'proj.list'
 
 
-class FilterProjList(PermissionRequiredMixin, BaseProjList):
+class FilterProjList(APIPermissionRequiredMixin, BaseProjList):
     permission_required = 'proj.list'
     permission_filter_queryset = True
 
 
-class DetailProjList(PermissionRequiredMixin, BaseProjList):
+class DetailProjList(APIPermissionRequiredMixin, BaseProjList):
     permission_required = 'proj.list'
     permission_filter_queryset = ['proj.detail']
 
 
-class DeleteProjList(PermissionRequiredMixin, BaseProjList):
+class DeleteProjList(APIPermissionRequiredMixin, BaseProjList):
     permission_required = 'proj.list'
     permission_filter_queryset = ['proj.delete']
 
 
-class DetailDeleteProjList(PermissionRequiredMixin, BaseProjList):
+class DetailDeleteProjList(APIPermissionRequiredMixin, BaseProjList):
     permission_required = 'proj.list'
     permission_filter_queryset = ['proj.detail', 'proj.delete']
 

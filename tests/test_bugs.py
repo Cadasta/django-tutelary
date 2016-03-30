@@ -4,7 +4,7 @@ import json
 from rest_framework.test import APIRequestFactory
 
 from tutelary.models import Policy
-from tutelary.mixins import PermissionRequiredMixin
+from tutelary.mixins import APIPermissionRequiredMixin
 from tutelary.decorators import permissioned_model
 from django.db import models
 
@@ -66,7 +66,7 @@ class DummySerializer:
 # multi-object, like here).  The constructor and "object" attribute
 # here are just to make it so that you can pass an object to as_view.
 
-class ProjectUsers(PermissionRequiredMixin, generic.ListCreateAPIView):
+class ProjectUsers(APIPermissionRequiredMixin, generic.ListCreateAPIView):
     object = None
     serializer_class = DummySerializer
     permission_required = {

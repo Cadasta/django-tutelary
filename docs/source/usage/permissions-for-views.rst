@@ -11,12 +11,11 @@ Class-based views
 -----------------
 
 Using django-tutelary for controlling access to Django views is
-straightforward.  There is a single ``PermissionRequiredMixin`` mixin
-class defined in ``tutelary.mixins``, and in most cases this can
-simply be mixed into your view classes without any drama.  The
-``PermissionRequiredMixin`` mixin is written to work both with
-"normal" Django and with `DRF
-<http://www.django-rest-framework.org/>`_.
+straightforward.  There are two mixin classes defined in
+``tutelary.mixins``, ``PermissionRequiredMixin`` for "normal" Django
+views and ``APIPermissionRequiredMixin`` for `DRF
+<http://www.django-rest-framework.org/>`_ views, and in most cases one
+of these can simply be mixed into your view classes without any drama.
 
 For example, suppose that you've defined a ``user.detail`` action for
 the ``User`` model (using the ``permissioned_model`` function).  You
@@ -47,9 +46,10 @@ The ``permission_required`` attribute
 
 As noted above, the simplest value that can be given for the
 ``permission_required`` attribute in the ``PermissionRequiredMixin``
-mixin is a single action name.  A range of other possibilities allow
-for more flexible handling of permissions lookup, dependent on
-characteristics of the request being processed.
+or ``APIPermissionRequiredMixin`` mixins is a single action name.  A
+range of other possibilities allow for more flexible handling of
+permissions lookup, dependent on characteristics of the request being
+processed.
 
 The options for ``permission_required`` are:
 
@@ -122,7 +122,7 @@ depend on the state of a model entity (is the entity "archived"?) and
 the request body (is the request trying to "archive" or "unarchive"
 the entity?)::
 
-  class OrganizationDetail(PermissionRequiredMixin,
+  class OrganizationDetail(APIPermissionRequiredMixin,
                            generics.RetrieveUpdateAPIView):
       def patch_actions(self, view, request):
           is_archived = self.get_object().archived
@@ -200,7 +200,7 @@ Suppose that we wish to provide a view to list all projects in the
 database.  Using a DRF ``ListAPIView``, our view might look something
 like this::
 
-  class ProjectListView(PermissionRequiredMixin, ListAPIView):
+  class ProjectListView(APIPermissionRequiredMixin, ListAPIView):
       queryset = Project.objects.all()
       serializer_class = ProjectSerializer
       permission_required = 'project.list'
@@ -222,7 +222,7 @@ doing this, django-tutelary allows us to specify that we want the
 view's queryset to be filtered.  We do this by adding a
 ``permission_filter_queryset`` attribute to the view class::
 
-  class ProjectListView(PermissionRequiredMixin, ListAPIView):
+  class ProjectListView(APIPermissionRequiredMixin, ListAPIView):
       queryset = Project.objects.all()
       serializer_class = ProjectSerializer
       permission_required = 'project.list'
@@ -246,7 +246,7 @@ As an example of the last, more complex case, suppose that we want to
 display a list of all the projects that a user is allowed to delete.
 We can do this with a view like this::
 
-  class ProjectDeleteListView(PermissionRequiredMixin, ListAPIView):
+  class ProjectDeleteListView(APIPermissionRequiredMixin, ListAPIView):
       queryset = Project.objects.all()
       serializer_class = ProjectSerializer
       permission_required = 'project.list'
@@ -287,7 +287,7 @@ organization is an operation on the *organization*, not on the user
 list, but the user list is what the views will be managing.  To deal
 with this, we write code like this::
 
-  class OrganizationUsersDelete(PermissionRequiredMixin,
+  class OrganizationUsersDelete(APIPermissionRequiredMixin,
                                 OrganizationUsersQuerySet,
                                 generics.DestroyAPIView):
       permission_required = 'org.users.remove'
