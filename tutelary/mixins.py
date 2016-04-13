@@ -1,5 +1,7 @@
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from collections.abc import Sequence
+from django.contrib.auth.views import redirect_to_login
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import check_perms
 from .decorators import action_error_message
@@ -103,6 +105,20 @@ class PermissionRequiredMixin(BasePermissionRequiredMixin):
     def dispatch(self, request, *args, **kwargs):
         if not self.has_permission():
             return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+
+
+class LoginPermissionRequiredMixin(PermissionRequiredMixin,
+                                   LoginRequiredMixin):
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            if hasattr(self, 'raise_exception') and self.raise_exception:
+                raise PermissionDenied(self.get_permission_denied_message())
+
+            return redirect_to_login(self.request.get_full_path(),
+                                     self.get_login_url(),
+                                     self.get_redirect_field_name())
+
         return super().dispatch(request, *args, **kwargs)
 
 

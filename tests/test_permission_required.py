@@ -1,9 +1,12 @@
+import pytest
 from tutelary.engine import Action
 from tutelary.decorators import permissioned_model
-from tutelary.mixins import PermissionRequiredMixin
+from tutelary import mixins
 from django.db import models
 import django.views.generic as generic
-import pytest
+from django.contrib.auth.models import AnonymousUser
+from django.http import HttpResponseRedirect
+from django.core.exceptions import PermissionDenied
 from .factories import UserFactory, PolicyFactory
 from .datadir import datadir  # noqa
 
@@ -49,9 +52,18 @@ class DummyRequest:
         self.user = user
         self.method = method
 
+    def get_full_path(self):
+        return '/'
+
+    def get_login_url(self):
+        return '/account/login/'
+
+    def get_redirect_field_name(self):
+        return 'next'
+
 
 def test_permission_required_single(datadir, setup):  # noqa
-    class CheckViewBase(PermissionRequiredMixin, generic.DetailView):
+    class CheckViewBase(mixins.PermissionRequiredMixin, generic.DetailView):
         permission_required = 'check.detail'
         raise_exception = True
 
@@ -78,7 +90,7 @@ def test_permission_required_single(datadir, setup):  # noqa
 
 
 def test_permission_required_sequence(datadir, setup):  # noqa
-    class CheckViewBase(PermissionRequiredMixin, generic.DetailView):
+    class CheckViewBase(mixins.PermissionRequiredMixin, generic.DetailView):
         permission_required = ('check.list', 'check.detail')
         raise_exception = True
 
@@ -105,7 +117,7 @@ def test_permission_required_sequence(datadir, setup):  # noqa
 
 
 def test_permission_required_callable(datadir, setup):  # noqa
-    class CheckViewBase(PermissionRequiredMixin, generic.DetailView):
+    class CheckViewBase(mixins.PermissionRequiredMixin, generic.DetailView):
         def check_actions(self, view, request):
             if request.method == 'GET':
                 return ('check.list', 'check.detail')
@@ -140,7 +152,7 @@ def test_permission_required_callable(datadir, setup):  # noqa
 
 
 def test_permission_required_dict(datadir, setup):  # noqa
-    class CheckViewBase(PermissionRequiredMixin, generic.DetailView):
+    class CheckViewBase(mixins.PermissionRequiredMixin, generic.DetailView):
         permission_required = {'GET': ('check.list', 'check.detail'),
                                'POST': 'check.create'}
         raise_exception = True
@@ -165,3 +177,68 @@ def test_permission_required_dict(datadir, setup):  # noqa
     assert not CheckView1(secret_obj, user1).has_permission()
     assert CheckView1(ok_obj, user2).has_permission()
     assert CheckView1(secret_obj, user2).has_permission()
+
+
+def patch_redirect_to_login(next, login_url, redirect_field_name):
+    return HttpResponseRedirect('/login/')
+
+
+def test_login_required(datadir, setup, monkeypatch):  # noqa
+    request = DummyRequest(AnonymousUser())
+    monkeypatch.setattr(mixins, 'redirect_to_login', patch_redirect_to_login)
+
+    class CheckView(mixins.LoginPermissionRequiredMixin, generic.DetailView):
+        permission_required = 'check.detail'
+
+        def __init__(self, obj, user):
+            self.model = obj
+            self.obj = obj
+            self.request = request
+
+        def get_object(self):
+            return self.obj
+
+    ok_obj = CheckModel(name='not-secret')
+    response = CheckView(ok_obj, AnonymousUser()).dispatch(request)
+    assert response.status_code == 302
+
+
+def test_login_required_raise_exception(datadir, setup):  # noqa
+    request = DummyRequest(AnonymousUser())
+
+    class CheckView(mixins.LoginPermissionRequiredMixin, generic.DetailView):
+        permission_required = 'check.detail'
+        raise_exception = True
+
+        def __init__(self, obj, user):
+            self.model = obj
+            self.obj = obj
+            self.request = request
+
+        def get_object(self):
+            return self.obj
+
+    ok_obj = CheckModel(name='not-secret')
+    with pytest.raises(PermissionDenied):
+        CheckView(ok_obj, AnonymousUser()).dispatch(request)
+
+
+def test_login_required_with_authenticated_user(datadir, setup):  # noqa
+    user, user1 = setup
+    request = DummyRequest(user)
+
+    class CheckView(mixins.LoginPermissionRequiredMixin, generic.DetailView):
+        permission_required = 'check.detail'
+        raise_exception = True
+
+        def __init__(self, obj, user):
+            self.model = obj
+            self.obj = obj
+            self.request = request
+
+        def get_object(self):
+            return self.obj
+
+    ok_obj = CheckModel(name='not-secret')
+    response = CheckView(ok_obj, user).dispatch(request)
+    assert response.status_code == 200
