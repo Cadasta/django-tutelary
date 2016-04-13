@@ -1,2 +1,2 @@
-__version__ = '0.1.10'
+__version__ = '0.1.11'
 default_app_config = 'tutelary.apps.TutelaryConfig'
