@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import re
 import os
+import shutil
 import sys
 from setuptools import setup
 
@@ -12,7 +13,7 @@ description = 'Policy-based permissions for Django.'
 url = 'https://github.com/Cadasta/django-tutelary'
 author = 'Ian Ross'
 author_email = 'iross@cadasta.org'
-license = 'BSD'
+license = 'GNU AGPL v3'
 
 readme_file = os.path.join(os.path.dirname(__file__), 'README.rst')
 with open(readme_file, 'r') as f:
@@ -60,8 +61,14 @@ if sys.argv[-1] == 'publish':
     if os.system("pip freeze | grep wheel"):
         print("wheel not installed.\nUse `pip install wheel`.\nExiting.")
         sys.exit()
-    os.system("python setup.py sdist upload")
-    os.system("python setup.py bdist_wheel upload")
+    if os.system("pip freeze | grep twine"):
+        print("twine not installed.\nUse `pip install twine`.\nExiting.")
+        sys.exit()
+    shutil.rmtree('dist', ignore_errors=True)
+    shutil.rmtree('build', ignore_errors=True)
+    os.system("python setup.py sdist")
+    os.system("python setup.py bdist_wheel")
+    os.system("twine upload dist/*")
     print("You probably want to also tag the version now:")
     print("  git tag -a {0} -m 'version {0}'".format(version))
     print("  git push --tags")
@@ -88,7 +95,7 @@ setup(
         'Environment :: Web Environment',
         'Framework :: Django :: 1.9',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
+        'License :: OSI Approved :: GNU Affero General Public License v3',
         'Operating System :: OS Independent',
         'Natural Language :: English',
         'Programming Language :: Python :: 3.5',

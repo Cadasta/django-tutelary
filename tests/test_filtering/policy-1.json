@@ -13,6 +13,10 @@
       "object": ["proj/*/*"] },
 
     { "effect": "allow",
+      "action": ["proj.detail_private"],
+      "object": ["proj/org1/*"] },
+
+    { "effect": "allow",
       "action": ["proj.delete"],
       "object": ["proj/*/*"] }
   ]

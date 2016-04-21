@@ -16,10 +16,12 @@ class Org(models.Model):
 class Proj(models.Model):
     name = models.CharField(max_length=100)
     org = models.ForeignKey(Org)
+    public = models.BooleanField(default=True)
 
     class TutelaryMeta:
         perm_type = 'proj'
         path_fields = ('org', 'name',)
         actions = [('proj.list', {'permissions_object': 'org'}),
                    'proj.detail',
+                   'proj.detail_private',
                    'proj.delete']

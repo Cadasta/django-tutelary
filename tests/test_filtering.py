@@ -71,6 +71,14 @@ class DetailDeleteProjList(PermissionRequiredMixin, BaseProjList):
     permission_filter_queryset = ['proj.detail', 'proj.delete']
 
 
+class DetailWithPrivateProjList(PermissionRequiredMixin, BaseProjList):
+    permission_required = 'proj.list'
+    permission_filter_queryset = (
+        lambda self, view, proj:
+        ('proj.detail',) if proj.public else ('proj.detail_private',)
+    )
+
+
 def api_get(url, user):
     req = RequestFactory().get(url)
     req.user = user
@@ -83,22 +91,25 @@ def api_get(url, user):
 # org.list           X  X  X  X  X
 #
 # proj.list
+#
 #   org1             X  X        X
 #   org2             X     X     X
 #
-# proj.detail
-#   org1/proj1       X  X        X
-#   org1/proj2       X  X        X
-#   org1/proj3       X  X        X
-#   org1/proj4       X           X
-#   org1/proj5       X           X
-#   org1/proj6       X
-#   org1/proj7       X
+# proj.detail (P=+proj.detail_private)
+#
+#   org1/proj1       P  X        X
+#   org1/proj2       P  X        X
+#   org1/proj3       P  X        X
+#   org1/proj4       P           X
+#   org1/proj5       P           X
+#   org1/proj6       P
+#   org1/proj7 (P)   P
 #   org2/proj8       X     X     X
-#   org2/proj9       X     X     X
-#   org2/proj10      X     X     X
+#   org2/proj9 (P)   X     P     X
+#   org2/proj10 (P)  X     X     X
 #
 # proj.delete
+#
 #   org1/proj1       X  X
 #   org1/proj2       X
 #   org1/proj3       X
@@ -131,6 +142,8 @@ def setup(datadir, db):
     for i in range(1, 11):
         projs.append(Proj(pk=i, name='proj{}'.format(i),
                           org=orgs[0] if i < 8 else orgs[1]))
+    for i in (6, 8, 9):
+        projs[i].public = False
 
     return (users, pols, orgs, projs)
 
@@ -200,3 +213,15 @@ def test_detail_delete_filter_listing(datadir, setup):  # noqa
     assert project_count(view(r3).render()) == 2
     assert project_count(view(r4).render()) == 0
     assert project_count(view(r5).render()) == 0
+
+
+def test_detail_with_private_filter_listing(datadir, setup):  # noqa
+    users, pols, orgs, projs = setup
+    r1, r2, r3, r4, r5 = map(lambda u: api_get('/projs', u), users)
+
+    view = DetailWithPrivateProjList.as_view(objects=projs)
+    assert project_count(view(r1).render()) == 8
+    assert project_count(view(r2).render()) == 3
+    assert project_count(view(r3).render()) == 2
+    assert project_count(view(r4).render()) == 0
+    assert project_count(view(r5).render()) == 6

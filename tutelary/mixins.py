@@ -22,6 +22,8 @@ class BasePermissionRequiredMixin:
         if isinstance(self.permission_required, dict):
             if self.request.method in self.permission_required:
                 perms = self.permission_required[self.request.method]
+            else:
+                perms = ()
 
         if callable(perms):
             perms = perms(self, self.request)
@@ -53,7 +55,10 @@ class BasePermissionRequiredMixin:
             actions += tuple(self.permission_filter_queryset)
 
         def check_one(obj):
-            return check_perms(self.request.user, actions,
+            check_actions = actions
+            if callable(self.permission_filter_queryset):
+                check_actions += self.permission_filter_queryset(self, obj)
+            return check_perms(self.request.user, check_actions,
                                [obj], self.request.method)
 
         filtered_pks = [o.pk for o in filter(check_one, objs)]

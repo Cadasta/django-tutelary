@@ -241,6 +241,14 @@ The ``permission_filter_queryset`` attribute can be set to:
    the "associated" action -- this capability is intended primarily
    for list views, where it may be desirable to restrict the entities
    rendered to a subset where certain other actions can be performed.
+ - a callable: this is called as ``fun(self, view, obj)``, where
+   ``self`` and ``view`` both refer to the Django view being rendered,
+   and ``obj`` is the object for which permissions are being
+   determined.  The return value of the callable should be a sequence
+   of "associated" actions to add to the list of actions whose
+   permissions are being checked for the object.  (The slightly
+   strange calling sequence of the callable is because Python treats
+   it as a method within the view class.)
 
 As an example of the last, more complex case, suppose that we want to
 display a list of all the projects that a user is allowed to delete.

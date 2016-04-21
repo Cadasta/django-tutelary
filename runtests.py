@@ -12,7 +12,7 @@ PYTEST_ARGS = {
     'fast': ['tests', '-q'],
 }
 
-FLAKE8_ARGS = ['tutelary', 'tests', '--ignore=E501']
+FLAKE8_ARGS = ['tutelary', 'tests', '--exclude=migrations']
 
 
 sys.path.append(os.path.dirname(__file__))
