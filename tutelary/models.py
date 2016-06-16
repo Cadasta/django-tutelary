@@ -307,7 +307,7 @@ def clear_user_policies(user):
         pset.refresh()
         if user is not None:
             pset.users.remove(user)
-        if pset.users.count() == 0:
+        if pset.users.count() == 0 and not pset.anonymous_user:
             pset.delete()
 
 
@@ -336,8 +336,6 @@ def user_assigned_policies(user):
     if user is None:
         try:
             pset = PermissionSet.objects.get(anonymous_user=True)
-            pset.anonymous_user = False
-            pset.save()
         except ObjectDoesNotExist:
             return []
     else:
