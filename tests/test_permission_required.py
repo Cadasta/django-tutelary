@@ -6,6 +6,7 @@ from django.db import models
 import django.views.generic as generic
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpResponseRedirect
+from django.http.response import Http404
 from django.core.exceptions import PermissionDenied
 from .factories import UserFactory, PolicyFactory
 from .datadir import datadir  # noqa
@@ -242,3 +243,24 @@ def test_login_required_with_authenticated_user(datadir, setup):  # noqa
     ok_obj = CheckModel(name='not-secret')
     response = CheckView(ok_obj, user).dispatch(request)
     assert response.status_code == 200
+
+
+def test_missing_object(datadir, setup):  # noqa
+    user, user1 = setup
+    request = DummyRequest(user)
+
+    class CheckView(mixins.LoginPermissionRequiredMixin, generic.DetailView):
+        permission_required = 'check.detail'
+        raise_exception = True
+
+        def __init__(self, obj, user):
+            self.model = obj
+            self.obj = obj
+            self.request = request
+
+        def get_object(self):
+            raise Http404()
+
+    ok_obj = CheckModel(name='not-secret')
+    with pytest.raises(Http404):
+        CheckView(ok_obj, user).dispatch(request)

@@ -1,4 +1,5 @@
 from django.core.exceptions import ImproperlyConfigured
+from django.http.response import Http404
 from rest_framework.exceptions import PermissionDenied
 import rest_framework.generics as generic
 
@@ -324,16 +325,36 @@ def test_mixin_null_perms_obj(datadir, setup):  # noqa
         serializer_class = DummySerializer
         permission_required = 'check4.list'
 
+        def __init__(self, *args, **kwargs):
+            if 'object' in kwargs:
+                self.model = kwargs['object']
+                self.object = kwargs['object']
+            else:
+                self.object = None
+
         def get_queryset(self):
-            return [self.object]
+            if self.object is not None:
+                return [self.object]
+            else:
+                return []
 
     class Check4CreateView(APIPermissionRequiredMixin, generic.CreateAPIView):
         object = None
         serializer_class = DummySerializer
         permission_required = 'check4.create'
 
+        def __init__(self, *args, **kwargs):
+            if 'object' in kwargs:
+                self.model = kwargs['object']
+                self.object = kwargs['object']
+            else:
+                self.object = None
+
         def get_object(self):
-            return self.object
+            if self.object is not None:
+                return self.object
+            else:
+                raise Http404('No object')
 
     user1, user2 = setup
     obj = CheckModel4(name='visible')
@@ -353,6 +374,10 @@ def test_mixin_null_perms_obj(datadir, setup):  # noqa
     rsp4 = Check4CreateView().as_view(object=new_obj)(req4).render()
     assert rsp4.status_code == 201
 
+    req5 = api_get('/check', user2)
+    rsp5 = Check4ListView().as_view(object=None)(req5).render()
+    assert rsp5.status_code == 200
+
 
 def test_mixin_no_permissions_object(datadir, setup):  # noqa
     class Check5DetailView(APIPermissionRequiredMixin,
@@ -365,9 +390,14 @@ def test_mixin_no_permissions_object(datadir, setup):  # noqa
             if 'object' in kwargs:
                 self.model = kwargs['object']
                 self.object = kwargs['object']
+            else:
+                self.object = None
 
         def get_object(self):
-            return self.object
+            if self.object is not None:
+                return self.object
+            else:
+                raise Http404('No object')
 
     user1, user2 = setup
     obj = CheckModel5(name='check')
@@ -378,3 +408,6 @@ def test_mixin_no_permissions_object(datadir, setup):  # noqa
     req2 = api_get('/check', user2)
     rsp2 = Check5DetailView().as_view(object=obj)(req2).render()
     assert rsp2.status_code == 200
+    req3 = api_get('/check', user1)
+    rsp3 = Check5DetailView().as_view(object=None)(req3).render()
+    assert rsp3.status_code == 404

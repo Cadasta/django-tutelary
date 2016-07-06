@@ -2,6 +2,7 @@ from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from collections.abc import Sequence
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http.response import Http404
 
 from .models import check_perms
 from .decorators import action_error_message
@@ -20,10 +21,7 @@ class BasePermissionRequiredMixin:
 
         perms = self.permission_required
         if isinstance(self.permission_required, dict):
-            if self.request.method in self.permission_required:
-                perms = self.permission_required[self.request.method]
-            else:
-                perms = ()
+            perms = self.permission_required.get(self.request.method, ())
 
         if callable(perms):
             perms = perms(self, self.request)
@@ -44,10 +42,8 @@ class BasePermissionRequiredMixin:
     def get_queryset(self):
         if hasattr(self, 'filtered_queryset'):
             return self.filtered_queryset
-        elif hasattr(super(), 'get_queryset'):
-            return super().get_queryset()
         else:
-            return [None]
+            return super().get_queryset()
 
     def perms_filter_queryset(self, objs):
         actions = self.get_permission_required()
@@ -82,11 +78,10 @@ class PermissionRequiredMixin(BasePermissionRequiredMixin):
             if hasattr(self, 'get_object'):
                 try:
                     objs = [self.get_object()]
+                except Http404:
+                    raise
                 except:
-                    try:
-                        objs = [self.get_form().save(commit=False)]
-                    except:
-                        pass
+                    pass
             if objs == [None]:
                 objs = self.get_queryset()
 
@@ -142,12 +137,14 @@ class APIPermissionRequiredMixin(BasePermissionRequiredMixin):
             if hasattr(self, 'get_object'):
                 try:
                     objs = [self.get_object()]
+                except Http404:
+                    raise
                 except:
                     pass
-                if objs == [None]:
-                    objs = self.get_queryset()
-                if len(objs) == 0:
-                    objs = [None]
+            if objs == [None]:
+                objs = self.get_queryset()
+            if len(objs) == 0:
+                objs = [None]
 
         if (hasattr(self, 'permission_filter_queryset') and
            self.permission_filter_queryset is not False and

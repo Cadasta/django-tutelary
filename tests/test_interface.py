@@ -67,7 +67,10 @@ class CheckView1(CheckView1Base):
 
 class CheckView2(CheckView1Base):
     def get_queryset(self):
-        return [self.obj]
+        if self.obj is not None:
+            return [self.obj]
+        else:
+            return []
 
 
 def test_mixin_basic_obj_path(datadir, setup):  # noqa
@@ -92,6 +95,7 @@ def test_mixin_basic_queryset_path(datadir, setup):  # noqa
     assert not CheckView2(secret_obj, user1).has_permission()
     assert CheckView2(ok_obj, user2).has_permission()
     assert CheckView2(secret_obj, user2).has_permission()
+    assert CheckView2(None, user2).has_permission()
 
 
 def test_view_exceptions_no_policies(datadir, setup):  # noqa
