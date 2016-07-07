@@ -341,9 +341,20 @@ def user_assigned_policies(user):
     else:
         pset = user.permissionset.first()
     res = []
+    skip_role_policies = False
+    skip_role = None
+    skip_role_variables = None
     for pi in PolicyInstance.objects.filter(pset=pset):
+        if skip_role_policies:
+            if pi.role == skip_role and pi.variables == skip_role_variables:
+                continue
+            else:
+                skip_role_policies = False
         if pi.role:
             res.append(pi.role)
+            skip_role = pi.role
+            skip_role_variables = pi.variables
+            skip_role_policies = True
         else:
             if pi.variables != '{}':
                 res.append((pi.policy, json.loads(pi.variables)))

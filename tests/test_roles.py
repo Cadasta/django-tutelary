@@ -107,3 +107,28 @@ def test_roles_policies_variables(datadir, setup):  # noqa
         variables={'organisation': 'TestOrg', 'project': 'NewProj'}
     )
     ok_role.save()
+
+
+def test_roles_policies_roundtripping(datadir, setup):  # noqa
+    u1, u2, u3, u4, u5, def_pol, org_pol, prj_pol, deny_pol = setup
+
+    org_role = Role.objects.create(
+        name='cadasta_org', policies=[def_pol, org_pol],
+        variables={'organisation': 'Cadasta'}
+    )
+    testproj_proj_role = Role.objects.create(
+        name='testproj_proj', policies=[def_pol, org_pol, prj_pol],
+        variables={'organisation': 'Cadasta', 'project': 'TestProj'}
+    )
+
+    u1.assign_policies(def_pol)
+    assert(len(u1.assigned_policies()) == 1)
+    u1.assign_policies(def_pol)
+    assert(len(u1.assigned_policies()) == 1)
+
+    u2.assign_policies(def_pol, org_role)
+    assert(len(u2.assigned_policies()) == 2)
+    u2.assign_policies(def_pol, org_role)
+    assert(len(u2.assigned_policies()) == 2)
+    u2.assign_policies(def_pol, org_role, testproj_proj_role)
+    assert(len(u2.assigned_policies()) == 3)
