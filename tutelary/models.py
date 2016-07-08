@@ -1,5 +1,6 @@
 import json
 import itertools
+from functools import lru_cache
 import re
 from django.db import models
 from django.conf import settings
@@ -23,11 +24,6 @@ class Policy(models.Model):
     body = models.TextField()
     """Policy JSON body."""
 
-    def __setattr__(self, attrname, val):
-        super().__setattr__(attrname, val)
-        if attrname == 'body':
-            self.refresh()
-
     audit_log = AuditLog()
 
     def __str__(self):
@@ -36,6 +32,10 @@ class Policy(models.Model):
     def variable_names(self):
         pat = re.compile(r'\$(?:([_a-z][_a-z0-9]*)|{([_a-z][_a-z0-9]*)})')
         return set([m[0] for m in re.findall(pat, self.body)])
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.refresh()
 
     def refresh(self):
         for psetid in _policy_psets([(self, {})]):
@@ -325,8 +325,10 @@ def assign_user_policies(user, *policies_roles):
     else:
         pset.users.add(user)
     pset.save()
+    user_assigned_policies.cache_clear()
 
 
+@lru_cache(maxsize=64)
 def user_assigned_policies(user):
     """Return sequence of policies assigned to a user (or the anonymous
     user is ``user`` is ``None``).  (Also installed as
