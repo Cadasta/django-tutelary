@@ -152,6 +152,36 @@ def test_permission_required_callable(datadir, setup):  # noqa
     assert CheckView1(secret_obj, user2).has_permission()
 
 
+def test_permission_required_callable_false(datadir, setup):  # noqa
+    class CheckViewBase(mixins.PermissionRequiredMixin, generic.DetailView):
+        def check_actions(self, view, request):
+            return False
+
+        permission_required = check_actions
+        raise_exception = True
+
+        def __init__(self, obj, user):
+            self.model = obj
+            self.obj = obj
+            self.request = DummyRequest(user)
+
+    class CheckView1(CheckViewBase):
+        def get_object(self):
+            return self.obj
+
+    class CheckView2(CheckViewBase):
+        def get_queryset(self):
+            return [self.obj]
+
+    user1, user2 = setup
+    ok_obj = CheckModel(name='not-secret')
+    secret_obj = CheckModel(name='secret')
+    assert not CheckView1(ok_obj, user1).has_permission()
+    assert not CheckView1(secret_obj, user1).has_permission()
+    assert not CheckView1(ok_obj, user2).has_permission()
+    assert not CheckView1(secret_obj, user2).has_permission()
+
+
 def test_permission_required_dict(datadir, setup):  # noqa
     class CheckViewBase(mixins.PermissionRequiredMixin, generic.DetailView):
         permission_required = {'GET': ('check.list', 'check.detail'),

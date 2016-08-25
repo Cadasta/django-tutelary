@@ -366,6 +366,8 @@ def user_assigned_policies(user):
 
 
 def check_perms(user, actions, objs, method=None):
+    if actions is False:
+        return False
     if actions is not None:
         for a in actions:
             for o in objs:
