@@ -265,6 +265,31 @@ the ``project.list`` permission for the associated organization, and
 for which the user has the ``project.delete`` permission on the
 project itself.
 
+``PermissionsFilterMixin``
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Another option to filter querysets based on permissions is to provide required permissions as a query filter with the request. 
+
+Imagine, we have a view that lists all projects in an organization that the user is allowed to view. The corresponding view would look like this::
+
+  class ProjectListView(APIPermissionRequiredMixin, ListAPIView):
+      queryset = Project.objects.all()
+      serializer_class = ProjectSerializer
+      permission_required = 'project.list'
+      permission_filter_queryset = ['project.view']
+
+Clients can access this view via ``GET /projects``; the server returns a list of all viewable projects. To get a list of all projects the user can both access as well as update and delete, clients can request ``GET /projects/?permissions=project.update,project.delete`` to get a list filtered according to the required permissions. 
+
+To make this work, you have to add the ``PermissionsFilterMixin`` from ``tutelary.mixins`` to the view::
+
+  class ProjectListView(PermissionsFilterMixin,
+                        APIPermissionRequiredMixin,
+                        ListAPIView):
+      queryset = Project.objects.all()
+      serializer_class = ProjectSerializer
+      permission_required = 'project.list'
+      permission_filter_queryset = ['project.view']
+
 The ``get_perms_objects`` method
 --------------------------------
 
