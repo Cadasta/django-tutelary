@@ -122,6 +122,20 @@ class LoginPermissionRequiredMixin(PermissionRequiredMixin,
         return super().dispatch(request, *args, **kwargs)
 
 
+class PermissionsFilterMixin:
+    def dispatch(self, request, *args, **kwargs):
+        permissions = request.GET.get('permissions', None)
+        if permissions:
+            actions = tuple(permissions.split(','))
+
+            if isinstance(self.permission_filter_queryset, Sequence):
+                actions += tuple(self.permission_filter_queryset)
+
+            self.permission_filter_queryset = actions
+
+        return super().dispatch(request, *args, **kwargs)
+
+
 class APIPermissionRequiredMixin(BasePermissionRequiredMixin):
     """Permission checking mixin for Django Rest Framework -- works just
     like the ``PermissionRequiredMixin`` in the default Django
