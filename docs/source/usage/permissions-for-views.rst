@@ -265,12 +265,16 @@ the ``project.list`` permission for the associated organization, and
 for which the user has the ``project.delete`` permission on the
 project itself.
 
-``PermissionsFilterMixin``
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Collective action filtering using ``PermissionsFilterMixin``
+------------------------------------------------------------
 
-Another option to filter querysets based on permissions is to provide required permissions as a query filter with the request. 
+Another method to filter querysets for collective actions (especially
+listing of objects) is to provide a list of permissions as a query
+filter with the request.
 
-Imagine, we have a view that lists all projects in an organization that the user is allowed to view. The corresponding view would look like this::
+Suppose that we have a view that lists all projects in an organization
+that the user is allowed to view. The corresponding view would look
+like this::
 
   class ProjectListView(APIPermissionRequiredMixin, ListAPIView):
       queryset = Project.objects.all()
@@ -278,9 +282,18 @@ Imagine, we have a view that lists all projects in an organization that the user
       permission_required = 'project.list'
       permission_filter_queryset = ['project.view']
 
-Clients can access this view via ``GET /projects``; the server returns a list of all viewable projects. To get a list of all projects the user can both access as well as update and delete, clients can request ``GET /projects/?permissions=project.update,project.delete`` to get a list filtered according to the required permissions. 
+Clients can access this view via ``GET /projects`` and the server
+returns a list of all viewable projects.  To get a list of all
+projects the user can update and delete as well as view, clients can
+add a ``permissions`` query parameter to the request URL: ``GET
+/projects/?permissions=project.update,project.delete``.  This results
+in a list of projects for which the user has ``project.view``,
+``project.update`` and ``project.delete`` permissions.
 
-To make this work, you have to add the ``PermissionsFilterMixin`` from ``tutelary.mixins`` to the view::
+This functionality is provided by the ``PermissionsFilterMixin`` mixin
+class from ``tutelary.mixins``.  Filtering based on the
+``permissions`` URL query parameter can be enabled by adding this
+mixin to the view::
 
   class ProjectListView(PermissionsFilterMixin,
                         APIPermissionRequiredMixin,
