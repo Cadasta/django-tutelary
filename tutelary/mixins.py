@@ -128,7 +128,8 @@ class PermissionsFilterMixin:
         if permissions:
             actions = tuple(permissions.split(','))
 
-            if isinstance(self.permission_filter_queryset, Sequence):
+            if (hasattr(self, 'permission_filter_queryset') and
+                    isinstance(self.permission_filter_queryset, Sequence)):
                 actions += tuple(self.permission_filter_queryset)
 
             self.permission_filter_queryset = actions
