@@ -1,7 +1,7 @@
 from rest_framework import serializers
 import rest_framework.generics as generics
 
-from tutelary.mixins import APIPermissionRequiredMixin
+from tutelary.mixins import APIPermissionRequiredMixin, PermissionsFilterMixin
 
 import pytest
 from rest_framework.test import APIRequestFactory, force_authenticate
@@ -59,7 +59,21 @@ class FilterProjList(APIPermissionRequiredMixin, BaseProjList):
     permission_filter_queryset = True
 
 
+class FilterPermissionsProjList(PermissionsFilterMixin,
+                                APIPermissionRequiredMixin,
+                                BaseProjList):
+    permission_required = 'proj.list'
+    permission_filter_queryset = True
+
+
 class DetailProjList(APIPermissionRequiredMixin, BaseProjList):
+    permission_required = 'proj.list'
+    permission_filter_queryset = ['proj.detail']
+
+
+class FilterPermissionsDetailProjList(PermissionsFilterMixin,
+                                      APIPermissionRequiredMixin,
+                                      BaseProjList):
     permission_required = 'proj.list'
     permission_filter_queryset = ['proj.detail']
 
@@ -228,3 +242,55 @@ def test_detail_with_private_filter_listing(datadir, setup):  # noqa
     assert project_count(view(r3).render()) == 2
     assert project_count(view(r4).render()) == 0
     assert project_count(view(r5).render()) == 6
+
+
+def test_permission_basic_listing_without_filter(datadir, setup):  # noqa
+    url = '/projs'
+    users, pols, orgs, projs = setup
+    r1, r2, r3, r4, r5 = map(lambda u: api_get(url, u), users)
+
+    view = FilterPermissionsProjList().as_view(objects=projs)
+    assert project_count(view(r1).render()) == 10
+    assert project_count(view(r2).render()) == 7
+    assert project_count(view(r3).render()) == 3
+    assert project_count(view(r4).render()) == 0
+    assert project_count(view(r5).render()) == 10
+
+
+def test_permission_basic_listing(datadir, setup):  # noqa
+    url = '/projs?permissions=proj.delete'
+    users, pols, orgs, projs = setup
+    r1, r2, r3, r4, r5 = map(lambda u: api_get(url, u), users)
+
+    view = FilterPermissionsProjList().as_view(objects=projs)
+    assert project_count(view(r1).render()) == 10
+    assert project_count(view(r2).render()) == 1
+    assert project_count(view(r3).render()) == 2
+    assert project_count(view(r4).render()) == 0
+    assert project_count(view(r5).render()) == 0
+
+
+def test_permission_detail_listing_without_filter(datadir, setup):  # noqa
+    url = '/projs'
+    users, pols, orgs, projs = setup
+    r1, r2, r3, r4, r5 = map(lambda u: api_get(url, u), users)
+
+    view = FilterPermissionsDetailProjList().as_view(objects=projs)
+    assert project_count(view(r1).render()) == 10
+    assert project_count(view(r2).render()) == 3
+    assert project_count(view(r3).render()) == 3
+    assert project_count(view(r4).render()) == 0
+    assert project_count(view(r5).render()) == 8
+
+
+def test_permission_detail_listing(datadir, setup):  # noqa
+    url = '/projs?permissions=proj.delete'
+    users, pols, orgs, projs = setup
+    r1, r2, r3, r4, r5 = map(lambda u: api_get(url, u), users)
+
+    view = FilterPermissionsDetailProjList().as_view(objects=projs)
+    assert project_count(view(r1).render()) == 10
+    assert project_count(view(r2).render()) == 1
+    assert project_count(view(r3).render()) == 2
+    assert project_count(view(r4).render()) == 0
+    assert project_count(view(r5).render()) == 0
