@@ -54,6 +54,12 @@ class NormalProjList(APIPermissionRequiredMixin, BaseProjList):
     permission_required = 'proj.list'
 
 
+class NormalPermissionsProjList(PermissionsFilterMixin,
+                                APIPermissionRequiredMixin,
+                                BaseProjList):
+    permission_required = 'proj.list'
+
+
 class FilterProjList(APIPermissionRequiredMixin, BaseProjList):
     permission_required = 'proj.list'
     permission_filter_queryset = True
@@ -242,6 +248,34 @@ def test_detail_with_private_filter_listing(datadir, setup):  # noqa
     assert project_count(view(r3).render()) == 2
     assert project_count(view(r4).render()) == 0
     assert project_count(view(r5).render()) == 6
+
+
+def test_permission_normal_listing_without_filter(datadir, setup):  # noqa
+    users, pols, orgs, projs = setup
+    r1, r2, r3, r4, r5 = map(lambda u: api_get('/projs', u), users)
+
+    view = NormalPermissionsProjList().as_view(objects=projs)
+    assert project_count(view(r1).render()) == 10
+    rsp2 = view(r2).render()
+    assert rsp2.status_code == 403
+    rsp3 = view(r3).render()
+    assert rsp3.status_code == 403
+    rsp4 = view(r4).render()  # noqa
+    assert rsp4.status_code == 403
+    assert project_count(view(r5).render()) == 10
+
+
+def test_permission_normal_listing(datadir, setup):  # noqa
+    url = '/projs?permissions=proj.delete'
+    users, pols, orgs, projs = setup
+    r1, r2, r3, r4, r5 = map(lambda u: api_get(url, u), users)
+
+    view = NormalPermissionsProjList().as_view(objects=projs)
+    assert project_count(view(r1).render()) == 10
+    assert project_count(view(r2).render()) == 1
+    assert project_count(view(r3).render()) == 2
+    assert project_count(view(r4).render()) == 0
+    assert project_count(view(r5).render()) == 0
 
 
 def test_permission_basic_listing_without_filter(datadir, setup):  # noqa
