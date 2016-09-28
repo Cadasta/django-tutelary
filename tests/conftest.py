@@ -35,6 +35,11 @@ def pytest_configure():
         AUTHENTICATION_BACKENDS=[
             'tutelary.backends.Backend'
         ],
+        CACHES={
+            'default': {
+                'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+            }
+        }
     )
 
     try:

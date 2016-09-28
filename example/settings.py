@@ -92,3 +92,10 @@ DATABASES = {
 # Static files (CSS, JavaScript, Images)
 
 STATIC_URL = '/static/'
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}

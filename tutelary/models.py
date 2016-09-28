@@ -1,12 +1,12 @@
 import json
 import itertools
-from functools import lru_cache
 import re
 from django.db import models
 from django.conf import settings
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.cache import cache
 from audit_log.models.managers import AuditLog
 import tutelary.engine as engine
 from tutelary.exceptions import RoleVariableException
@@ -311,6 +311,10 @@ def clear_user_policies(user):
             pset.delete()
 
 
+def user_cache_key(user):
+    return 'tutelary:user:' + str(user.pk) if user is not None else 'anon'
+
+
 def assign_user_policies(user, *policies_roles):
     """Assign a sequence of policies to a user (or the anonymous user is
     ``user`` is ``None``).  (Also installed as ``assign_policies``
@@ -325,16 +329,20 @@ def assign_user_policies(user, *policies_roles):
     else:
         pset.users.add(user)
     pset.save()
-    user_assigned_policies.cache_clear()
+    cache.set(user_cache_key(user), None)
 
 
-@lru_cache(maxsize=64)
 def user_assigned_policies(user):
     """Return sequence of policies assigned to a user (or the anonymous
     user is ``user`` is ``None``).  (Also installed as
     ``assigned_policies`` method on ``User`` model.
 
     """
+    key = user_cache_key(user)
+    cached = cache.get(key)
+    if cached is not None:
+        return cached
+
     if user is None:
         try:
             pset = PermissionSet.objects.get(anonymous_user=True)
@@ -362,6 +370,7 @@ def user_assigned_policies(user):
                 res.append((pi.policy, json.loads(pi.variables)))
             else:
                 res.append(pi.policy)
+    cache.set(key, res)
     return res
 
 
