@@ -263,21 +263,24 @@ class PermissionSet(models.Model):
     # generated from identical sequences of policies.
     objects = PermissionSetManager()
 
+    def cache_key(self):
+        return 'tutelary:ptree:' + str(self.pk)
+
     def tree(self):
-        if not hasattr(PermissionSet, 'ptree_cache'):
-            PermissionSet.ptree_cache = {}
-        if self.pk not in PermissionSet.ptree_cache:
-            PermissionSet.ptree_cache[self.pk] = engine.PermissionTree(
+        key = self.cache_key()
+        cached = cache.get(key)
+        if cached is None:
+            ptree = engine.PermissionTree(
                 policies=[engine.PolicyBody(json=pi.policy.body,
                                             variables=json.loads(pi.variables))
                           for pi in PolicyInstance.objects.filter(pset=self)]
             )
-        return PermissionSet.ptree_cache[self.pk]
+            cache.set(key, ptree)
+            cached = ptree
+        return cached
 
     def refresh(self):
-        if hasattr(PermissionSet, 'ptree_cache'):
-            if self.pk in PermissionSet.ptree_cache:
-                del PermissionSet.ptree_cache[self.pk]
+        cache.set(self.cache_key(), None)
 
     def __str__(self):
         return str(self.pk)
