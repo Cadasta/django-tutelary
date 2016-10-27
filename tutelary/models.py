@@ -273,7 +273,9 @@ class PermissionSet(models.Model):
             ptree = engine.PermissionTree(
                 policies=[engine.PolicyBody(json=pi.policy.body,
                                             variables=json.loads(pi.variables))
-                          for pi in PolicyInstance.objects.filter(pset=self)]
+                          for pi in (PolicyInstance.objects
+                                     .select_related('policy')
+                                     .filter(pset=self))]
             )
             cache.set(key, ptree)
             cached = ptree
@@ -357,7 +359,8 @@ def user_assigned_policies(user):
     skip_role_policies = False
     skip_role = None
     skip_role_variables = None
-    for pi in PolicyInstance.objects.filter(pset=pset):
+    for pi in (PolicyInstance.objects
+               .select_related('policy', 'role').filter(pset=pset)):
         if skip_role_policies:
             if pi.role == skip_role and pi.variables == skip_role_variables:
                 continue
