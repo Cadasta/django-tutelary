@@ -9,6 +9,7 @@ pytest==2.8.5
 pytest-cov==2.2.0
 flake8==2.5.1
 factory_boy==2.6.1
+fake-factory<=0.7.4
 
 # wheel for PyPI installs
 wheel==0.26.0
