@@ -22,7 +22,7 @@ def permission_required(*actions, obj=None, raise_exception=False):
     """
     def checker(user):
         ok = False
-        if user.is_authenticated() and check_perms(user, actions, [obj]):
+        if user.is_authenticated and check_perms(user, actions, [obj]):
             ok = True
         if raise_exception and not ok:
             raise PermissionDenied
