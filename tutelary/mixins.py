@@ -111,7 +111,7 @@ class PermissionRequiredMixin(BasePermissionRequiredMixin):
 class LoginPermissionRequiredMixin(PermissionRequiredMixin,
                                    LoginRequiredMixin):
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             if hasattr(self, 'raise_exception') and self.raise_exception:
                 raise PermissionDenied(self.get_permission_denied_message())
 
