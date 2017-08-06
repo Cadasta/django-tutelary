@@ -11,10 +11,13 @@ class Backend:
     """
     def _get_pset(self, user):
         try:
-            if user.is_authenticated():
-                return user.permissionset.first().tree()
-            else:
-                return PermissionSet.objects.get(anonymous_user=True).tree()
+            if not getattr(user, '_pset', None):
+                if user.is_authenticated():
+                    user._pset = user.permissionset.first().tree()
+                else:
+                    user._pset = PermissionSet.objects.get(
+                        anonymous_user=True).tree()
+            return user._pset
         except AttributeError:
             raise ObjectDoesNotExist
 
