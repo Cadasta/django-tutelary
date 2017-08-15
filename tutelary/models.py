@@ -294,6 +294,36 @@ def user_delete(sender, instance, **kwargs):
     clear_user_policies(instance)
 
 
+def _get_permission_set_tree(user):
+    """ Helper to cache permission set tree on user instance """
+    key = '__pset_tree'
+    if not hasattr(user, key):
+        try:
+            if user.is_authenticated():
+                setattr(user, key, user.permissionset.first().tree())
+            else:
+                setattr(user, key, PermissionSet.objects.get(
+                    anonymous_user=True).tree())
+        except AttributeError:
+            raise ObjectDoesNotExist
+    return getattr(user, key)
+
+
+def _del_permission_set_tree(user):
+    """ Helper to clear permission set tree cached on user instance """
+    key = '__pset_tree'
+    if hasattr(user, key):
+        delattr(user, key)
+
+
+permission_set_tree_property = property(
+    fget=_get_permission_set_tree,
+    fset=None,
+    fdel=_del_permission_set_tree,
+    doc="Helper to cache Tutelary's permission_set tree on user instance"
+)
+
+
 def clear_user_policies(user):
     """Remove all policies assigned to a user (or the anonymous user if
     ``user`` is ``None``).
@@ -307,6 +337,7 @@ def clear_user_policies(user):
         except ObjectDoesNotExist:
             return
     else:
+        del user.permset_tree
         pset = user.permissionset.first()
     if pset:
         pset.refresh()

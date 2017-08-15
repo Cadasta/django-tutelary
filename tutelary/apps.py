@@ -9,6 +9,10 @@ class TutelaryConfig(AppConfig):
     def ready(self):
         user_model = django_apps.get_model(settings.AUTH_USER_MODEL)
         if not hasattr(user_model, 'assign_policies'):
-            from .models import assign_user_policies, user_assigned_policies
-            user_model.assign_policies = assign_user_policies
-            user_model.assigned_policies = user_assigned_policies
+            from . import models
+            user_model.assign_policies = models.assign_user_policies
+            user_model.assigned_policies = models.user_assigned_policies
+            user_model.permset_tree = models.permission_set_tree_property
+
+        from django.contrib.auth.models import AnonymousUser
+        AnonymousUser.permset_tree = models.permission_set_tree_property
