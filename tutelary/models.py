@@ -1,5 +1,4 @@
 import json
-import itertools
 import re
 from django.db import models
 from django.conf import settings
@@ -38,8 +37,8 @@ class Policy(models.Model):
         self.refresh()
 
     def refresh(self):
-        for psetid in _policy_psets([(self, {})]):
-            PermissionSet.objects.get(pk=psetid).refresh()
+        for pset in _policy_psets([(self, {})]):
+            pset.refresh()
 
 
 class RolePolicyAssign(models.Model):
@@ -76,7 +75,7 @@ class RoleManager(models.Manager):
         vns = set().union(*[p.variable_names() for p in pols])
         if not vns.issubset(vs.keys()):
             raise RoleVariableException("missing variable in role definition")
-        for p, i in zip(pols, itertools.count()):
+        for i, p in enumerate(pols):
             RolePolicyAssign.objects.create(role=r, policy=p, index=i)
         return r
 
@@ -157,19 +156,11 @@ def _policy_psets(policies):
     if len(policies) == 0:
         # Special case: find any permission sets that don't have
         # associated policy instances.
-        pipsets = set([pi.pset.id for pi in PolicyInstance.objects.all()])
-        allpsets = set([pset.id for pset in PermissionSet.objects.all()])
-        return list(allpsets - pipsets)
+        return PermissionSet.objects.filter(policyinstance__isnull=True)
     else:
-        psetids = None
-        for p in policies:
-            pis = PolicyInstance.objects.filter(policy=p[0])
-            ppsetids = set([pi.pset.id for pi in pis])
-            if psetids is None:
-                psetids = ppsetids
-            else:
-                psetids &= ppsetids
-        return [] if psetids is None else list(psetids)
+        policy_instances = [p[0] for p in policies]
+        return PermissionSet.objects.filter(
+            policyinstance__policy__in=policy_instances).distinct()
 
 
 class PermissionSetManager(models.Manager):
@@ -197,25 +188,26 @@ class PermissionSetManager(models.Manager):
                 canonpols.append((pr, vars, None))
 
         # Try to find an existing permission set using all the same
-        # policies and variable assignments.  First step is to find a
-        # list of permission set IDs using all the same policies as
-        # appear in the supplied policy list.
-        for psetid in _policy_psets(canonpols):
+        # policies and variable assignments.
+        matching_psets = _policy_psets(canonpols).annotate(
+            num_pis=models.Count('policyinstance')
+        ).filter(
+            # Same number of policy instances
+            num_pis=len(canonpols)
+        )
+
+        for policy, variables, role in canonpols:
             # Now, for each permission set candidate, check whether
             # the policy instance rows correspond exactly to the input
             # policy+variable assignment list.
-            pset = self.get(id=psetid)
-            pis = PolicyInstance.objects.filter(pset=pset)
-            if len(pis) == len(canonpols):
-                same = True
-                for pi, canonpol in zip(pis, canonpols):
-                    if (pi.variables != canonpol[1] or
-                       (canonpol[2] is not None and pi.role != canonpol[0]) or
-                       (canonpol[2] is None and pi.policy != canonpol[0])):
-                        same = False
-                        break
-                if same:
-                    return pset
+            matching_psets = matching_psets.filter(
+                policyinstance__policy=policy,
+                policyinstance__variables=variables,
+                policyinstance__role=role,
+            )
+        matched_pset = matching_psets.first()
+        if matched_pset:
+            return matched_pset
 
         # If we get here, there is not an existing permission set for
         # the exact combination of policies and variable assignments
@@ -226,13 +218,17 @@ class PermissionSetManager(models.Manager):
 
         # Make a temporary object and save it for use in building the
         # relevant PolicyInstance objects.
+
         obj = self.create()
         obj.save()
 
         # Set up policy instance references.
-        for p, i in zip(canonpols, itertools.count()):
-            PolicyInstance.objects.create(pset=obj, policy=p[0], role=p[2],
-                                          index=i, variables=p[1])
+        PolicyInstance.objects.bulk_create([
+            PolicyInstance(
+                pset=obj, policy=policy, role=role,
+                index=i, variables=variables
+            ) for i, (policy, variables, role) in enumerate(canonpols)
+        ])
 
         # The construction of the permission tree for this permission
         # set happens lazily when needed, so at this point we just
@@ -349,18 +345,17 @@ def user_assigned_policies(user):
         return cached
 
     if user is None:
-        try:
-            pset = PermissionSet.objects.get(anonymous_user=True)
-        except ObjectDoesNotExist:
-            return []
+        pset = PermissionSet.objects.filter(anonymous_user=True).first()
     else:
         pset = user.permissionset.first()
+    if pset is None:
+        return []
+
     res = []
     skip_role_policies = False
     skip_role = None
     skip_role_variables = None
-    for pi in (PolicyInstance.objects
-               .select_related('policy', 'role').filter(pset=pset)):
+    for pi in pset.policyinstance_set.select_related('policy', 'role'):
         if skip_role_policies:
             if pi.role == skip_role and pi.variables == skip_role_variables:
                 continue
