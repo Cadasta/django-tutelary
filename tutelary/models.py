@@ -35,11 +35,11 @@ class Policy(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        self.refresh()
+        self.flush_cache()
 
-    def refresh(self):
+    def flush_cache(self):
         for psetid in _policy_psets([(self, {})]):
-            PermissionSet.objects.get(pk=psetid).refresh()
+            PermissionSet.objects.get(pk=psetid).flush_cache()
 
 
 class RolePolicyAssign(models.Model):
@@ -146,6 +146,13 @@ class PolicyInstance(models.Model):
             self.policy.name, self.pset.pk, self.index,
             self.role.name if self.role else "NULL",
             self.variables
+        )
+
+    @property
+    def policy_body(self):
+        return engine.PolicyBody(
+            json=self.policy.body,
+            variables=json.loads(self.variables)
         )
 
 
@@ -263,29 +270,60 @@ class PermissionSet(models.Model):
     # generated from identical sequences of policies.
     objects = PermissionSetManager()
 
+    @property
     def cache_key(self):
         return 'tutelary:ptree:' + str(self.pk)
 
     def tree(self):
-        key = self.cache_key()
-        cached = cache.get(key)
+        cached = cache.get(self.cache_key)
         if cached is None:
             ptree = engine.PermissionTree(
                 policies=[
-                    engine.PolicyBody(
-                        json=policy_body,
-                        variables=json.loads(variables)
-                    ) for (policy_body, variables) in
-                    self.policyinstance_set.values_list(
-                        'policy__body', 'variables')
+                    policy_instance.policy_body for policy_instance in
+                    self.policyinstance_set.prefetch_related('policy')
                 ]
             )
-            cache.set(key, ptree)
+            cache.set(self.cache_key, ptree)
             cached = ptree
         return cached
 
-    def refresh(self):
-        cache.set(self.cache_key(), None)
+    def summarize(self):
+        """
+        Helper to return human-readable summary of permission set.
+        Summary consists of an array of tuples of effect, action, object.
+        """
+        return [
+            policy for policy in
+            self._flattened_tree([('', self.tree().tree.root)])
+        ]
+
+    def _flattened_tree(self, subtrees, action=None, obj=None, depth=0):
+        for action_or_obj, subtree in subtrees:
+
+            if depth < 3:
+                _action = (
+                    '.'.join([action, action_or_obj])
+                    if action else action_or_obj)
+                _obj = None
+            else:
+                _action = action
+                _obj = (
+                    '/'.join([obj, action_or_obj])
+                    if obj else action_or_obj)
+
+            effect = subtree['item']
+            if effect:
+                yield (effect, _action, _obj)
+
+            _subtrees = subtree['subtrees']
+            if _subtrees:
+                next_level = self._flattened_tree(
+                    _subtrees, _action, _obj, depth=depth + 1)
+                for output in next_level:
+                    yield output
+
+    def flush_cache(self):
+        cache.delete(self.cache_key)
 
     def __str__(self):
         return str(self.pk)
@@ -312,7 +350,7 @@ def clear_user_policies(user):
     else:
         pset = user.permissionset.first()
     if pset:
-        pset.refresh()
+        pset.flush_cache()
         if user is not None:
             pset.users.remove(user)
         if pset.users.count() == 0 and not pset.anonymous_user:
@@ -331,13 +369,13 @@ def assign_user_policies(user, *policies_roles):
     """
     clear_user_policies(user)
     pset = PermissionSet.objects.by_policies_and_roles(policies_roles)
-    pset.refresh()
+    pset.flush_cache()
     if user is None:
         pset.anonymous_user = True
     else:
         pset.users.add(user)
     pset.save()
-    cache.set(user_cache_key(user), None)
+    cache.delete(user_cache_key(user))
 
 
 def user_assigned_policies(user):
