@@ -51,6 +51,9 @@ class SimpleSeparated(Sequence):
     def __str__(self):
         return self.separator.join(self.components)
 
+    def __repr__(self):
+        return '{}({!r})'.format(self.__class__.__name__, str(self))
+
     def __eq__(self, other):
         return self.components == other.components
 
@@ -259,10 +262,10 @@ class PermissionTree:
             self.add(policies=policies)
 
     def __repr__(self):
-        """Serialisation to JSON.
-
-        """
-        return repr(self.tree)
+        return '{}(\n{}\n)'.format(
+            self.__class__.__name__,
+            '  ' + str(self.tree).replace('\n', '\n  ')  # Pad tree output
+        )
 
     def add(self, effect=None, act=None, obj=None,
             policy=None, policies=None):

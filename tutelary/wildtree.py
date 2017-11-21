@@ -1,6 +1,7 @@
 # coding:utf-8
 from collections import MutableMapping
 from json import loads, dumps
+from pprint import pformat
 
 
 class WildTree(MutableMapping):
@@ -10,8 +11,8 @@ class WildTree(MutableMapping):
     (e.g. ``a/*/c/*``), where later key path insertions override
     earlier ones.
 
-    Provides JSON serialisation (via repr) and deserialisation (via
-    constructor).
+    Provides JSON serialisation (via ``to_json()``) and deserialisation
+    (via constructor).
 
     """
     def __init__(self, json=None):
@@ -30,6 +31,12 @@ class WildTree(MutableMapping):
             self.root = loads(json)
 
     def __repr__(self):
+        return pformat(self.root)
+
+    def to_json(self):
+        """
+        Serialisation to JSON.
+        """
         return dumps(self.root)
 
     def __contains__(self, key):
