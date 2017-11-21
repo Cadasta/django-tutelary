@@ -271,11 +271,14 @@ class PermissionSet(models.Model):
         cached = cache.get(key)
         if cached is None:
             ptree = engine.PermissionTree(
-                policies=[engine.PolicyBody(json=pi.policy.body,
-                                            variables=json.loads(pi.variables))
-                          for pi in (PolicyInstance.objects
-                                     .select_related('policy')
-                                     .filter(pset=self))]
+                policies=[
+                    engine.PolicyBody(
+                        json=policy_body,
+                        variables=json.loads(variables)
+                    ) for (policy_body, variables) in
+                    self.policyinstance_set.values_list(
+                        'policy__body', 'variables')
+                ]
             )
             cache.set(key, ptree)
             cached = ptree
