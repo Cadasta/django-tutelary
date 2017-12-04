@@ -37,7 +37,7 @@ class Policy(models.Model):
         self.refresh()
 
     def refresh(self):
-        for pset in _policy_psets([(self, {})]):
+        for pset in _policy_psets([self]):
             pset.refresh()
 
 
@@ -148,17 +148,16 @@ class PolicyInstance(models.Model):
         )
 
 
-def _policy_psets(policies):
-    """Find all permission sets making use of all of a list of policies. The
-    input is a list of (policy, variables) pairs.
+def _policy_psets(policy_instances):
+    """Find all permission sets making use of all of a list of policy_instances.
+    The input is an array of policy instances.
 
     """
-    if len(policies) == 0:
+    if len(policy_instances) == 0:
         # Special case: find any permission sets that don't have
         # associated policy instances.
         return PermissionSet.objects.filter(policyinstance__isnull=True)
     else:
-        policy_instances = [p[0] for p in policies]
         return PermissionSet.objects.filter(
             policyinstance__policy__in=policy_instances).distinct()
 
@@ -189,7 +188,8 @@ class PermissionSetManager(models.Manager):
 
         # Try to find an existing permission set using all the same
         # policies and variable assignments.
-        matching_psets = _policy_psets(canonpols).annotate(
+        policies = [policy for (policy, variables, role) in canonpols]
+        matching_psets = _policy_psets(policies).annotate(
             num_pis=models.Count('policyinstance')
         ).filter(
             # Same number of policy instances
