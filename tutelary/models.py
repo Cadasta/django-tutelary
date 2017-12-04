@@ -149,8 +149,8 @@ class PolicyInstance(models.Model):
 
 
 def _policy_psets(policies):
-    """Find the IDs of all permission sets making use of all of a list of
-    policies.  The input is a list of (policy, variables) pairs.
+    """Find all permission sets making use of all of a list of policies. The
+    input is a list of (policy, variables) pairs.
 
     """
     if len(policies) == 0:
