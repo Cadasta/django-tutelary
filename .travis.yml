@@ -7,7 +7,7 @@ sudo: false
 env:
     - TOX_ENV=py35-flake8
     - TOX_ENV=py35-docs
-    - TOX_ENV=py35-django1.9
+    - TOX_ENV=py35-django1.11
 
 matrix:
   fast_finish: true
