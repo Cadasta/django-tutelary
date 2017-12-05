@@ -1,7 +1,4 @@
-import os.path
-
 from django.core.exceptions import PermissionDenied
-import django.template.loader
 import django.views.generic as generic
 
 from tutelary.mixins import PermissionRequiredMixin
@@ -12,11 +9,6 @@ from django.test import RequestFactory
 from .factories import UserFactory, PolicyFactory
 from .datadir import datadir  # noqa
 from .filter_models import Org, Proj
-
-
-django.template.loader._engine_list(None)[0].engine.dirs = [
-    os.path.join(os.path.dirname(__file__), "templates")
-]
 
 
 class FakeQueryset:
