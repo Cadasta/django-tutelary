@@ -68,16 +68,16 @@ class RoleManager(models.Manager):
     cover all the variables used in the role's policies.
 
     """
-    def create(self, *args, **kwargs):
-        pols = kwargs.get('policies', [])
-        vs = kwargs.get('variables', {})
-        r = super().create(name=kwargs['name'], variables=vs)
-        vns = set().union(*[p.variable_names() for p in pols])
-        if not vns.issubset(vs.keys()):
+    def create(self, name, policies=None, variables=None):
+        policies = policies or []
+        variables = variables or {}
+        role = super().create(name=name, variables=variables)
+        variable_names = set().union(*[p.variable_names() for p in policies])
+        if not variable_names.issubset(variables.keys()):
             raise RoleVariableException("missing variable in role definition")
-        for i, p in enumerate(pols):
-            RolePolicyAssign.objects.create(role=r, policy=p, index=i)
-        return r
+        for i, policy in enumerate(policies):
+            RolePolicyAssign.objects.create(role=role, policy=policy, index=i)
+        return role
 
 
 class Role(models.Model):
@@ -181,7 +181,9 @@ class PermissionSetManager(models.Manager):
                 pr = pr[0]
             if isinstance(pr, Role):
                 vars = json.dumps(pr.variables)
-                for rp in RolePolicyAssign.objects.filter(role=pr):
+                policy_assignments = RolePolicyAssign.objects.filter(
+                    role=pr).select_related('policy')
+                for rp in policy_assignments:
                     canonpols.append((rp.policy, vars, pr))
             else:
                 canonpols.append((pr, vars, None))
@@ -216,11 +218,9 @@ class PermissionSetManager(models.Manager):
         # The permission set model stores the JSON serialisation of
         # this tree structure.
 
-        # Make a temporary object and save it for use in building the
-        # relevant PolicyInstance objects.
-
+        # Create a PermissionSet for use in building the relevant
+        # PolicyInstance objects.
         obj = self.create()
-        obj.save()
 
         # Set up policy instance references.
         PolicyInstance.objects.bulk_create([
