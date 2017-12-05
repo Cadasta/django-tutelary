@@ -294,26 +294,29 @@ def user_delete(sender, instance, **kwargs):
     clear_user_policies(instance)
 
 
+CACHED_PSET_PROPERTY_KEY = '__pset_tree'
+
+
 def _get_permission_set_tree(user):
-    """ Helper to cache permission set tree on user instance """
-    key = '__pset_tree'
-    if not hasattr(user, key):
+    """
+    Helper to return cached permission set tree from user instance if set, else
+    generates and returns analyzed permission set tree. Does not cache set
+    automatically, that must be done explicitely.
+    """
+    if hasattr(user, CACHED_PSET_PROPERTY_KEY):
+        return getattr(user, CACHED_PSET_PROPERTY_KEY)
+    if user.is_authenticated():
         try:
-            if user.is_authenticated():
-                setattr(user, key, user.permissionset.first().tree())
-            else:
-                setattr(user, key, PermissionSet.objects.get(
-                    anonymous_user=True).tree())
+            return user.permissionset.first().tree()
         except AttributeError:
             raise ObjectDoesNotExist
-    return getattr(user, key)
+    return PermissionSet.objects.get(anonymous_user=True).tree()
 
 
 def _del_permission_set_tree(user):
     """ Helper to clear permission set tree cached on user instance """
-    key = '__pset_tree'
-    if hasattr(user, key):
-        delattr(user, key)
+    if hasattr(user, CACHED_PSET_PROPERTY_KEY):
+        delattr(user, CACHED_PSET_PROPERTY_KEY)
 
 
 permission_set_tree_property = property(
@@ -322,6 +325,17 @@ permission_set_tree_property = property(
     fdel=_del_permission_set_tree,
     doc="Helper to cache Tutelary's permission_set tree on user instance"
 )
+
+
+def ensure_permission_set_tree_cached(user):
+    """ Helper to cache permission set tree on user instance """
+    if hasattr(user, CACHED_PSET_PROPERTY_KEY):
+        return
+    try:
+        setattr(
+            user, CACHED_PSET_PROPERTY_KEY, _get_permission_set_tree(user))
+    except ObjectDoesNotExist:  # No permission set
+        pass
 
 
 def clear_user_policies(user):
@@ -337,7 +351,6 @@ def clear_user_policies(user):
         except ObjectDoesNotExist:
             return
     else:
-        del user.permset_tree
         pset = user.permissionset.first()
     if pset:
         pset.refresh()
@@ -412,6 +425,7 @@ def user_assigned_policies(user):
 
 
 def check_perms(user, actions, objs, method=None):
+    ensure_permission_set_tree_cached(user)
     if actions is False:
         return False
     if actions is not None:

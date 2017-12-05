@@ -65,8 +65,6 @@ def test_policy_update_1(datadir, setup):  # noqa
     assert str(org_pol) == 'org'
     org_pol.body = datadir.join('org-policy-2.json').read()
     org_pol.save()
-    for u in (user1, user2, user3):
-        del u.permset_tree
 
     check(nuser=3, npol=3, npolin=6, npset=3)
 
@@ -101,8 +99,6 @@ def test_policy_update_2(datadir, setup):  # noqa
 
     prj_pol.body = datadir.join('project-policy-2.json').read()
     prj_pol.save()
-    for u in (user1, user2, user3):
-        del u.permset_tree
 
     check(nuser=3, npol=3, npolin=6, npset=3)
 

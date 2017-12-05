@@ -1,5 +1,5 @@
 from tutelary.models import (
-    PermissionSet, Policy, Role, PolicyInstance, RolePolicyAssign,
+    PermissionSet, Policy, Role, PolicyInstance, RolePolicyAssign
 )
 from tutelary.engine import Object
 from django.contrib.auth.models import User
@@ -73,8 +73,6 @@ def test_role_policy_update(datadir, setup):  # noqa
 
     org_pol.body = datadir.join('org-policy-2.json').read()
     org_pol.save()
-    for u in (u1, u2, u3):
-        del u.permset_tree
 
     check(nuser=3, npol=3, nrole=2, npolin=6, npset=3)
 
