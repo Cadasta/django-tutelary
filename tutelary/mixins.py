@@ -57,7 +57,7 @@ class BasePermissionRequiredMixin:
             return check_perms(self.request.user, check_actions,
                                [obj], self.request.method)
 
-        filtered_pks = [o.pk for o in filter(check_one, objs)]
+        filtered_pks = [o.pk for o in objs if check_one(o)]
         self.filtered_queryset = self.get_queryset().filter(
             pk__in=filtered_pks
         )

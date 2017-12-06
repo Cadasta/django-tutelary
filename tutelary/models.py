@@ -294,6 +294,50 @@ def user_delete(sender, instance, **kwargs):
     clear_user_policies(instance)
 
 
+CACHED_PSET_PROPERTY_KEY = '__pset_tree'
+
+
+def _get_permission_set_tree(user):
+    """
+    Helper to return cached permission set tree from user instance if set, else
+    generates and returns analyzed permission set tree. Does not cache set
+    automatically, that must be done explicitely.
+    """
+    if hasattr(user, CACHED_PSET_PROPERTY_KEY):
+        return getattr(user, CACHED_PSET_PROPERTY_KEY)
+    if user.is_authenticated():
+        try:
+            return user.permissionset.first().tree()
+        except AttributeError:
+            raise ObjectDoesNotExist
+    return PermissionSet.objects.get(anonymous_user=True).tree()
+
+
+def _del_permission_set_tree(user):
+    """ Helper to clear permission set tree cached on user instance """
+    if hasattr(user, CACHED_PSET_PROPERTY_KEY):
+        delattr(user, CACHED_PSET_PROPERTY_KEY)
+
+
+permission_set_tree_property = property(
+    fget=_get_permission_set_tree,
+    fset=None,
+    fdel=_del_permission_set_tree,
+    doc="Helper to cache Tutelary's permission_set tree on user instance"
+)
+
+
+def ensure_permission_set_tree_cached(user):
+    """ Helper to cache permission set tree on user instance """
+    if hasattr(user, CACHED_PSET_PROPERTY_KEY):
+        return
+    try:
+        setattr(
+            user, CACHED_PSET_PROPERTY_KEY, _get_permission_set_tree(user))
+    except ObjectDoesNotExist:  # No permission set
+        pass
+
+
 def clear_user_policies(user):
     """Remove all policies assigned to a user (or the anonymous user if
     ``user`` is ``None``).
@@ -381,6 +425,7 @@ def user_assigned_policies(user):
 
 
 def check_perms(user, actions, objs, method=None):
+    ensure_permission_set_tree_cached(user)
     if actions is False:
         return False
     if actions is not None:

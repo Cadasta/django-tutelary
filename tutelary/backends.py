@@ -1,6 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
 from .exceptions import InvalidPermissionObjectException
-from .models import PermissionSet
 from .engine import Action, Object
 
 
@@ -9,15 +8,6 @@ class Backend:
     the user's permission set.
 
     """
-    def _get_pset(self, user):
-        try:
-            if user.is_authenticated():
-                return user.permissionset.first().tree()
-            else:
-                return PermissionSet.objects.get(anonymous_user=True).tree()
-        except AttributeError:
-            raise ObjectDoesNotExist
-
     @staticmethod
     def _obj_ok(obj):
         return obj is None or callable(obj) or isinstance(obj, Object)
@@ -39,7 +29,7 @@ class Backend:
                     obj = obj.get_permissions_object(perm)
                 else:
                     raise InvalidPermissionObjectException
-            return self._get_pset(user).allow(Action(perm), obj)
+            return user.permset_tree.allow(Action(perm), obj)
         except ObjectDoesNotExist:
             return False
 
@@ -58,6 +48,6 @@ class Backend:
         try:
             if not self._obj_ok(obj):
                 raise InvalidPermissionObjectException
-            return self._get_pset(user).permitted_actions(obj)
+            return user.permset_tree.permitted_actions(obj)
         except ObjectDoesNotExist:
             return []
