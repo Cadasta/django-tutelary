@@ -1,5 +1,7 @@
 import json
+import logging
 import re
+
 from django.db import models
 from django.conf import settings
 from django.db.models.signals import pre_delete
@@ -7,8 +9,12 @@ from django.dispatch import receiver
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 from audit_log.models.managers import AuditLog
+
 import tutelary.engine as engine
 from tutelary.exceptions import RoleVariableException
+
+
+logger = logging.getLogger(__name__)
 
 
 class Policy(models.Model):
@@ -264,7 +270,13 @@ class PermissionSet(models.Model):
 
     def tree(self):
         key = self.cache_key()
-        cached = cache.get(key)
+
+        cache_errored = False
+        try:
+            cached = cache.get(key)
+        except Exception:
+            logger.exception("Failed to retrieve permission tree from cache")
+            cache_errored = True
         if cached is None:
             ptree = engine.PermissionTree(
                 policies=[engine.PolicyBody(json=pi.policy.body,
@@ -273,7 +285,11 @@ class PermissionSet(models.Model):
                                      .select_related('policy')
                                      .filter(pset=self))]
             )
-            cache.set(key, ptree)
+            if not cache_errored:
+                try:
+                    cache.set(key, ptree)
+                except Exception:
+                    logger.exception("Failed to set permission tree in cache")
             cached = ptree
         return cached
 
