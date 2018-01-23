@@ -276,6 +276,7 @@ class PermissionSet(models.Model):
             cached = cache.get(key)
         except Exception:
             logger.exception("Failed to retrieve permission tree from cache")
+            cached = None
             cache_errored = True
         if cached is None:
             ptree = engine.PermissionTree(
