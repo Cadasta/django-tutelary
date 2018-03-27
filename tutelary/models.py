@@ -419,16 +419,18 @@ def user_assigned_policies(user):
     return res
 
 
-def check_perms(user, actions, objs, method=None):
-    ensure_permission_set_tree_cached(user)
-    if actions is False:
+def check_perms(user, required_permissions, objs, method=None):
+    if required_permissions is False:
         return False
-    if actions is not None:
-        for a in actions:
-            for o in objs:
-                test_obj = None
-                if o is not None:
-                    test_obj = o.get_permissions_object(a)
-                if not user.has_perm(a, test_obj):
-                    return False
+    if not required_permissions:
+        return True
+    if objs:
+        ensure_permission_set_tree_cached(user)
+    for required_permission in required_permissions:
+        for o in objs:
+            test_obj = None
+            if o is not None:
+                test_obj = o.get_permissions_object(required_permission)
+            if not user.has_perm(required_permission, test_obj):
+                return False
     return True
