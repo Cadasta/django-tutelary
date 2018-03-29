@@ -303,9 +303,7 @@ def _get_permission_set_tree(user):
         return getattr(user, CACHED_PSET_PROPERTY_KEY)
     if user.is_authenticated():
         try:
-            tree = user.permissionset.first().tree()
-            setattr(user, CACHED_PSET_PROPERTY_KEY, tree)
-            return tree
+            return user.permissionset.first().tree()
         except AttributeError:
             raise ObjectDoesNotExist
     return PermissionSet.objects.get(anonymous_user=True).tree()
