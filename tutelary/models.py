@@ -303,7 +303,9 @@ def _get_permission_set_tree(user):
         return getattr(user, CACHED_PSET_PROPERTY_KEY)
     if user.is_authenticated():
         try:
-            return user.permissionset.first().tree()
+            tree = user.permissionset.first().tree()
+            setattr(user, CACHED_PSET_PROPERTY_KEY, tree)
+            return tree
         except AttributeError:
             raise ObjectDoesNotExist
     return PermissionSet.objects.get(anonymous_user=True).tree()
@@ -321,17 +323,6 @@ permission_set_tree_property = property(
     fdel=_del_permission_set_tree,
     doc="Helper to cache Tutelary's permission_set tree on user instance"
 )
-
-
-def ensure_permission_set_tree_cached(user):
-    """ Helper to cache permission set tree on user instance """
-    if hasattr(user, CACHED_PSET_PROPERTY_KEY):
-        return
-    try:
-        setattr(
-            user, CACHED_PSET_PROPERTY_KEY, _get_permission_set_tree(user))
-    except ObjectDoesNotExist:  # No permission set
-        pass
 
 
 def clear_user_policies(user):
@@ -420,7 +411,6 @@ def user_assigned_policies(user):
 
 
 def check_perms(user, actions, objs, method=None):
-    ensure_permission_set_tree_cached(user)
     if actions is False:
         return False
     if actions is not None:
