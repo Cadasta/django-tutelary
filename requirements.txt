@@ -1,5 +1,5 @@
 # Minimum Django version
-Django==1.9
+Django==1.11.23
 django-audit-log==0.7.0
 
 # Test requirements
