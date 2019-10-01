@@ -17,4 +17,4 @@ wheel==0.26.0
 Sphinx==1.3.3
 
 # Only used for testing.
-djangorestframework==3.3.2
+djangorestframework==3.9.1
